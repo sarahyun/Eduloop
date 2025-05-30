@@ -299,14 +299,16 @@ ${questions && Array.isArray(questions) ? questions.map(q => `- ${q.question}`).
 
 ${sectionContext}
 
+IMPORTANT: Follow the predefined questions in order. Do not ask excessive follow-up questions.
+
 Guidelines:
-- If the user wants to "expand on answers" or "add more details", analyze their existing responses and ask thoughtful follow-up questions
-- For follow-ups, dig deeper into interesting aspects they mentioned, ask for specific examples, or explore connections between their interests
-- Ask one question at a time, building naturally on their responses
-- Don't repeat questions that have already been covered in other sections
-- Keep responses conversational and encouraging
-- Extract key information from their answers
-- When you have enough information for the current section (usually after 3-4 meaningful exchanges), indicate completion
+- Work through the questions systematically, asking each one in the list
+- After a user answers a question, acknowledge their response briefly and move to the next question
+- Maximum of 1 brief follow-up question per original question, only if the answer is very short or unclear
+- Don't create new questions beyond what's provided in the section
+- Keep responses conversational but focused
+- Extract key information from their answers for the profile
+- When all questions in the section are covered, indicate completion
 - Return response in JSON format: {"response": "your response", "isComplete": boolean, "profileUpdates": {questionId: "extracted answer"}}
 
 Conversation history:
