@@ -31,6 +31,7 @@ export default function ChatOnboarding() {
   
   const [user] = useState<User>({ id: 1, username: "sarah", email: "sarah@example.com", fullName: "Sarah Johnson" });
   const [input, setInput] = useState("");
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [showContinueButton, setShowContinueButton] = useState(false);
   const [showExpandButton, setShowExpandButton] = useState(false);
@@ -199,7 +200,8 @@ export default function ChatOnboarding() {
           message: userMessage,
           section: targetSection,
           conversationHistory: messages.slice(-5), // Last 5 messages for context
-          questions: targetSection ? PROFILE_SECTIONS[targetSection as keyof typeof PROFILE_SECTIONS] : []
+          questions: targetSection ? PROFILE_SECTIONS[targetSection as keyof typeof PROFILE_SECTIONS] : [],
+          currentQuestionIndex
         })
       });
       
@@ -218,6 +220,11 @@ export default function ChatOnboarding() {
       };
       
       setMessages(prev => [...prev, assistantMessage]);
+      
+      // Update question index for next question
+      if (data.nextQuestionIndex !== undefined) {
+        setCurrentQuestionIndex(data.nextQuestionIndex);
+      }
       
       if (data.isComplete) {
         setIsComplete(true);
