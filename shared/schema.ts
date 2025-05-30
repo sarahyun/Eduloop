@@ -1,5 +1,6 @@
 import { pgTable, text, serial, integer, boolean, jsonb, timestamp, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
+import { relations } from "drizzle-orm";
 import { z } from "zod";
 
 export const users = pgTable("users", {
@@ -149,3 +150,66 @@ export type SavedCollege = typeof savedColleges.$inferSelect;
 export type InsertSavedCollege = z.infer<typeof insertSavedCollegeSchema>;
 export type SearchQuery = typeof searchQueries.$inferSelect;
 export type InsertSearchQuery = z.infer<typeof insertSearchQuerySchema>;
+
+// Relations
+export const usersRelations = relations(users, ({ one, many }) => ({
+  studentProfile: one(studentProfiles, {
+    fields: [users.id],
+    references: [studentProfiles.userId],
+  }),
+  conversations: many(conversations),
+  savedColleges: many(savedColleges),
+  collegeRecommendations: many(collegeRecommendations),
+  searchQueries: many(searchQueries),
+}));
+
+export const studentProfilesRelations = relations(studentProfiles, ({ one }) => ({
+  user: one(users, {
+    fields: [studentProfiles.userId],
+    references: [users.id],
+  }),
+}));
+
+export const conversationsRelations = relations(conversations, ({ one, many }) => ({
+  user: one(users, {
+    fields: [conversations.userId],
+    references: [users.id],
+  }),
+  messages: many(messages),
+}));
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [messages.conversationId],
+    references: [conversations.id],
+  }),
+}));
+
+export const collegeRecommendationsRelations = relations(collegeRecommendations, ({ one }) => ({
+  user: one(users, {
+    fields: [collegeRecommendations.userId],
+    references: [users.id],
+  }),
+  college: one(colleges, {
+    fields: [collegeRecommendations.collegeId],
+    references: [colleges.id],
+  }),
+}));
+
+export const savedCollegesRelations = relations(savedColleges, ({ one }) => ({
+  user: one(users, {
+    fields: [savedColleges.userId],
+    references: [users.id],
+  }),
+  college: one(colleges, {
+    fields: [savedColleges.collegeId],
+    references: [colleges.id],
+  }),
+}));
+
+export const searchQueriesRelations = relations(searchQueries, ({ one }) => ({
+  user: one(users, {
+    fields: [searchQueries.userId],
+    references: [users.id],
+  }),
+}));
