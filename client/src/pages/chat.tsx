@@ -17,7 +17,7 @@ export default function ChatPage() {
   const queryClient = useQueryClient();
 
   // Fetch conversations
-  const { data: conversations = [] } = useQuery({
+  const { data: conversations = [] } = useQuery<Conversation[]>({
     queryKey: ['/api/conversations', user.id],
     enabled: !!user?.id,
   });
@@ -31,7 +31,7 @@ export default function ChatPage() {
 
   // Fetch messages for selected conversation
   const { data: messages = [] } = useQuery({
-    queryKey: ['/api/conversations', selectedConversationId, 'messages'],
+    queryKey: [`/api/conversations/${selectedConversationId}/messages`],
     enabled: !!selectedConversationId,
   });
 
@@ -50,7 +50,7 @@ export default function ChatPage() {
       api.sendMessage(conversationId, { role: 'user', content }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/conversations'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/conversations', variables.conversationId, 'messages'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/conversations/${variables.conversationId}/messages`] });
     },
   });
 
