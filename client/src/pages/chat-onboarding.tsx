@@ -34,6 +34,10 @@ interface OnboardingState {
 }
 
 export default function ChatOnboarding() {
+  // Get section from URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetSection = urlParams.get('section');
+  
   // Sample previous answers - in real app this would come from user's profile
   const previousAnswers = {
     name: "Sarah",
@@ -50,18 +54,52 @@ export default function ChatOnboarding() {
     {
       id: '1',
       role: 'assistant',
-      content: `Hi Sarah! I have your previous answers from our introduction. Let me recap what I know about you:\n\n🎯 **Career interests**: ${previousAnswers.career}\n🏫 **Dream schools**: ${previousAnswers.dreamSchools}\n⏰ **Free time**: ${previousAnswers.freeTime}\n🎓 **College experience**: ${previousAnswers.collegeExperience}\n📋 **Activities**: ${previousAnswers.extracurriculars}\n📊 **Academics**: GPA ${previousAnswers.gpa}, SAT ${previousAnswers.satScore}\n\nHas anything changed since we last talked? Would you like to update or expand on any of these answers?`,
+      content: getInitialMessage(),
       timestamp: new Date()
     }
   ]);
+
+  function getInitialMessage() {
+    switch (targetSection) {
+      case 'Academic Information':
+        return `Hi Sarah! Let's dive into your academic experience to help me understand what drives your intellectual curiosity.\n\nWhat are your 3 favorite classes you've taken so far? Tell me what makes them special to you.`;
+      
+      case 'Extracurriculars and Interests':
+        return `Hi Sarah! Now I'd love to learn about what you're passionate about outside the classroom.\n\nWhat are you most proud of outside of academics? This could be an accomplishment, project, or something you've worked hard on.`;
+      
+      case 'Personal Reflections':
+        return `Hi Sarah! Let's explore what makes you uniquely you and what drives you.\n\nWhat makes you happy? I'd love to understand what brings you joy and fulfillment.`;
+      
+      case 'College Preferences':
+        return `Hi Sarah! Let's talk about what you're looking for in your college experience.\n\nWhat do you want in your college experience? Think about the environment, opportunities, and community you're hoping to find.`;
+      
+      default:
+        return `Hi Sarah! I have your previous answers from our introduction. Let me recap what I know about you:\n\n🎯 **Career interests**: ${previousAnswers.career}\n🏫 **Dream schools**: ${previousAnswers.dreamSchools}\n⏰ **Free time**: ${previousAnswers.freeTime}\n🎓 **College experience**: ${previousAnswers.collegeExperience}\n📋 **Activities**: ${previousAnswers.extracurriculars}\n📊 **Academics**: GPA ${previousAnswers.gpa}, SAT ${previousAnswers.satScore}\n\nHas anything changed since we last talked? Would you like to update or expand on any of these answers?`;
+    }
+  }
   
   const [showExpandButton, setShowExpandButton] = useState(true);
   
   const [input, setInput] = useState("");
   const [onboardingState, setOnboardingState] = useState<OnboardingState>({
-    step: 0,
+    step: targetSection ? getInitialStepForSection(targetSection) : 0,
     data: previousAnswers
   });
+
+  function getInitialStepForSection(section: string) {
+    switch (section) {
+      case 'Academic Information':
+        return 10;
+      case 'Extracurriculars and Interests':
+        return 20;
+      case 'Personal Reflections':
+        return 30;
+      case 'College Preferences':
+        return 40;
+      default:
+        return 0;
+    }
+  }
 
   // Calculate progress for current section
   const getSectionProgress = () => {
@@ -160,6 +198,99 @@ export default function ChatOnboarding() {
           const newState = { ...state, step: 13, data: { ...state.data, academicFascinations: response } };
           return {
             response: `I love hearing about what genuinely excites you intellectually! This gives me great insight into programs and research opportunities you might thrive in.\n\nThis is a great start to building your profile. To give you the best college recommendations, I'll need to learn more about your personal interests, values, and preferences. You can continue building your profile or you can begin exploring.\n\nI can help you:\n• Create personalized college recommendations based on your unique profile\n• Find schools that match your academic passions and career aspirations\n• Discover programs with research opportunities in your areas of interest\n• Answer questions about specific colleges, majors, and application processes\n• Guide you through building a comprehensive student profile\n• Search for colleges using natural language queries\n• Provide insights about what makes you stand out as an applicant\n• Help you understand college cultures and find your best fit`,
+            newState,
+            isComplete: true,
+            showContinueButton: true
+          };
+        
+        // Extracurriculars and Interests section (steps 20-22)
+        } else if (state.step === 20) {
+          const newState = { ...state, step: 21, data: { ...state.data, proudOfOutsideAcademics: response } };
+          return {
+            response: `That's really impressive! It's great to see what you're passionate about outside the classroom.\n\nWhat fields or problems do you want to explore/solve in the world? This could be anything from environmental issues to technology challenges to social causes.`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 21) {
+          const newState = { ...state, step: 22, data: { ...state.data, fieldsToExplore: response } };
+          return {
+            response: `I love hearing about the impact you want to make! That really helps me understand your motivations.\n\nAside from hanging out with friends, how do you like to spend your free time? What activities bring you joy or help you recharge?`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 22) {
+          const newState = { ...state, step: 23, data: { ...state.data, freeTimeActivities: response } };
+          return {
+            response: `Thank you for sharing about your interests and passions! This gives me great insight into what environments and opportunities would help you thrive.\n\nThis section is complete. You can continue building your profile with other sections or start exploring colleges based on what I've learned about you so far.`,
+            newState,
+            isComplete: true,
+            showContinueButton: true
+          };
+        
+        // Personal Reflections section (steps 30-33)
+        } else if (state.step === 30) {
+          const newState = { ...state, step: 31, data: { ...state.data, whatMakesHappy: response } };
+          return {
+            response: `It's wonderful to hear about what brings you joy! Understanding what makes you happy helps me find colleges where you'll truly thrive.\n\nDescribe a time you overcame a challenge. This could be academic, personal, or anything that required you to grow and persevere.`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 31) {
+          const newState = { ...state, step: 32, data: { ...state.data, challengeOvercome: response } };
+          return {
+            response: `Thank you for sharing that - it takes courage to reflect on challenges and even more to overcome them. That shows real character.\n\nIf you could be remembered for one thing, what would it be? Think about the legacy or impact you'd want to leave behind.`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 32) {
+          const newState = { ...state, step: 33, data: { ...state.data, rememberedFor: response } };
+          return {
+            response: `That's a powerful vision for your impact on the world.\n\nWhat's the most important lesson you've learned in high school? This could be academic, social, or personal.`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 33) {
+          const newState = { ...state, step: 34, data: { ...state.data, importantLesson: response } };
+          return {
+            response: `Thank you for sharing these deep reflections about yourself. This gives me incredible insight into your values, resilience, and aspirations.\n\nThis section is complete. You can continue building your profile with other sections or start exploring colleges based on what I've learned about you.`,
+            newState,
+            isComplete: true,
+            showContinueButton: true
+          };
+        
+        // College Preferences section (steps 40-44)
+        } else if (state.step === 40) {
+          const newState = { ...state, step: 41, data: { ...state.data, collegeExperience: response } };
+          return {
+            response: `That sounds like a great vision for your college experience! Understanding what you want helps me find the right fit.\n\nDo you prefer small, medium, or large schools? Think about class sizes, campus feel, and community dynamics.`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 41) {
+          const newState = { ...state, step: 42, data: { ...state.data, schoolSize: response } };
+          return {
+            response: `Good to know your preference! School size really does impact the overall experience.\n\nWhat location experiences matter to you (arts, nature, city life, sports, etc)? Think about the environment that would energize and inspire you.`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 42) {
+          const newState = { ...state, step: 43, data: { ...state.data, locationExperiences: response } };
+          return {
+            response: `Those location preferences will really help narrow down great options for you.\n\nWhat are your parents' expectations for college? Understanding family perspectives helps me consider the full picture.`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 43) {
+          const newState = { ...state, step: 44, data: { ...state.data, parentsExpectations: response } };
+          return {
+            response: `Thanks for sharing about your family's perspective - that's always important to consider.\n\nDescribe the type of community or environment where you feel most at home. What qualities or characteristics make you feel a sense of belonging?`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 44) {
+          const newState = { ...state, step: 45, data: { ...state.data, communityEnvironment: response } };
+          return {
+            response: `Perfect! I now have a comprehensive understanding of what you're looking for in your college experience.\n\nThis section is complete. You can continue building your profile with other sections or start exploring colleges based on your preferences.`,
             newState,
             isComplete: true,
             showContinueButton: true
