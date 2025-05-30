@@ -7,6 +7,7 @@ import Dashboard from "@/pages/dashboard";
 import ChatPage from "@/pages/chat";
 import ExplorePage from "@/pages/explore";
 import OnboardingPage from "@/pages/onboarding";
+import ChatOnboarding from "@/pages/chat-onboarding";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/chat" component={ChatPage} />
       <Route path="/explore" component={ExplorePage} />
       <Route path="/onboarding" component={OnboardingPage} />
+      <Route path="/chat-onboarding" component={ChatOnboarding} />
       <Route component={NotFound} />
     </Switch>
   );
