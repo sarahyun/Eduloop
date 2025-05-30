@@ -110,12 +110,16 @@ export class MemStorage implements IStorage {
     // Create sample users
     const user1: User = {
       id: 1,
-      username: "student1",
-      password: "password123",
+      userId: "user-1",
       email: "student1@example.com",
-      fullName: "Alex Johnson",
+      name: "Alex Johnson",
+      createdAt: new Date(),
+      lastLogin: null,
+      role: "student",
+      students: null,
       grade: "12th",
-      createdAt: new Date()
+      counselorId: null,
+      parentId: null,
     };
     this.users.set(1, user1);
 
@@ -223,8 +227,8 @@ export class MemStorage implements IStorage {
     return this.users.get(id);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
+  async getUserByUserId(userId: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.userId === userId);
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
