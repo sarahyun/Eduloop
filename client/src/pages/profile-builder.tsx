@@ -35,7 +35,8 @@ export default function ProfileBuilder() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Build Your Profile</h1>
           <p className="text-gray-600 mb-4">
-            The more we learn about you, the better we can match you with colleges that fit your unique story.
+            The more we learn about you, the better we can find colleges that truly fit your personality and goals, 
+            provide personalized guidance, and help you discover hidden gems you might not have considered.
           </p>
           
           {/* Progress Overview */}
@@ -249,26 +250,7 @@ export default function ProfileBuilder() {
           ))}
         </div>
 
-        {/* Benefits Reminder */}
-        <Card className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-          <CardContent className="p-6">
-            <h3 className="font-semibold text-gray-900 mb-3">Why Complete Your Profile?</h3>
-            <div className="grid md:grid-cols-3 gap-4 text-sm">
-              <div>
-                <h4 className="font-medium text-gray-800 mb-1">Better Matches</h4>
-                <p className="text-gray-600">Find colleges that truly fit your personality and goals</p>
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-800 mb-1">Personalized Guidance</h4>
-                <p className="text-gray-600">Get advice tailored to your unique situation</p>
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-800 mb-1">Discover Hidden Gems</h4>
-                <p className="text-gray-600">Uncover schools you might not have considered</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+
       </div>
     </div>
   );
