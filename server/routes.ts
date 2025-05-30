@@ -380,7 +380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const questions = await aiService.generateFollowUpQuestions(stepId, response, previousResponses);
       res.json({ questions });
     } catch (error) {
-      log(`Error generating follow-up questions: ${error}`);
+      console.error(`Error generating follow-up questions:`, error);
       res.status(500).json({ error: "Failed to generate follow-up questions" });
     }
   });
