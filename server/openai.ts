@@ -271,46 +271,45 @@ Recommend a diverse mix of colleges with specific reasoning for each. Return you
     userMessage: string;
     section?: string;
     conversationHistory: Array<{ role: string; content: string }>;
-    questions: Array<{ id: string; question: string }>;
+    questions: Array<{ id: number; question: string }>;
+    currentQuestionIndex?: number;
   }): Promise<{
     response: string;
     isComplete: boolean;
+    nextQuestionIndex?: number;
     profileUpdates?: Record<string, string>;
   }> {
     try {
-      const { userMessage, section, conversationHistory, questions } = context;
+      const { userMessage, section, conversationHistory, questions, currentQuestionIndex = 0 } = context;
       
-      // Debug logging
-      console.log('OpenAI context:', { userMessage, section, questions: questions || 'undefined', conversationHistory: conversationHistory || 'undefined' });
+      console.log('OpenAI context:', { userMessage, section, currentQuestionIndex, totalQuestions: questions?.length });
       
-      // Build context about the current section and questions
-      const sectionContext = section ? `
-Current section: ${section}
-Questions for this section:
-${questions && Array.isArray(questions) ? questions.map(q => `- ${q.question}`).join('\n') : 'No questions defined'}
-` : '';
-
-
+      const currentQuestion = questions && questions[currentQuestionIndex];
+      const nextQuestion = questions && questions[currentQuestionIndex + 1];
+      const isLastQuestion = currentQuestionIndex >= (questions?.length || 0) - 1;
       
       const completion = await this.openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
           {
             role: "system",
-            content: `You are a friendly college counselor having a conversation with a student to build their profile. 
+            content: `You are a friendly college counselor. You are working through a specific set of questions in order.
 
-${sectionContext}
+Current section: ${section}
+Current question (${currentQuestionIndex + 1}/${questions?.length || 0}): ${currentQuestion?.question || 'N/A'}
+Next question: ${nextQuestion ? nextQuestion.question : 'Section complete'}
 
-Guidelines:
-- Work through the questions in the order they are listed
-- After each user response, move to the next question in the sequence
-- Keep responses brief and conversational
-- Don't ask excessive follow-up questions
-- Extract key information for the profile
-- Return response in JSON format: {"response": "your response", "isComplete": boolean, "profileUpdates": {questionId: "extracted answer"}}
+Instructions:
+- The user just answered the current question: "${currentQuestion?.question || 'previous question'}"
+- Acknowledge their response briefly and positively
+- If there's a next question, ask it directly
+- If this was the last question, indicate the section is complete
+- Only ask 1 brief follow-up if the answer is extremely vague (like "idk" or "nothing")
+- Be conversational but move efficiently through questions
+- Return JSON: {"response": "your response", "isComplete": ${isLastQuestion}, "profileUpdates": {"field": "value"}}
 
-Conversation history:
-${conversationHistory ? conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n') : 'No previous conversation'}`
+Recent conversation:
+${conversationHistory ? conversationHistory.slice(-4).map(msg => `${msg.role}: ${msg.content}`).join('\n') : 'Starting conversation'}`
           },
           {
             role: "user",
@@ -320,18 +319,20 @@ ${conversationHistory ? conversationHistory.map(msg => `${msg.role}: ${msg.conte
         response_format: { type: "json_object" },
       });
 
-      const result = JSON.parse(completion.choices[0].message.content || '{"response": "Could you tell me more?", "isComplete": false, "profileUpdates": {}}');
+      const result = JSON.parse(completion.choices[0].message.content || '{"response": "Could you tell me more?", "isComplete": false}');
       
       return {
         response: result.response || "I'd love to learn more about you.",
         isComplete: result.isComplete || false,
+        nextQuestionIndex: isLastQuestion ? currentQuestionIndex : currentQuestionIndex + 1,
         profileUpdates: result.profileUpdates || {}
       };
     } catch (error) {
       console.error('Error generating onboarding response:', error);
       return {
         response: "I'm having trouble processing that. Could you try rephrasing your response?",
-        isComplete: false
+        isComplete: false,
+        nextQuestionIndex: context.currentQuestionIndex || 0
       };
     }
   }

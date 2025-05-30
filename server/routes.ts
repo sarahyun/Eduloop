@@ -102,7 +102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Chat onboarding with OpenAI
   app.post("/api/chat/onboarding", async (req, res) => {
     try {
-      const { message, section, conversationHistory, questions } = req.body;
+      const { message, section, conversationHistory, questions, currentQuestionIndex = 0 } = req.body;
       
       if (!message) {
         return res.status(400).json({ message: "Message is required" });
@@ -113,7 +113,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userMessage: message,
         section,
         conversationHistory,
-        questions
+        questions,
+        currentQuestionIndex
       });
 
       res.json(aiResponse);
