@@ -350,9 +350,19 @@
 .chat-assistant-message {
   background-color: #ffffff !important;
   color: #111827 !important;
+  min-height: fit-content !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .chat-assistant-message * {
   background-color: #ffffff !important;
   color: #111827 !important;
+}
+
+.chat-assistant-message .whitespace-pre-wrap {
+  flex: 1 !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
 }
