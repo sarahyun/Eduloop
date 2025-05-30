@@ -326,7 +326,11 @@ export default function ChatOnboarding() {
                                 timestamp: new Date()
                               };
                               setMessages(prev => [...prev, expandMessage]);
-                              generateResponseMutation.mutate("I'd like to expand on my answers and add more details.");
+                              
+                              // Create context with existing data for better follow-up questions
+                              const existingData = getSectionData(targetSection, profile);
+                              const contextMessage = `I'd like to expand on my answers and add more details. Here's what I've shared so far: ${JSON.stringify(existingData, null, 2)}`;
+                              generateResponseMutation.mutate(contextMessage);
                             }}
                             className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg"
                           >
