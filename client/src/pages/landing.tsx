@@ -33,15 +33,8 @@ type SignInData = z.infer<typeof signInSchema>;
 
 export default function LandingPage() {
   const { toast } = useToast();
-  const { login, signup, user } = useAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("");
-
-  // Redirect if already authenticated
-  if (user) {
-    setLocation("/dashboard");
-    return null;
-  }
 
   const signUpForm = useForm<SignUpData>({
     resolver: zodResolver(signUpSchema),
@@ -63,14 +56,27 @@ export default function LandingPage() {
 
   const signUpMutation = useMutation({
     mutationFn: async (data: SignUpData) => {
-      await signup(data.email, data.password, data.fullName);
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+          fullName: data.fullName
+        })
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to sign up');
+      }
+      return response.json();
     },
     onSuccess: () => {
       toast({
         title: "Account created successfully!",
         description: "Welcome to your college discovery journey.",
       });
-      setLocation("/onboarding");
+      setLocation("/dashboard");
     },
     onError: (error: Error) => {
       toast({
@@ -83,7 +89,16 @@ export default function LandingPage() {
 
   const signInMutation = useMutation({
     mutationFn: async (data: SignInData) => {
-      await login(data.email, data.password);
+      const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to sign in');
+      }
+      return response.json();
     },
     onSuccess: () => {
       toast({
