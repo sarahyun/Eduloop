@@ -252,11 +252,40 @@ export default function OnboardingPage() {
     createProfileMutation.mutate(formData);
   };
 
+  // Autosave mutation
+  const autosaveMutation = useMutation({
+    mutationFn: async (data: { [key: string]: string }) => {
+      const profileUpdates: Record<string, string> = {};
+      
+      // Map response keys to profile field names
+      if (data.careerMajor !== undefined) profileUpdates.careerMajor = data.careerMajor;
+      if (data.dreamSchools !== undefined) profileUpdates.dreamSchools = data.dreamSchools;
+      if (data.freeTime !== undefined) profileUpdates.freeTimeActivities = data.freeTime;
+      if (data.collegeExperience !== undefined) profileUpdates.collegeExperience = data.collegeExperience;
+      if (data.extracurriculars !== undefined) profileUpdates.extracurricularsAdditionalInfo = data.extracurriculars;
+
+      const response = await fetch('/api/profile/1', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: 1,
+          ...profileUpdates
+        })
+      });
+      if (!response.ok) throw new Error('Failed to autosave');
+      return response.json();
+    },
+  });
+
   const updateResponse = (key: string, value: string) => {
     console.log('Updating response:', key, '=', value);
     setResponses(prev => {
       const updated = { ...prev, [key]: value };
       console.log('Updated responses state:', updated);
+      
+      // Autosave the single field that changed
+      autosaveMutation.mutate({ [key]: value });
+      
       return updated;
     });
   };
@@ -590,20 +619,19 @@ Started a coding club at school..."
             </Button>
 
             {currentStep === allSteps.length - 1 ? (
-              <Button 
-                onClick={handleSubmit}
-                disabled={createProfileMutation.isPending}
-                className="flex items-center space-x-2 bg-gradient-to-r from-primary to-purple-500 hover:from-primary-dark hover:to-purple-600"
-              >
-                {createProfileMutation.isPending ? (
-                  <span>Creating Profile...</span>
-                ) : (
-                  <>
-                    <span>Start My Journey</span>
-                    <CheckCircle className="w-4 h-4" />
-                  </>
-                )}
-              </Button>
+              <div className="text-center space-y-4">
+                <div className="flex items-center justify-center space-x-2 text-green-600">
+                  <CheckCircle className="w-6 h-6" />
+                  <span className="text-lg font-medium">Profile Complete!</span>
+                </div>
+                <p className="text-gray-600">Your responses have been automatically saved. You can now explore your dashboard.</p>
+                <Button 
+                  onClick={() => window.location.href = '/dashboard'}
+                  className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary-dark hover:to-purple-600"
+                >
+                  Go to Dashboard
+                </Button>
+              </div>
             ) : (
               <Button 
                 onClick={handleNext}
