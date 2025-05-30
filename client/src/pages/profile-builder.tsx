@@ -14,12 +14,11 @@ export default function ProfileBuilder() {
   
   // Dynamic sections with completion tracking - all offer both methods
   const sections = [
-    { id: 'basic', title: 'Basic Info', completed: true, method: 'both', lastUpdated: '2 days ago' },
-    { id: 'academic', title: 'Academic Background', completed: true, method: 'both', lastUpdated: '1 week ago' },
-    { id: 'interests', title: 'Interests & Passions', completed: false, method: 'both' },
-    { id: 'goals', title: 'Career Goals', completed: false, method: 'both' },
-    { id: 'preferences', title: 'College Preferences', completed: false, method: 'both' },
-    { id: 'values', title: 'Personal Values', completed: false, method: 'both' },
+    { id: 'onboarding', title: 'Basic Info', completed: true, method: 'both', lastUpdated: '2 days ago', description: 'Name, school, basic background' },
+    { id: 'academics', title: 'Academics', completed: false, method: 'both', description: 'Favorite classes, subjects, academic interests' },
+    { id: 'interests', title: 'Interests', completed: false, method: 'both', description: 'What you\'re proud of, fields to explore, free time' },
+    { id: 'reflections', title: 'Personal Reflections', completed: false, method: 'both', description: 'What makes you happy, challenges overcome, values' },
+    { id: 'college-preferences', title: 'College Preferences', completed: false, method: 'both', description: 'School size, location, community, family expectations' },
   ];
 
   // Find first incomplete section
@@ -193,6 +192,7 @@ export default function ProfileBuilder() {
                       <h3 className={`font-medium ${section.completed ? 'text-green-900' : 'text-gray-900'}`}>
                         {section.title}
                       </h3>
+                      <p className="text-sm text-gray-500 mt-1">{section.description}</p>
                     </div>
                   </div>
                   
