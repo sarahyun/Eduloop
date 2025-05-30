@@ -90,31 +90,8 @@ export default function OnboardingPage() {
     return ((currentStep + 1) / allSteps.length) * 100;
   };
 
-  const handleNext = async () => {
+  const handleNext = () => {
     const allSteps = [...baseSteps, ...dynamicSteps];
-    const currentStepData = allSteps[currentStep];
-    
-
-    
-    // Check if we should generate a follow-up for this step
-    if (currentStepData && !currentStepData.id.includes('followup') && !currentStepData.id.includes('welcome') && !currentStepData.id.includes('academics')) {
-      // Map step IDs to response keys
-      const keyMapping: { [key: string]: keyof typeof responses } = {
-        'career': 'careerMajor',
-        'dreamSchools': 'dreamSchools',
-        'freeTime': 'freeTime',
-        'collegeExperience': 'collegeExperience',
-        'extracurriculars': 'extracurriculars'
-      };
-      
-      const responseKey = keyMapping[currentStepData.id];
-      const response = responseKey ? responses[responseKey] : null;
-
-      if (response && response.length > 20) {
-        await generateFollowUpStep(currentStepData.id, response);
-        return; // Don't advance step yet, wait for follow-up to be generated
-      }
-    }
     
     if (currentStep < allSteps.length - 1) {
       setCurrentStep(currentStep + 1);
