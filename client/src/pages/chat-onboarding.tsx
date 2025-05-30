@@ -327,8 +327,16 @@ export default function ChatOnboarding() {
                           </div>
                         </div>
                       ) : (
-                        <div className="max-w-[80%] p-4 rounded-lg mr-auto" style={{ backgroundColor: '#f3f4f6', color: '#374151' }}>
-                          <div className="whitespace-pre-wrap">
+                        <div 
+                          className="max-w-[80%] p-4 rounded-lg mr-auto"
+                          style={{ 
+                            backgroundColor: '#ffffff',
+                            color: '#1f2937',
+                            border: '1px solid #e5e7eb',
+                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+                          }}
+                        >
+                          <div className="whitespace-pre-wrap" style={{ backgroundColor: '#ffffff', color: '#1f2937' }}>
                             {message.content}
                           </div>
                         </div>
