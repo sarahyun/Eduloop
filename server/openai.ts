@@ -290,8 +290,32 @@ Questions for this section:
 ${questions && Array.isArray(questions) ? questions.map(q => `- ${q.question}`).join('\n') : 'No questions defined'}
 ` : '';
 
+      // Analyze conversation to determine which questions have been addressed
+      const questionsAsked = new Set();
+      const conversationText = conversationHistory ? conversationHistory.map(msg => msg.content.toLowerCase()).join(' ') : '';
+      
+      questions.forEach(q => {
+        const questionKeywords = q.question.toLowerCase();
+        if (questionKeywords.includes('career') || questionKeywords.includes('major')) {
+          if (conversationText.includes('biology') || conversationText.includes('cs') || conversationText.includes('computer science') || conversationText.includes('major')) {
+            questionsAsked.add(q.id);
+          }
+        } else if (questionKeywords.includes('dream school')) {
+          if (conversationText.includes('harvard') || conversationText.includes('caltech') || conversationText.includes('school')) {
+            questionsAsked.add(q.id);
+          }
+        } else if (questionKeywords.includes('free time') || questionKeywords.includes('outside of school')) {
+          if (conversationText.includes('idk') || conversationText.includes('sure') || conversationText.includes('relax') || conversationText.includes('movies')) {
+            questionsAsked.add(q.id);
+          }
+        }
+      });
+
+      // Find next unanswered question
+      const nextQuestion = questions.find(q => !questionsAsked.has(q.id));
+      
       const completion = await this.openai.chat.completions.create({
-        model: "gpt-3.5-turbo", // faster model for chat conversations
+        model: "gpt-3.5-turbo",
         messages: [
           {
             role: "system",
@@ -299,34 +323,38 @@ ${questions && Array.isArray(questions) ? questions.map(q => `- ${q.question}`).
 
 ${sectionContext}
 
-IMPORTANT: Follow the predefined questions in order. Do not ask excessive follow-up questions.
+IMPORTANT: 
+- Questions already covered: ${Array.from(questionsAsked).join(', ') || 'None'}
+- Next question to ask: ${nextQuestion ? nextQuestion.question : 'All questions completed'}
+- DO NOT repeat questions that have already been answered
+- Move systematically through the question list
+- Keep responses brief and conversational
+- If all questions are covered, indicate completion
 
 Guidelines:
-- Work through the questions systematically, asking each one in the list
-- After a user answers a question, acknowledge their response briefly and move to the next question
-- Maximum of 1 brief follow-up question per original question, only if the answer is very short or unclear
-- Don't create new questions beyond what's provided in the section
-- Keep responses conversational but focused
-- Extract key information from their answers for the profile
-- When all questions in the section are covered, indicate completion
+- Acknowledge the user's previous response briefly
+- Ask the next unanswered question from the list
+- Don't ask follow-up questions unless the answer is completely unclear
+- Extract key information for the profile
 - Return response in JSON format: {"response": "your response", "isComplete": boolean, "profileUpdates": {questionId: "extracted answer"}}
 
-Conversation history:
-${conversationHistory ? conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n') : 'No previous conversation'}`
+Recent conversation:
+${conversationHistory ? conversationHistory.slice(-4).map(msg => `${msg.role}: ${msg.content}`).join('\n') : 'No previous conversation'}`
           },
           {
             role: "user",
             content: userMessage
           }
         ],
+        response_format: { type: "json_object" },
       });
 
-      const response = completion.choices[0].message.content || "I'd love to learn more about you. Could you tell me a bit more?";
+      const result = JSON.parse(completion.choices[0].message.content || '{"response": "Could you tell me more?", "isComplete": false, "profileUpdates": {}}');
       
       return {
-        response: response,
-        isComplete: false,
-        profileUpdates: {}
+        response: result.response || "I'd love to learn more about you.",
+        isComplete: result.isComplete || false,
+        profileUpdates: result.profileUpdates || {}
       };
     } catch (error) {
       console.error('Error generating onboarding response:', error);
