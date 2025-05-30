@@ -297,6 +297,8 @@ ${questions.map(q => `- ${q.question}`).join('\n')}
 ${sectionContext}
 
 Guidelines:
+- If the user wants to "expand on answers" or "add more details", analyze their existing responses and ask thoughtful follow-up questions
+- For follow-ups, dig deeper into interesting aspects they mentioned, ask for specific examples, or explore connections between their interests
 - Ask one question at a time, building naturally on their responses
 - Don't repeat questions that have already been covered in other sections
 - Keep responses conversational and encouraging
