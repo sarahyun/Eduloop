@@ -345,3 +345,14 @@
 .bg-white {
   background-color: hsl(var(--card));
 }
+
+/* Chat message background fix */
+.chat-assistant-message {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+.chat-assistant-message * {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
