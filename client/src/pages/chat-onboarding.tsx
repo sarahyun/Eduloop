@@ -320,13 +320,16 @@ export default function ChatOnboarding() {
                     className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[80%] p-4 rounded-lg ${
+                      className={`max-w-[80%] p-4 rounded-lg relative z-10 ${
                         message.role === 'user'
                           ? 'bg-blue-500 text-white'
                           : 'bg-white text-gray-900 border border-gray-200 shadow-sm'
                       }`}
+                      style={{
+                        backgroundColor: message.role === 'assistant' ? 'white' : undefined
+                      }}
                     >
-                      <div className="whitespace-pre-wrap">{message.content}</div>
+                      <div className="whitespace-pre-wrap relative z-20 bg-inherit">{message.content}</div>
                       
                       {/* Show expand button for completed sections */}
                       {message.role === 'assistant' && showExpandButton && index === messages.length - 1 && (
