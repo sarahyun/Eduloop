@@ -6,6 +6,7 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull().unique(), // Unique identifier for the user
   email: text("email").notNull().unique(), // User's email address
+  password: text("password").notNull(), // User's password
   name: text("name"), // Optional full name of the user
   createdAt: timestamp("created_at").defaultNow(), // Account creation timestamp
   lastLogin: timestamp("last_login"), // Optional timestamp for the last login
