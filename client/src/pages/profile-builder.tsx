@@ -27,42 +27,42 @@ export default function ProfileBuilder() {
     { 
       id: 'Introduction', 
       title: 'Introduction', 
-      completed: !!(profile && (profile.careerMajor || profile.dreamSchools || profile.freeTimeActivities)), 
+      completed: !!(profile && profile.careerMajor && profile.dreamSchools && profile.freeTimeActivities), 
       method: 'both', 
       description: 'Name, grade, school, and basic information about yourself', 
-      lastUpdated: profile?.careerMajor ? 'Completed' : 'Not started' 
+      lastUpdated: (profile?.careerMajor && profile?.dreamSchools && profile?.freeTimeActivities) ? 'Completed' : 'Not started' 
     },
     { 
       id: 'Academic Information', 
       title: 'Academic Information', 
-      completed: !!(profile && (profile.gpa || profile.satScore || profile.actScore)), 
+      completed: !!(profile && profile.gpa && (profile.favoriteClasses || profile.academicFascinations)), 
       method: 'both', 
       description: 'Favorite classes, subjects, academic interests', 
-      lastUpdated: profile?.gpa ? 'Completed' : 'Not started' 
+      lastUpdated: (profile?.gpa && (profile?.favoriteClasses || profile?.academicFascinations)) ? 'Completed' : 'Not started' 
     },
     { 
       id: 'Extracurriculars and Interests', 
       title: 'Extracurriculars and Interests', 
-      completed: !!(profile && profile.extracurricularsAdditionalInfo), 
+      completed: !!(profile && profile.extracurricularsAdditionalInfo && profile.proudOfOutsideAcademics), 
       method: 'both', 
       description: 'What you\'re proud of, fields to explore, free time activities', 
-      lastUpdated: profile?.extracurricularsAdditionalInfo ? 'Completed' : 'Not started' 
+      lastUpdated: (profile?.extracurricularsAdditionalInfo && profile?.proudOfOutsideAcademics) ? 'Completed' : 'Not started' 
     },
     { 
       id: 'Personal Reflections', 
       title: 'Personal Reflections', 
-      completed: !!(profile && (profile.whatMakesHappy || profile.challengeOvercome)), 
+      completed: !!(profile && profile.whatMakesHappy && profile.challengeOvercome && profile.rememberedFor), 
       method: 'both', 
       description: 'What makes you happy, challenges overcome, values', 
-      lastUpdated: profile?.whatMakesHappy ? 'Completed' : 'Not started' 
+      lastUpdated: (profile?.whatMakesHappy && profile?.challengeOvercome && profile?.rememberedFor) ? 'Completed' : 'Not started' 
     },
     { 
       id: 'College Preferences', 
       title: 'College Preferences', 
-      completed: !!(profile && (profile.collegeExperience || profile.schoolSize)), 
+      completed: !!(profile && profile.collegeExperience && profile.schoolSize && profile.locationExperiences), 
       method: 'both', 
       description: 'College experience, school size, location preferences', 
-      lastUpdated: profile?.collegeExperience ? 'Completed' : 'Not started' 
+      lastUpdated: (profile?.collegeExperience && profile?.schoolSize && profile?.locationExperiences) ? 'Completed' : 'Not started' 
     },
   ];
 
