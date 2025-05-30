@@ -100,11 +100,11 @@ export default function ChatOnboarding() {
         } else if (state.step === 5) {
           const newState = { ...state, step: 6, data: { ...state.data, extracurriculars: response } };
           return {
-            response: `That's wonderful! Now I'd like to get a sense of your academic profile to help match you with the right colleges.\n\nPlease fill out the form below with your GPA and any test scores you have.`,
+            response: `That's wonderful! Now I'd like to get a sense of your academic profile to help match you with the right colleges.\n\nPlease fill out your academic information below:`,
             newState,
             isComplete: false,
             showAcademicForm: true
-          } as any;
+          };
         } else if (state.step === 6) {
           const newState = { ...state, step: 7, data: { ...state.data, academicInfo: response } };
           return {
@@ -236,6 +236,92 @@ export default function ChatOnboarding() {
                     }`}
                   >
                     <p className="whitespace-pre-wrap">{message.content}</p>
+                    
+                    {/* Show academic form in the chat bubble if this is the academic step */}
+                    {message.role === 'assistant' && showAcademicForm && index === messages.length - 1 && (
+                      <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600">
+                        <div className="flex items-center space-x-2 mb-3">
+                          <GraduationCap className="w-5 h-5 text-purple-500" />
+                          <h3 className="font-semibold text-gray-800 dark:text-gray-200">Academic Information</h3>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <Label htmlFor="gpa-chat" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              GPA (required) *
+                            </Label>
+                            <Input
+                              id="gpa-chat"
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              max="4"
+                              value={academicData.gpa}
+                              onChange={(e) => setAcademicData(prev => ({ ...prev, gpa: e.target.value }))}
+                              placeholder="e.g., 3.75"
+                              className="mt-1"
+                            />
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label htmlFor="sat-chat" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                SAT Score (optional)
+                              </Label>
+                              <Input
+                                id="sat-chat"
+                                type="number"
+                                min="400"
+                                max="1600"
+                                value={academicData.satScore}
+                                onChange={(e) => setAcademicData(prev => ({ ...prev, satScore: e.target.value }))}
+                                placeholder="e.g., 1350"
+                                className="mt-1"
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor="act-chat" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                ACT Score (optional)
+                              </Label>
+                              <Input
+                                id="act-chat"
+                                type="number"
+                                min="1"
+                                max="36"
+                                value={academicData.actScore}
+                                onChange={(e) => setAcademicData(prev => ({ ...prev, actScore: e.target.value }))}
+                                placeholder="e.g., 30"
+                                className="mt-1"
+                              />
+                            </div>
+                          </div>
+                          
+                          <Button
+                            onClick={() => {
+                              const academicInfo = `GPA: ${academicData.gpa || 'Not provided'}, SAT: ${academicData.satScore || 'Not provided'}, ACT: ${academicData.actScore || 'Not provided'}`;
+                              setOnboardingState(prev => ({
+                                ...prev,
+                                data: {
+                                  ...prev.data,
+                                  academicInfo,
+                                  gpa: academicData.gpa ? parseFloat(academicData.gpa) : undefined,
+                                  satScore: academicData.satScore ? parseInt(academicData.satScore) : undefined,
+                                  actScore: academicData.actScore ? parseInt(academicData.actScore) : undefined
+                                }
+                              }));
+                              setShowAcademicForm(false);
+                              generateResponseMutation.mutate(academicInfo);
+                            }}
+                            disabled={!academicData.gpa}
+                            className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-medium py-2 rounded-lg transition-all duration-300"
+                          >
+                            Submit Academic Info
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="text-xs opacity-70 mt-2">
                       {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
@@ -253,99 +339,7 @@ export default function ChatOnboarding() {
             </div>
           </ScrollArea>
 
-          {/* Academic Form */}
-          {showAcademicForm && (
-            <div className="px-6 py-6 border-t border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-blue-50/50 to-indigo-50/30 dark:from-gray-800/50 dark:to-gray-700/30">
-              <div className="max-w-2xl mx-auto">
-                <div className="bg-white dark:bg-gray-700 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-600">
-                  <div className="flex items-center space-x-3 mb-6">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
-                      <GraduationCap className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Academic Information</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Help us find the right academic fit</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="gpa" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        GPA (on 4.0 scale)
-                      </Label>
-                      <Input
-                        id="gpa"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="4.0"
-                        value={academicData.gpa}
-                        onChange={(e) => setAcademicData(prev => ({ ...prev, gpa: e.target.value }))}
-                        placeholder="e.g., 3.75"
-                        className="mt-1"
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="sat" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          SAT Score (optional)
-                        </Label>
-                        <Input
-                          id="sat"
-                          type="number"
-                          min="400"
-                          max="1600"
-                          value={academicData.satScore}
-                          onChange={(e) => setAcademicData(prev => ({ ...prev, satScore: e.target.value }))}
-                          placeholder="e.g., 1350"
-                          className="mt-1"
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="act" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          ACT Score (optional)
-                        </Label>
-                        <Input
-                          id="act"
-                          type="number"
-                          min="1"
-                          max="36"
-                          value={academicData.actScore}
-                          onChange={(e) => setAcademicData(prev => ({ ...prev, actScore: e.target.value }))}
-                          placeholder="e.g., 30"
-                          className="mt-1"
-                        />
-                      </div>
-                    </div>
-                    
-                    <Button
-                      onClick={() => {
-                        const academicInfo = `GPA: ${academicData.gpa || 'Not provided'}, SAT: ${academicData.satScore || 'Not provided'}, ACT: ${academicData.actScore || 'Not provided'}`;
-                        setOnboardingState(prev => ({
-                          ...prev,
-                          data: {
-                            ...prev.data,
-                            academicInfo,
-                            gpa: academicData.gpa ? parseFloat(academicData.gpa) : undefined,
-                            satScore: academicData.satScore ? parseInt(academicData.satScore) : undefined,
-                            actScore: academicData.actScore ? parseInt(academicData.actScore) : undefined
-                          }
-                        }));
-                        setShowAcademicForm(false);
-                        generateResponseMutation.mutate(academicInfo);
-                      }}
-                      disabled={!academicData.gpa}
-                      className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium py-3 rounded-xl transition-all duration-300"
-                    >
-                      Continue
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+
 
           {/* Input Area */}
           <div className="px-6 py-6 border-t border-gray-200/50 dark:border-gray-700/50 rounded-b-3xl bg-gradient-to-r from-gray-50/50 to-blue-50/30 dark:from-gray-800/50 dark:to-gray-700/30">
