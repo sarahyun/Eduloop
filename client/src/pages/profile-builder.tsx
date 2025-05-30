@@ -22,6 +22,24 @@ export default function ProfileBuilder() {
     { id: 'values', title: 'Personal Values', completed: false, method: 'both' },
   ];
 
+  // Find first incomplete section
+  const getFirstIncompleteSection = () => {
+    return sections.find(section => !section.completed);
+  };
+
+  // Handle navigation to specific method
+  const handleMethodSelection = (method: 'chat' | 'form', sectionId?: string) => {
+    const targetSection = sectionId ? sections.find(s => s.id === sectionId) : getFirstIncompleteSection();
+    
+    if (method === 'chat') {
+      // Navigate to chat onboarding with specific section
+      window.location.href = `/chat-onboarding?section=${targetSection?.id || 'interests'}`;
+    } else {
+      // Navigate to form with specific section
+      window.location.href = `/onboarding?section=${targetSection?.id || 'interests'}`;
+    }
+  };
+
   // Calculate completion percentage based on actual completed sections
   const completedSections = sections.filter(section => section.completed).length;
   const profileCompletion = Math.round((completedSections / sections.length) * 100);
@@ -94,7 +112,10 @@ export default function ProfileBuilder() {
                     </div>
                   </div>
                   
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  <Button 
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    onClick={() => handleMethodSelection('chat')}
+                  >
                     Start Chatting
                   </Button>
                 </CardContent>
@@ -132,7 +153,10 @@ export default function ProfileBuilder() {
                     </div>
                   </div>
                   
-                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                  <Button 
+                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => handleMethodSelection('form')}
+                  >
                     Start Forms
                   </Button>
                 </CardContent>
@@ -141,7 +165,7 @@ export default function ProfileBuilder() {
             
             <div className="text-center mt-6">
               <p className="text-sm text-gray-500 mb-2">Can't decide?</p>
-              <Button variant="outline" onClick={() => setSelectedMethod('chat')}>
+              <Button variant="outline" onClick={() => handleMethodSelection('chat')}>
                 <Sparkles className="w-4 h-4 mr-2" />
                 Try Both - Start with Chat
               </Button>
@@ -176,11 +200,19 @@ export default function ProfileBuilder() {
                     {/* Actions for incomplete sections */}
                     {!section.completed && (
                       <>
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleMethodSelection('chat', section.id)}
+                        >
                           <MessageCircle className="w-4 h-4 mr-1" />
                           Chat
                         </Button>
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleMethodSelection('form', section.id)}
+                        >
                           <FileText className="w-4 h-4 mr-1" />
                           Form
                         </Button>
