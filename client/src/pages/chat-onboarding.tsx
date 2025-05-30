@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send, Bot, User, Sparkles } from "lucide-react";
 import { TypingIndicator } from "@/components/SmartLoadingStates";
+import { OwlCharacter } from "@/components/OwlCharacter";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
@@ -20,10 +21,10 @@ interface OnboardingState {
   step: number;
   data: {
     name?: string;
-    interests?: string;
-    academics?: string;
-    goals?: string;
-    preferences?: string;
+    career?: string;
+    dreamSchools?: string;
+    freeTime?: string;
+    collegeExperience?: string;
     extracurriculars?: string;
   };
 }
@@ -33,7 +34,7 @@ export default function ChatOnboarding() {
     {
       id: '1',
       role: 'assistant',
-      content: "Hi! I'm your college counselor, and I'm here to help you discover colleges that would be a great fit for you. I'll ask you some questions to get to know you better.\n\nWhat should I call you?",
+      content: "Hi! I'm Mark, your college counselor, and I'm here to help you discover colleges that would be a great fit for you. I'll ask you some questions to get to know you better.\n\nWhat should I call you?",
       timestamp: new Date()
     }
   ]);
@@ -44,6 +45,7 @@ export default function ChatOnboarding() {
     data: {}
   });
   const [isComplete, setIsComplete] = useState(false);
+  const [owlEmotion, setOwlEmotion] = useState<'happy' | 'thoughtful' | 'encouraging' | 'neutral'>('neutral');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -195,6 +197,7 @@ I'm going to create your personalized profile now and then we can start explorin
       
       setMessages(prev => [...prev, assistantMessage]);
       setOnboardingState(data.newState);
+      setOwlEmotion(data.isComplete ? 'happy' : 'encouraging');
       
       if (data.isComplete) {
         setIsComplete(true);
@@ -232,6 +235,7 @@ I'm going to create your personalized profile now and then we can start explorin
     };
 
     setMessages(prev => [...prev, userMessage]);
+    setOwlEmotion('thoughtful');
     generateResponseMutation.mutate(input);
     setInput("");
   };
@@ -258,14 +262,16 @@ I'm going to create your personalized profile now and then we can start explorin
       <div className="max-w-4xl mx-auto">
         <Card className="h-[90vh] flex flex-col">
           <CardHeader className="border-b bg-white/80 backdrop-blur">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                <Bot className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <CardTitle>College Discovery Chat</CardTitle>
+            <div className="flex flex-col items-center space-y-3">
+              <OwlCharacter 
+                isThinking={generateResponseMutation.isPending}
+                isSpeaking={messages.length > 1 && messages[messages.length - 1]?.role === 'assistant'}
+                emotion={owlEmotion}
+              />
+              <div className="text-center">
+                <CardTitle>Meet Mark, Your College Counselor</CardTitle>
                 <p className="text-sm text-gray-600">
-                  Let's have a friendly conversation to find your perfect college matches
+                  Let's have a conversation to find your perfect college matches
                 </p>
               </div>
             </div>
@@ -286,7 +292,7 @@ I'm going to create your personalized profile now and then we can start explorin
                         {message.role === 'user' ? (
                           <User className="w-4 h-4" />
                         ) : (
-                          <Bot className="w-4 h-4" />
+                          "🦉"
                         )}
                       </AvatarFallback>
                     </Avatar>
@@ -297,6 +303,11 @@ I'm going to create your personalized profile now and then we can start explorin
                           : 'bg-gray-100 text-gray-900'
                       }`}
                     >
+                      {message.role === 'assistant' && (
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-sm font-medium text-amber-600">Mark</span>
+                        </div>
+                      )}
                       <p className="whitespace-pre-wrap">{message.content}</p>
                     </div>
                   </div>
