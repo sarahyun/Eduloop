@@ -320,13 +320,17 @@ export default function ChatOnboarding() {
                     className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[80%] p-6 rounded-lg relative min-h-[60px] ${
+                      className={`max-w-[80%] p-6 rounded-lg relative w-auto flex-shrink-0 ${
                         message.role === 'user'
                           ? 'bg-blue-500 text-white'
                           : 'chat-assistant-message border border-gray-200 shadow-sm'
                       }`}
+                      style={{
+                        minHeight: 'fit-content',
+                        height: 'auto'
+                      }}
                     >
-                      <div className="whitespace-pre-wrap">
+                      <div className="whitespace-pre-wrap leading-relaxed">
                         {message.content}
                       </div>
                       
