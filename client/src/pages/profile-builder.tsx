@@ -75,6 +75,12 @@ export default function ProfileBuilder() {
   const handleMethodSelection = (method: 'chat' | 'form', sectionId?: string) => {
     const targetSection = sectionId ? sections.find(s => s.id === sectionId) : getFirstIncompleteSection();
     
+    // Special case for Introduction - always go to onboarding
+    if (sectionId === 'Introduction') {
+      window.location.href = '/onboarding';
+      return;
+    }
+    
     if (method === 'chat') {
       // Navigate to chat onboarding with specific section
       window.location.href = `/chat-onboarding?section=${targetSection?.id || 'interests'}`;
@@ -245,22 +251,36 @@ export default function ProfileBuilder() {
                     {/* Actions for incomplete sections */}
                     {!section.completed && (
                       <>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleMethodSelection('chat', section.id)}
-                        >
-                          <MessageCircle className="w-4 h-4 mr-1" />
-                          Chat
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleMethodSelection('form', section.id)}
-                        >
-                          <FileText className="w-4 h-4 mr-1" />
-                          Form
-                        </Button>
+                        {/* Introduction section only shows Form button */}
+                        {section.id === 'Introduction' ? (
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleMethodSelection('form', section.id)}
+                          >
+                            <FileText className="w-4 h-4 mr-1" />
+                            Form
+                          </Button>
+                        ) : (
+                          <>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleMethodSelection('chat', section.id)}
+                            >
+                              <MessageCircle className="w-4 h-4 mr-1" />
+                              Chat
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleMethodSelection('form', section.id)}
+                            >
+                              <FileText className="w-4 h-4 mr-1" />
+                              Form
+                            </Button>
+                          </>
+                        )}
                       </>
                     )}
                     
