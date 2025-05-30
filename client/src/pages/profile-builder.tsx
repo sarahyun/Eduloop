@@ -5,26 +5,26 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, FileText, Sparkles, Clock, CheckCircle } from "lucide-react";
+import { MessageCircle, FileText, Sparkles, Clock, CheckCircle, Edit, RefreshCw } from "lucide-react";
 import { api, type User } from "@/lib/api";
 
 export default function ProfileBuilder() {
   const [user] = useState<User>({ id: 1, username: "sarah", email: "sarah@example.com", fullName: "Sarah Johnson" });
   const [selectedMethod, setSelectedMethod] = useState<'chat' | 'form' | null>(null);
   
-  // Sample data - in real app this would come from API
-  const profileCompletion = 45;
-  const chatProgress = 3; // conversations completed
-  const formProgress = 2; // form sections completed
-  
+  // Dynamic sections with completion tracking
   const sections = [
-    { id: 'basic', title: 'Basic Info', completed: true, method: 'form' },
-    { id: 'academic', title: 'Academic Background', completed: true, method: 'form' },
+    { id: 'basic', title: 'Basic Info', completed: true, method: 'form', lastUpdated: '2 days ago' },
+    { id: 'academic', title: 'Academic Background', completed: true, method: 'form', lastUpdated: '1 week ago' },
     { id: 'interests', title: 'Interests & Passions', completed: false, method: 'both' },
     { id: 'goals', title: 'Career Goals', completed: false, method: 'chat' },
     { id: 'preferences', title: 'College Preferences', completed: false, method: 'both' },
     { id: 'values', title: 'Personal Values', completed: false, method: 'chat' },
   ];
+
+  // Calculate completion percentage based on actual completed sections
+  const completedSections = sections.filter(section => section.completed).length;
+  const profileCompletion = Math.round((completedSections / sections.length) * 100);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -45,6 +45,10 @@ export default function ProfileBuilder() {
               <span className="text-sm text-gray-500">{profileCompletion}% complete</span>
             </div>
             <Progress value={profileCompletion} className="mb-4" />
+            <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+              <span>{completedSections} of {sections.length} sections completed</span>
+              <span>You can always update your answers later</span>
+            </div>
             <p className="text-sm text-gray-600">
               Complete your profile to unlock personalized recommendations and better college matches.
             </p>
@@ -193,34 +197,52 @@ export default function ProfileBuilder() {
                     </div>
                   </div>
                   
-                  {!section.completed && (
-                    <div className="flex gap-2">
-                      {section.method === 'both' && (
-                        <>
-                          <Button size="sm" variant="outline">
+                  <div className="flex gap-2">
+                    {/* Actions for incomplete sections */}
+                    {!section.completed && (
+                      <>
+                        {section.method === 'both' && (
+                          <>
+                            <Button size="sm" variant="outline">
+                              <MessageCircle className="w-4 h-4 mr-1" />
+                              Chat
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              <FileText className="w-4 h-4 mr-1" />
+                              Form
+                            </Button>
+                          </>
+                        )}
+                        {section.method === 'chat' && (
+                          <Button size="sm">
                             <MessageCircle className="w-4 h-4 mr-1" />
-                            Chat
+                            Start Chat
                           </Button>
-                          <Button size="sm" variant="outline">
+                        )}
+                        {section.method === 'form' && (
+                          <Button size="sm">
                             <FileText className="w-4 h-4 mr-1" />
-                            Form
+                            Fill Form
                           </Button>
-                        </>
-                      )}
-                      {section.method === 'chat' && (
-                        <Button size="sm">
-                          <MessageCircle className="w-4 h-4 mr-1" />
-                          Start Chat
+                        )}
+                      </>
+                    )}
+                    
+                    {/* Actions for completed sections - allow updates */}
+                    {section.completed && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500">Updated {section.lastUpdated}</span>
+                        <Button size="sm" variant="ghost" className="text-gray-600 hover:text-blue-600">
+                          <Edit className="w-3 h-3 mr-1" />
+                          Update
                         </Button>
-                      )}
-                      {section.method === 'form' && (
-                        <Button size="sm">
-                          <FileText className="w-4 h-4 mr-1" />
-                          Fill Form
+                        <Button size="sm" variant="ghost" className="text-gray-600 hover:text-green-600">
+                          <RefreshCw className="w-3 h-3 mr-1" />
+                          Redo
                         </Button>
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
