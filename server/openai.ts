@@ -225,9 +225,12 @@ Generate questions that:
 Respond with a JSON array of questions (maximum 2).`;
 
     try {
-      const completion = await openai.chat.completions.create({
+      const completion = await this.openai.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-        messages: [{ role: "user", content: prompt }],
+        messages: [
+          { role: "system", content: "You are a helpful college counselor assistant that generates thoughtful follow-up questions. Always respond with valid JSON containing a 'questions' array." },
+          { role: "user", content: prompt }
+        ],
         response_format: { type: "json_object" },
         max_tokens: 300,
       });
