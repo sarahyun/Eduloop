@@ -30,41 +30,84 @@ export default function SectionForm() {
   // Populate answers from existing profile data
   useEffect(() => {
     if (profile && PROFILE_SECTIONS[currentSection as keyof typeof PROFILE_SECTIONS]) {
-      const questions = PROFILE_SECTIONS[currentSection as keyof typeof PROFILE_SECTIONS];
       const initialAnswers: Record<string, string> = {};
+      const profileData = profile as any;
       
-      questions.forEach(question => {
-        if (question.id !== 'additionalInfo') {
-          initialAnswers[question.id] = (profile as any)[question.id] || '';
-        }
-      });
+      // Map profile fields to question IDs for each section
+      if (currentSection === 'Academic Information') {
+        initialAnswers['1'] = profileData.favoriteClasses || '';
+        initialAnswers['2'] = profileData.strugglingSubjects || '';
+        initialAnswers['3'] = profileData.academicFascinations || '';
+      } else if (currentSection === 'Extracurriculars and Interests') {
+        initialAnswers['1'] = profileData.proudOfOutsideAcademics || '';
+        initialAnswers['2'] = profileData.fieldsToExplore || '';
+        initialAnswers['3'] = profileData.freeTimeActivities || '';
+      } else if (currentSection === 'Personal Reflections') {
+        initialAnswers['1'] = profileData.whatMakesHappy || '';
+        initialAnswers['2'] = profileData.challengeOvercome || '';
+        initialAnswers['3'] = profileData.rememberedFor || '';
+        initialAnswers['4'] = profileData.importantLesson || '';
+      } else if (currentSection === 'College Preferences') {
+        initialAnswers['1'] = profileData.collegeExperience || '';
+        initialAnswers['2'] = profileData.schoolSize || '';
+        initialAnswers['3'] = profileData.locationExperiences || '';
+        initialAnswers['4'] = profileData.parentsExpectations || '';
+        initialAnswers['5'] = profileData.communityEnvironment || '';
+      }
       
       setAnswers(initialAnswers);
     }
   }, [profile, currentSection]);
 
-  // Save answer mutation
-  const saveAnswerMutation = useMutation({
-    mutationFn: async ({ questionId, answer }: { questionId: string; answer: string }) => {
-      const response = await fetch('/api/profile/1/answer', {
-        method: 'PATCH',
+  // Save section mutation
+  const saveSectionMutation = useMutation({
+    mutationFn: async (sectionAnswers: Record<string, string>) => {
+      // Map question IDs back to profile field names
+      const profileUpdates: Record<string, string> = {};
+      
+      if (currentSection === 'Academic Information') {
+        if (sectionAnswers['1']) profileUpdates.favoriteClasses = sectionAnswers['1'];
+        if (sectionAnswers['2']) profileUpdates.strugglingSubjects = sectionAnswers['2'];
+        if (sectionAnswers['3']) profileUpdates.academicFascinations = sectionAnswers['3'];
+      } else if (currentSection === 'Extracurriculars and Interests') {
+        if (sectionAnswers['1']) profileUpdates.proudOfOutsideAcademics = sectionAnswers['1'];
+        if (sectionAnswers['2']) profileUpdates.fieldsToExplore = sectionAnswers['2'];
+        if (sectionAnswers['3']) profileUpdates.freeTimeActivities = sectionAnswers['3'];
+      } else if (currentSection === 'Personal Reflections') {
+        if (sectionAnswers['1']) profileUpdates.whatMakesHappy = sectionAnswers['1'];
+        if (sectionAnswers['2']) profileUpdates.challengeOvercome = sectionAnswers['2'];
+        if (sectionAnswers['3']) profileUpdates.rememberedFor = sectionAnswers['3'];
+        if (sectionAnswers['4']) profileUpdates.importantLesson = sectionAnswers['4'];
+      } else if (currentSection === 'College Preferences') {
+        if (sectionAnswers['1']) profileUpdates.collegeExperience = sectionAnswers['1'];
+        if (sectionAnswers['2']) profileUpdates.schoolSize = sectionAnswers['2'];
+        if (sectionAnswers['3']) profileUpdates.locationExperiences = sectionAnswers['3'];
+        if (sectionAnswers['4']) profileUpdates.parentsExpectations = sectionAnswers['4'];
+        if (sectionAnswers['5']) profileUpdates.communityEnvironment = sectionAnswers['5'];
+      }
+
+      const response = await fetch('/api/profile/1', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ questionId, answer })
+        body: JSON.stringify({
+          userId: 1,
+          ...profileUpdates
+        })
       });
-      if (!response.ok) throw new Error('Failed to save answer');
+      if (!response.ok) throw new Error('Failed to save answers');
       return response.json();
     },
     onSuccess: () => {
       setHasChanges(false);
       toast({
-        title: "Answer saved",
-        description: "Your response has been saved successfully.",
+        title: "Section saved",
+        description: "Your answers have been saved successfully.",
       });
     },
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to save your answer. Please try again.",
+        description: "Failed to save your answers. Please try again.",
         variant: "destructive",
       });
     }
@@ -76,11 +119,7 @@ export default function SectionForm() {
   };
 
   const handleSave = () => {
-    Object.entries(answers).forEach(([questionId, answer]) => {
-      if (answer.trim()) {
-        saveAnswerMutation.mutate({ questionId, answer });
-      }
-    });
+    saveSectionMutation.mutate(answers);
   };
 
   const questions = PROFILE_SECTIONS[currentSection as keyof typeof PROFILE_SECTIONS] || [];
@@ -133,11 +172,11 @@ export default function SectionForm() {
               {hasChanges && (
                 <Button 
                   onClick={handleSave}
-                  disabled={saveAnswerMutation.isPending}
+                  disabled={saveSectionMutation.isPending}
                   size="sm"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  {saveAnswerMutation.isPending ? 'Saving...' : 'Save Changes'}
+                  {saveSectionMutation.isPending ? 'Saving...' : 'Save Changes'}
                 </Button>
               )}
             </CardTitle>
@@ -145,13 +184,13 @@ export default function SectionForm() {
           <CardContent className="space-y-6">
             {regularQuestions.map((question, index) => (
               <div key={question.id} className="space-y-2">
-                <Label htmlFor={question.id} className="text-base font-medium">
+                <Label htmlFor={String(question.id)} className="text-base font-medium">
                   {index + 1}. {question.question}
                 </Label>
                 <Textarea
-                  id={question.id}
-                  value={answers[question.id] || ''}
-                  onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                  id={String(question.id)}
+                  value={answers[String(question.id)] || ''}
+                  onChange={(e) => handleAnswerChange(String(question.id), e.target.value)}
                   placeholder="Share your thoughts here..."
                   className="min-h-[100px]"
                 />
