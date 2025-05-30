@@ -92,12 +92,14 @@ export default function OnboardingPage() {
     const allSteps = [...baseSteps, ...dynamicSteps];
     const currentStepData = allSteps[currentStep];
     
-    console.log('Current step:', currentStepData?.id, 'Response length:', responses[currentStepData?.id as keyof typeof responses]?.length);
+    console.log('Current step:', currentStepData?.id);
+    console.log('All responses:', responses);
+    console.log('Response length:', responses[currentStepData?.id as keyof typeof responses]?.length);
     
     // Check if we should generate a follow-up for this step
     if (currentStepData && !currentStepData.id.includes('followup') && !currentStepData.id.includes('welcome') && !currentStepData.id.includes('academics')) {
       const response = responses[currentStepData.id as keyof typeof responses];
-      console.log('Checking response:', response);
+      console.log('Checking response for', currentStepData.id, ':', response);
       if (response && response.length > 20) {
         console.log('Generating follow-up for:', currentStepData.id);
         await generateFollowUpStep(currentStepData.id, response);
@@ -210,6 +212,7 @@ export default function OnboardingPage() {
   };
 
   const updateResponse = (key: string, value: string) => {
+    console.log('Updating response:', key, 'with value:', value);
     setResponses(prev => ({ ...prev, [key]: value }));
   };
 
