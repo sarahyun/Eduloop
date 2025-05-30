@@ -15,6 +15,11 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
 
   // Fetch core data
+  const { data: profile } = useQuery({
+    queryKey: ['/api/profile', user.id],
+    enabled: !!user?.id,
+  });
+
   const { data: recommendations = [] } = useQuery({
     queryKey: ['/api/recommendations', user.id],
     enabled: !!user?.id,
@@ -77,6 +82,27 @@ export default function Dashboard() {
     return savedColleges.some((saved: any) => saved.collegeId === collegeId);
   };
 
+  // Calculate profile completion percentage
+  const calculateProfileCompletion = () => {
+    if (!profile) return 0;
+    
+    const fields = [
+      'careerMajor', 'dreamSchools', 'freeTimeActivities', 'collegeExperience', 
+      'extracurricularsAdditionalInfo', 'gpa', 'satScore', 'actScore',
+      'favoriteClasses', 'strugglingSubjects', 'whatMakesHappy', 'challengeOvercome'
+    ];
+    
+    const completedFields = fields.filter(field => {
+      const value = profile[field];
+      return value !== null && value !== undefined && value !== '';
+    });
+    
+    return Math.round((completedFields.length / fields.length) * 100);
+  };
+
+  const profileCompletion = calculateProfileCompletion();
+  const isProfileComplete = profileCompletion >= 70; // Require 70% completion for recommendations
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation user={user} />
@@ -94,14 +120,23 @@ export default function Dashboard() {
           {/* Profile Completion Nudge */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium text-blue-900 mb-1">Complete your profile for better matches</h3>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-medium text-blue-900">Complete your profile for better matches</h3>
+                  <span className="text-sm font-medium text-blue-700">{profileCompletion}% complete</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2 mb-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${profileCompletion}%` }}
+                  />
+                </div>
                 <p className="text-sm text-blue-700">The more we learn about you, the more helpful our recommendations become.</p>
               </div>
               <Button 
                 onClick={() => window.location.href = '/profile'}
                 size="sm"
-                className="bg-blue-600 text-white hover:bg-blue-700"
+                className="bg-blue-600 text-white hover:bg-blue-700 ml-4"
               >
                 Build Profile
               </Button>
@@ -148,8 +183,9 @@ export default function Dashboard() {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => generateRecommendationsMutation.mutate(user.id)}
-                disabled={generateRecommendationsMutation.isPending}
+                onClick={() => isProfileComplete ? generateRecommendationsMutation.mutate(user.id) : null}
+                disabled={generateRecommendationsMutation.isPending || !isProfileComplete}
+                className={!isProfileComplete ? "opacity-50 cursor-not-allowed" : ""}
               >
                 {generateRecommendationsMutation.isPending ? "Loading..." : "Refresh"}
               </Button>
@@ -158,13 +194,27 @@ export default function Dashboard() {
           <CardContent>
             {(recommendations as any[]).length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-500 mb-4">No recommendations yet</p>
-                <Button 
-                  onClick={() => generateRecommendationsMutation.mutate(user.id)}
-                  disabled={generateRecommendationsMutation.isPending}
-                >
-                  Get Recommendations
-                </Button>
+                {!isProfileComplete ? (
+                  <>
+                    <p className="text-gray-500 mb-4">Complete your profile to unlock recommendations</p>
+                    <Button 
+                      disabled={true}
+                      className="opacity-50 cursor-not-allowed"
+                    >
+                      Complete Profile to Unlock
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-gray-500 mb-4">No recommendations yet</p>
+                    <Button 
+                      onClick={() => generateRecommendationsMutation.mutate(user.id)}
+                      disabled={generateRecommendationsMutation.isPending}
+                    >
+                      Get Recommendations
+                    </Button>
+                  </>
+                )}
               </div>
             ) : (
               <div className="grid gap-4">
