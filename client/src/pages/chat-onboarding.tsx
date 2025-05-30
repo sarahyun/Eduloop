@@ -205,7 +205,7 @@ export default function ChatOnboarding() {
                       className={`max-w-[80%] p-4 rounded-lg ${
                         message.role === 'user'
                           ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 text-gray-900'
+                          : 'bg-white text-gray-900 border border-gray-200 shadow-sm'
                       }`}
                     >
                       <div className="whitespace-pre-wrap">{message.content}</div>
