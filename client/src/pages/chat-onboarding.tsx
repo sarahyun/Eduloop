@@ -261,7 +261,7 @@ I'm going to create your personalized profile now and then we can start explorin
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-4xl mx-auto">
         <Card className="h-[90vh] flex flex-col">
-          <CardHeader className="border-b bg-white/80 backdrop-blur">
+          <CardHeader className="border-b bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
             <div className="flex flex-col items-center space-y-3">
               <OwlCharacter 
                 isThinking={generateResponseMutation.isPending}
@@ -270,7 +270,7 @@ I'm going to create your personalized profile now and then we can start explorin
               />
               <div className="text-center">
                 <CardTitle>Meet Mark, Your College Counselor</CardTitle>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   Let's have a conversation to find your perfect college matches
                 </p>
               </div>
@@ -300,7 +300,7 @@ I'm going to create your personalized profile now and then we can start explorin
                       className={`max-w-[80%] p-4 rounded-2xl ${
                         message.role === 'user'
                           ? 'bg-primary text-primary-foreground ml-auto'
-                          : 'bg-gray-100 text-gray-900'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                       }`}
                     >
                       {message.role === 'assistant' && (
@@ -318,7 +318,7 @@ I'm going to create your personalized profile now and then we can start explorin
             </ScrollArea>
 
             {!isComplete ? (
-              <div className="border-t p-4 bg-white/80 backdrop-blur">
+              <div className="border-t p-4 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
                 <div className="flex space-x-2">
                   <Input
                     ref={inputRef}
@@ -339,12 +339,12 @@ I'm going to create your personalized profile now and then we can start explorin
                 </div>
               </div>
             ) : (
-              <div className="border-t p-6 bg-white/80 backdrop-blur text-center">
+              <div className="border-t p-6 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 text-center">
                 <div className="flex items-center justify-center space-x-2 text-primary mb-2">
                   <Sparkles className="w-5 h-5" />
                   <span className="font-medium">Profile Complete!</span>
                 </div>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                   Taking you to your personalized dashboard...
                 </p>
                 <div className="w-8 h-1 bg-primary rounded-full mx-auto animate-pulse"></div>
