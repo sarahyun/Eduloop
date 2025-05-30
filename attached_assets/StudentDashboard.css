@@ -1,0 +1,40 @@
+/* StudentDashboard.css */
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap');
+
+body {
+    font-family: 'Lexend', sans-serif;
+    background-color: #f9f9f9; /* Light background for contrast */
+    color: #333; /* Dark text for readability */
+}
+
+.student-dashboard {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff; /* White background for the dashboard */
+}
+/* Add this to StudentDashboard.css */
+.welcome-text {
+    color: black;
+}
+
+.section {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #e0e0e0; /* Light border for separation */
+    border-radius: 5px;
+    background-color: white; /* Slightly darker background for sections */
+}
+
+h1, h2 {
+    color: #007BFF; /* Primary color for headings */
+}
+
+ul {
+    list-style-type: disc; /* Bullet points */
+    padding-left: 20px; /* Indentation for bullet points */
+}
+
+li {
+    margin-bottom: 5px; /* Space between list items */
+}
