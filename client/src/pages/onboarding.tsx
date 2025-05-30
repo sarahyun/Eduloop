@@ -248,6 +248,7 @@ export default function OnboardingPage() {
       satScore: formValues.satScore || null,
       actScore: formValues.actScore || null,
     };
+    console.log('Onboarding submitting data:', { responses, formValues, formData });
     createProfileMutation.mutate(formData);
   };
 
