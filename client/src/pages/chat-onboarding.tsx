@@ -50,6 +50,8 @@ export default function ChatOnboarding() {
   });
   const [isComplete, setIsComplete] = useState(false);
   const [showAcademicForm, setShowAcademicForm] = useState(false);
+  const [showProfileInsights, setShowProfileInsights] = useState(false);
+  const [showContinueButton, setShowContinueButton] = useState(false);
   const [academicData, setAcademicData] = useState({
     gpa: '',
     satScore: '',
@@ -107,10 +109,57 @@ export default function ChatOnboarding() {
           };
         } else if (state.step === 6) {
           const newState = { ...state, step: 7, data: { ...state.data, academicInfo: response } };
+          
+          // Generate personalized and insightful profile summary
+          const generateInsights = (data: any) => {
+            const insights = [];
+            
+            // Career insights
+            if (data.career) {
+              const career = data.career.toLowerCase();
+              if (career.includes('engineer') || career.includes('tech')) {
+                insights.push("I can see you're drawn to problem-solving and innovation. Engineering programs with strong research opportunities might really excite you.");
+              } else if (career.includes('medicine') || career.includes('doctor')) {
+                insights.push("Your interest in medicine shows you care about helping others. I'll help you find programs with excellent pre-med support and research opportunities.");
+              } else if (career.includes('business')) {
+                insights.push("Your business interests suggest you enjoy leadership and strategy. Look for schools with strong entrepreneurship programs and internship networks.");
+              } else {
+                insights.push(`Your interest in ${data.career} shows you're already thinking purposefully about your future. I'll help you find programs that align with this passion.`);
+              }
+            }
+            
+            // Interests connection
+            if (data.freeTime) {
+              const interests = data.freeTime.toLowerCase();
+              if (interests.includes('music') || interests.includes('art')) {
+                insights.push("Your creative side is important to you. I'll look for colleges with vibrant arts communities, even if you're not majoring in the arts.");
+              } else if (interests.includes('sport') || interests.includes('athletic')) {
+                insights.push("Being active is part of who you are. I'll consider schools with great recreation facilities and maybe club sports opportunities.");
+              }
+            }
+            
+            // Academic fit
+            insights.push("Based on your academic profile, I'll help you find the right balance of reach, match, and safety schools where you can thrive.");
+            
+            return insights;
+          };
+          
+          const insights = generateInsights(state.data);
+          const profileSummary = `I've gotten to know you through our conversation, and here's what stands out about you:\n\n${insights.join('\n\n')}\n\nYou're not just another applicant with test scores - you're someone with genuine interests, goals, and a unique story. I'm excited to help you find colleges where you'll truly belong.`;
+          
           return {
-            response: `Perfect! I have a great sense of who you are and what you're looking for. Thank you for sharing so much with me.\n\nI'm excited to help you discover colleges that would be an amazing fit for your interests, goals, and personality. Let's start exploring your personalized recommendations!`,
+            response: profileSummary,
             newState,
-            isComplete: true
+            isComplete: false,
+            showProfileInsights: true
+          };
+        } else if (state.step === 7) {
+          const newState = { ...state, step: 8, data: { ...state.data } };
+          return {
+            response: `Thank you for taking the time to share your story with me. I'm excited to help you discover your perfect college match!`,
+            newState,
+            isComplete: true,
+            showContinueButton: true
           };
         }
         
@@ -142,6 +191,14 @@ export default function ChatOnboarding() {
       
       if (data.showAcademicForm) {
         setShowAcademicForm(true);
+      }
+      
+      if (data.showProfileInsights) {
+        setShowProfileInsights(true);
+      }
+      
+      if (data.showContinueButton) {
+        setShowContinueButton(true);
       }
       
       if (data.isComplete) {
@@ -237,6 +294,57 @@ export default function ChatOnboarding() {
                   >
                     <p className="whitespace-pre-wrap">{message.content}</p>
                     
+                    {/* Show profile insights in the chat bubble */}
+                    {message.role === 'assistant' && showProfileInsights && index === messages.length - 1 && (
+                      <div className="mt-4 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
+                        <div className="flex items-center space-x-2 mb-3">
+                          <User className="w-5 h-5 text-blue-500" />
+                          <h3 className="font-semibold text-blue-800 dark:text-blue-200">How I Can Help You</h3>
+                        </div>
+                        
+                        <div className="space-y-3 text-sm">
+                          <div className="p-3 bg-white/70 dark:bg-gray-800/70 rounded-lg">
+                            <p className="font-medium text-gray-800 dark:text-gray-200 mb-2">🎯 Personalized for You:</p>
+                            <ul className="space-y-1 text-gray-600 dark:text-gray-300">
+                              <li>• Find colleges that match your {onboardingState.data.career || 'academic interests'}</li>
+                              <li>• Discover schools with strong programs in your field</li>
+                              <li>• Match your academic profile with realistic options</li>
+                            </ul>
+                          </div>
+                          
+                          <div className="p-3 bg-white/70 dark:bg-gray-800/70 rounded-lg">
+                            <p className="font-medium text-gray-800 dark:text-gray-200 mb-2">💡 You Might Like:</p>
+                            <ul className="space-y-1 text-gray-600 dark:text-gray-300">
+                              <li>• AI-powered college recommendations</li>
+                              <li>• Real-time chat guidance throughout your search</li>
+                              <li>• Insights beyond just rankings and test scores</li>
+                              <li>• Personalized advice based on your unique profile</li>
+                            </ul>
+                          </div>
+                          
+                          <div className="p-3 bg-white/70 dark:bg-gray-800/70 rounded-lg">
+                            <p className="font-medium text-gray-800 dark:text-gray-200 mb-2">🚀 What's Next:</p>
+                            <ul className="space-y-1 text-gray-600 dark:text-gray-300">
+                              <li>• Explore your personalized college matches</li>
+                              <li>• Chat with me anytime for guidance</li>
+                              <li>• Save colleges you're interested in</li>
+                              <li>• Get insights on your application strategy</li>
+                            </ul>
+                          </div>
+                        </div>
+                        
+                        <Button
+                          onClick={() => {
+                            setShowProfileInsights(false);
+                            generateResponseMutation.mutate("I'm ready to continue");
+                          }}
+                          className="w-full mt-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-2 rounded-lg transition-all duration-300"
+                        >
+                          This sounds great! Continue
+                        </Button>
+                      </div>
+                    )}
+                    
                     {/* Show academic form in the chat bubble if this is the academic step */}
                     {message.role === 'assistant' && showAcademicForm && index === messages.length - 1 && (
                       <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600">
@@ -319,6 +427,18 @@ export default function ChatOnboarding() {
                             Submit Academic Info
                           </Button>
                         </div>
+                      </div>
+                    )}
+                    
+                    {/* Show continue button at the end */}
+                    {message.role === 'assistant' && showContinueButton && index === messages.length - 1 && (
+                      <div className="mt-4 text-center">
+                        <Button
+                          onClick={() => window.location.href = '/dashboard'}
+                          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+                        >
+                          🚀 Start Exploring Colleges
+                        </Button>
                       </div>
                     )}
                     
