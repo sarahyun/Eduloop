@@ -92,10 +92,14 @@ export default function OnboardingPage() {
     const allSteps = [...baseSteps, ...dynamicSteps];
     const currentStepData = allSteps[currentStep];
     
+    console.log('Current step:', currentStepData?.id, 'Response length:', responses[currentStepData?.id as keyof typeof responses]?.length);
+    
     // Check if we should generate a follow-up for this step
     if (currentStepData && !currentStepData.id.includes('followup') && !currentStepData.id.includes('welcome') && !currentStepData.id.includes('academics')) {
       const response = responses[currentStepData.id as keyof typeof responses];
+      console.log('Checking response:', response);
       if (response && response.length > 20) {
+        console.log('Generating follow-up for:', currentStepData.id);
         await generateFollowUpStep(currentStepData.id, response);
       }
     }
@@ -114,6 +118,7 @@ export default function OnboardingPage() {
   const generateFollowUpStep = async (stepId: string, response: string) => {
     if (!response.trim() || response.length < 20) return;
     
+    console.log('Starting follow-up generation for:', stepId);
     setIsGeneratingNextStep(true);
     try {
       const result = await fetch('/api/generate-followup-questions', {
@@ -126,9 +131,13 @@ export default function OnboardingPage() {
         })
       });
       
+      console.log('API result status:', result.status);
       if (result.ok) {
-        const { questions } = await result.json();
+        const data = await result.json();
+        console.log('API response:', data);
+        const { questions } = data;
         if (questions && questions.length > 0) {
+          console.log('Creating follow-up step with question:', questions[0]);
           // Create a new step with the first follow-up question
           const followUpStep: OnboardingStep = {
             id: `${stepId}_followup`,
@@ -158,12 +167,17 @@ export default function OnboardingPage() {
           setDynamicSteps(prev => {
             const newSteps = [...prev];
             newSteps.splice(currentStep + 1, 0, followUpStep);
+            console.log('Added follow-up step, new dynamic steps:', newSteps.length);
             return newSteps;
           });
+        } else {
+          console.log('No questions returned from API');
         }
+      } else {
+        console.log('API call failed with status:', result.status);
       }
     } catch (error) {
-      console.log('Could not generate follow-up question');
+      console.error('Error generating follow-up question:', error);
     } finally {
       setIsGeneratingNextStep(false);
     }
