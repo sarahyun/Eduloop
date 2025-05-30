@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { BookOpen, Target, Heart, Zap, GraduationCap, ArrowLeft, ArrowRight, CheckCircle } from "lucide-react";
+import { BookOpen, Target, Heart, Zap, GraduationCap, ArrowLeft, ArrowRight, CheckCircle, MessageCircle } from "lucide-react";
 import { insertStudentProfileSchema } from "../../../shared/schema";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -41,6 +40,9 @@ export default function OnboardingPage() {
     collegeExperience: "",
     extracurriculars: "",
   });
+  const [followUpQuestions, setFollowUpQuestions] = useState<{[key: string]: string[]}>({});
+  const [followUpResponses, setFollowUpResponses] = useState<{[key: string]: string}>({});
+  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -97,15 +99,60 @@ export default function OnboardingPage() {
     }
   };
 
+  const generateFollowUpQuestions = async (stepId: string, response: string) => {
+    if (!response.trim() || response.length < 20) return;
+    
+    setIsGeneratingQuestions(true);
+    try {
+      const result = await fetch('/api/generate-followup-questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          stepId, 
+          response,
+          previousResponses: responses
+        })
+      });
+      
+      if (result.ok) {
+        const { questions } = await result.json();
+        setFollowUpQuestions(prev => ({
+          ...prev,
+          [stepId]: questions.slice(0, 2) // Limit to 2 questions
+        }));
+      }
+    } catch (error) {
+      console.log('Could not generate follow-up questions');
+    } finally {
+      setIsGeneratingQuestions(false);
+    }
+  };
+
   const handleSubmit = () => {
     const formValues = form.getValues();
+    
+    // Combine main responses with follow-up responses
+    const allResponses = Object.keys(responses).map(key => {
+      let mainResponse = responses[key];
+      const followUps = followUpQuestions[key];
+      if (followUps && followUps.length > 0) {
+        const followUpAnswers = followUps.map((q, index) => 
+          followUpResponses[`${key}_followup_${index}`]
+        ).filter(Boolean);
+        
+        if (followUpAnswers.length > 0) {
+          mainResponse += '\n\nAdditional details:\n' + followUpAnswers.join('\n');
+        }
+      }
+      return mainResponse;
+    }).filter(Boolean);
+
     const formData = {
       userId: 1,
       academicInterests: responses.careerMajor ? [responses.careerMajor] : undefined,
       careerGoals: responses.careerMajor ? [responses.careerMajor] : undefined,
       values: responses.collegeExperience ? [responses.collegeExperience] : undefined,
       extracurriculars: responses.extracurriculars ? [responses.extracurriculars] : undefined,
-      learningStyle: formValues.learningStyle || undefined,
       gpa: formValues.gpa || undefined,
       satScore: formValues.satScore || undefined,
       actScore: formValues.actScore || undefined,
@@ -115,6 +162,17 @@ export default function OnboardingPage() {
 
   const updateResponse = (key: string, value: string) => {
     setResponses(prev => ({ ...prev, [key]: value }));
+    
+    // Generate follow-up questions when user pauses typing
+    const timeoutId = setTimeout(() => {
+      generateFollowUpQuestions(key, value);
+    }, 2000);
+    
+    return () => clearTimeout(timeoutId);
+  };
+
+  const updateFollowUpResponse = (key: string, value: string) => {
+    setFollowUpResponses(prev => ({ ...prev, [key]: value }));
   };
 
   const steps: OnboardingStep[] = [
@@ -177,6 +235,28 @@ export default function OnboardingPage() {
             <p className="text-sm text-gray-500">
               Feel free to mention multiple interests, uncertainty, or anything that comes to mind.
             </p>
+            
+            {/* Follow-up Questions */}
+            {isGeneratingQuestions && (
+              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <MessageCircle className="w-4 h-4 animate-pulse" />
+                <span>Thinking of follow-up questions...</span>
+              </div>
+            )}
+            
+            {followUpQuestions.careerMajor && followUpQuestions.careerMajor.map((question, index) => (
+              <div key={index} className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
+                <Label className="text-sm font-medium text-gray-800 mb-2 block">
+                  Follow-up: {question}
+                </Label>
+                <Textarea
+                  placeholder="Your thoughts..."
+                  value={followUpResponses[`careerMajor_followup_${index}`] || ''}
+                  onChange={(e) => updateFollowUpResponse(`careerMajor_followup_${index}`, e.target.value)}
+                  className="min-h-20 text-sm"
+                />
+              </div>
+            ))}
           </div>
         </div>
       )
@@ -207,6 +287,20 @@ export default function OnboardingPage() {
             <p className="text-sm text-gray-500">
               Share what you know or admit if you're still exploring - both are perfectly fine!
             </p>
+            
+            {followUpQuestions.dreamSchools && followUpQuestions.dreamSchools.map((question, index) => (
+              <div key={index} className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
+                <Label className="text-sm font-medium text-gray-800 mb-2 block">
+                  Follow-up: {question}
+                </Label>
+                <Textarea
+                  placeholder="Your thoughts..."
+                  value={followUpResponses[`dreamSchools_followup_${index}`] || ''}
+                  onChange={(e) => updateFollowUpResponse(`dreamSchools_followup_${index}`, e.target.value)}
+                  className="min-h-20 text-sm"
+                />
+              </div>
+            ))}
           </div>
         </div>
       )
@@ -237,6 +331,20 @@ export default function OnboardingPage() {
             <p className="text-sm text-gray-500">
               Include anything from hobbies to volunteer work to things you do just for fun.
             </p>
+            
+            {followUpQuestions.freeTime && followUpQuestions.freeTime.map((question, index) => (
+              <div key={index} className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
+                <Label className="text-sm font-medium text-gray-800 mb-2 block">
+                  Follow-up: {question}
+                </Label>
+                <Textarea
+                  placeholder="Your thoughts..."
+                  value={followUpResponses[`freeTime_followup_${index}`] || ''}
+                  onChange={(e) => updateFollowUpResponse(`freeTime_followup_${index}`, e.target.value)}
+                  className="min-h-20 text-sm"
+                />
+              </div>
+            ))}
           </div>
         </div>
       )
@@ -267,6 +375,20 @@ export default function OnboardingPage() {
             <p className="text-sm text-gray-500">
               Be honest about both your hopes and concerns - this helps us provide better guidance.
             </p>
+            
+            {followUpQuestions.collegeExperience && followUpQuestions.collegeExperience.map((question, index) => (
+              <div key={index} className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
+                <Label className="text-sm font-medium text-gray-800 mb-2 block">
+                  Follow-up: {question}
+                </Label>
+                <Textarea
+                  placeholder="Your thoughts..."
+                  value={followUpResponses[`collegeExperience_followup_${index}`] || ''}
+                  onChange={(e) => updateFollowUpResponse(`collegeExperience_followup_${index}`, e.target.value)}
+                  className="min-h-20 text-sm"
+                />
+              </div>
+            ))}
           </div>
         </div>
       )
@@ -302,53 +424,25 @@ Started a coding club at school..."
             <p className="text-sm text-gray-500">
               Include leadership roles, awards, jobs, volunteer work, or anything meaningful to you.
             </p>
+            
+            {followUpQuestions.extracurriculars && followUpQuestions.extracurriculars.map((question, index) => (
+              <div key={index} className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
+                <Label className="text-sm font-medium text-gray-800 mb-2 block">
+                  Follow-up: {question}
+                </Label>
+                <Textarea
+                  placeholder="Your thoughts..."
+                  value={followUpResponses[`extracurriculars_followup_${index}`] || ''}
+                  onChange={(e) => updateFollowUpResponse(`extracurriculars_followup_${index}`, e.target.value)}
+                  className="min-h-20 text-sm"
+                />
+              </div>
+            ))}
           </div>
         </div>
       )
     },
-    {
-      id: "learning",
-      title: "How do you learn best?",
-      subtitle: "Understanding your learning style helps us recommend the right college environments",
-      icon: <BookOpen className="w-8 h-8 text-primary" />,
-      component: (
-        <Form {...form}>
-          <div className="space-y-6">
-            <div className="text-center mb-6">
-              <p className="text-gray-600">
-                Different colleges have different teaching styles. Help us understand how you learn best.
-              </p>
-            </div>
-            <FormField
-              control={form.control}
-              name="learningStyle"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base font-medium text-gray-900">
-                    Which learning style describes you best?
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="h-12">
-                        <SelectValue placeholder="Select your learning preference" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {learningStyles.map((style) => (
-                        <SelectItem key={style.value} value={style.value}>
-                          {style.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </Form>
-      )
-    },
+
     {
       id: "academics",
       title: "Academic Background",
