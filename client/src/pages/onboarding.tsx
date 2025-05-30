@@ -253,8 +253,12 @@ export default function OnboardingPage() {
   };
 
   const updateResponse = (key: string, value: string) => {
-
-    setResponses(prev => ({ ...prev, [key]: value }));
+    console.log('Updating response:', key, '=', value);
+    setResponses(prev => {
+      const updated = { ...prev, [key]: value };
+      console.log('Updated responses state:', updated);
+      return updated;
+    });
   };
 
   const updateFollowUpResponse = (key: string, value: string) => {
