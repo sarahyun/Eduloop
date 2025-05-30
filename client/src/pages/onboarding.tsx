@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { BookOpen, Target, Heart, Zap, GraduationCap, ArrowLeft, ArrowRight, CheckCircle, MessageCircle } from "lucide-react";
+import { SmartLoading } from "@/components/SmartLoadingStates";
 import { insertStudentProfileSchema } from "../../../shared/schema";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -576,10 +577,7 @@ Started a coding club at school..."
                 className="flex items-center space-x-2"
               >
                 {isGeneratingNextStep ? (
-                  <>
-                    <span>Preparing next question...</span>
-                    <MessageCircle className="w-4 h-4 animate-pulse" />
-                  </>
+                  <SmartLoading type="followup" isLoading={true} />
                 ) : (
                   <>
                     <span>Continue</span>
