@@ -290,44 +290,7 @@ Questions for this section:
 ${questions && Array.isArray(questions) ? questions.map(q => `- ${q.question}`).join('\n') : 'No questions defined'}
 ` : '';
 
-      // Analyze conversation to determine which questions have been addressed
-      const questionsAsked = new Set();
-      
-      // Check if AI has already asked each question by looking at assistant messages
-      if (conversationHistory) {
-        conversationHistory.forEach(msg => {
-          if (msg.role === 'assistant') {
-            const content = msg.content.toLowerCase();
-            
-            // Check which question this AI message corresponds to
-            questions.forEach(q => {
-              const questionText = q.question.toLowerCase();
-              
-              // Match based on key phrases from each question
-              if (q.id === 'careerMajor' && (content.includes('career') || content.includes('major'))) {
-                questionsAsked.add(q.id);
-              } else if (q.id === 'dreamSchools' && (content.includes('dream school') || content.includes('schools in mind'))) {
-                questionsAsked.add(q.id);
-              } else if (q.id === 'introFreeTimeActivities' && content.includes('outside of school')) {
-                questionsAsked.add(q.id);
-              } else if (q.id === 'introCollegeExperience' && content.includes('college experience')) {
-                questionsAsked.add(q.id);
-              } else if (q.id === 'extracurriculars' && content.includes('extracurricular')) {
-                questionsAsked.add(q.id);
-              } else if (q.id === 'gpa' && content.includes('what is your gpa')) {
-                questionsAsked.add(q.id);
-              } else if (q.id === 'satScore' && content.includes('what is your sat')) {
-                questionsAsked.add(q.id);
-              } else if (q.id === 'actScore' && content.includes('what is your act')) {
-                questionsAsked.add(q.id);
-              }
-            });
-          }
-        });
-      }
 
-      // Find next unanswered question
-      const nextQuestion = questions.find(q => !questionsAsked.has(q.id));
       
       const completion = await this.openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -338,23 +301,16 @@ ${questions && Array.isArray(questions) ? questions.map(q => `- ${q.question}`).
 
 ${sectionContext}
 
-IMPORTANT: 
-- Questions already covered: ${Array.from(questionsAsked).join(', ') || 'None'}
-- Next question to ask: ${nextQuestion ? nextQuestion.question : 'All questions completed'}
-- DO NOT repeat questions that have already been answered
-- Move systematically through the question list
-- Keep responses brief and conversational
-- If all questions are covered, indicate completion
-
 Guidelines:
-- Acknowledge the user's previous response briefly
-- Ask the next unanswered question from the list
-- Don't ask follow-up questions unless the answer is completely unclear
+- Work through the questions in the order they are listed
+- After each user response, move to the next question in the sequence
+- Keep responses brief and conversational
+- Don't ask excessive follow-up questions
 - Extract key information for the profile
 - Return response in JSON format: {"response": "your response", "isComplete": boolean, "profileUpdates": {questionId: "extracted answer"}}
 
-Recent conversation:
-${conversationHistory ? conversationHistory.slice(-4).map(msg => `${msg.role}: ${msg.content}`).join('\n') : 'No previous conversation'}`
+Conversation history:
+${conversationHistory ? conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n') : 'No previous conversation'}`
           },
           {
             role: "user",
