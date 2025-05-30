@@ -1,26 +1,29 @@
 export const PROFILE_SECTIONS = {
   "Academic Information": [
-    { id: "favoriteClasses", question: "What are your 3 favorite classes you've taken so far, and what makes them special to you?" },
-    { id: "strugglingSubjects", question: "What subjects do you find particularly challenging or struggle with?" },
-    { id: "academicFascinations", question: "What academic topics, problems in the world, or questions fascinate you most?" },
+    { id: "favoriteClasses", question: "What are your 3 favorite classes?" },
+    { id: "strugglingSubjects", question: "What subjects do you struggle with?" },
+    { id: "academicFascinations", question: "What academic topics, problems in the world, or questions fascinate you?" },
     { id: "academicAdditionalInfo", question: "Additional information" }
   ],
-  "Personal Interests": [
-    { id: "hobbiesAndInterests", question: "What do you love doing in your free time? What hobbies or interests bring you joy?" },
-    { id: "passionProjects", question: "Tell me about a project, activity, or cause you're passionate about." },
-    { id: "personalValues", question: "What values are most important to you? What principles guide your decisions?" },
-    { id: "interestsAdditionalInfo", question: "Additional information" }
+  "Extracurriculars and Interests": [
+    { id: "proudOfOutsideAcademics", question: "What are you most proud of outside of academics?" },
+    { id: "fieldsToExplore", question: "What fields or problems do you want to explore/solve in the world?" },
+    { id: "freeTimeActivities", question: "Aside from hanging out with friends, how do you like to spend your free time?" },
+    { id: "extracurricularsAdditionalInfo", question: "Additional information" }
   ],
-  "Background & Goals": [
-    { id: "careerAspirations", question: "What career path or field are you considering? What draws you to this area?" },
-    { id: "lifeGoals", question: "What do you hope to accomplish in your life? What impact do you want to make?" },
-    { id: "personalChallenges", question: "What challenges have you overcome that have shaped who you are today?" },
-    { id: "goalsAdditionalInfo", question: "Additional information" }
+  "Personal Reflections": [
+    { id: "whatMakesHappy", question: "What makes you happy?" },
+    { id: "challengeOvercome", question: "Describe a time you overcame a challenge." },
+    { id: "rememberedFor", question: "If you could be remembered for one thing, what would it be?" },
+    { id: "importantLesson", question: "What's the most important lesson you've learned in high school?" },
+    { id: "personalAdditionalInfo", question: "Additional information" }
   ],
   "College Preferences": [
-    { id: "idealCollegeEnvironment", question: "Describe your ideal college environment. What kind of campus culture would help you thrive?" },
-    { id: "importantCollegeFactors", question: "What factors are most important to you when choosing a college?" },
-    { id: "preferredLocation", question: "Do you have preferences about location, climate, or distance from home?" },
+    { id: "collegeExperience", question: "What do you want in your college experience?" },
+    { id: "schoolSize", question: "Do you prefer small, medium, or large schools?" },
+    { id: "locationExperiences", question: "What location experiences matter to you (arts, nature, city life, sports, etc)?" },
+    { id: "parentsExpectations", question: "What are your parents' expectations for college?" },
+    { id: "communityEnvironment", question: "Describe the type of community or environment where you feel most at home. What qualities or characteristics make you feel a sense of belonging?" },
     { id: "collegeAdditionalInfo", question: "Additional information" }
   ]
 };

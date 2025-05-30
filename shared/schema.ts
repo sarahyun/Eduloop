@@ -20,20 +20,23 @@ export const studentProfiles = pgTable("student_profiles", {
   strugglingSubjects: text("struggling_subjects"), 
   academicFascinations: text("academic_fascinations"),
   academicAdditionalInfo: text("academic_additional_info"),
-  // Personal Interests section
-  hobbiesAndInterests: text("hobbies_and_interests"),
-  passionProjects: text("passion_projects"),
-  personalValues: text("personal_values"),
-  interestsAdditionalInfo: text("interests_additional_info"),
-  // Background & Goals section
-  careerAspirations: text("career_aspirations"),
-  lifeGoals: text("life_goals"),
-  personalChallenges: text("personal_challenges"),
-  goalsAdditionalInfo: text("goals_additional_info"),
+  // Extracurriculars and Interests section
+  proudOfOutsideAcademics: text("proud_of_outside_academics"),
+  fieldsToExplore: text("fields_to_explore"),
+  freeTimeActivities: text("free_time_activities"),
+  extracurricularsAdditionalInfo: text("extracurriculars_additional_info"),
+  // Personal Reflections section
+  whatMakesHappy: text("what_makes_happy"),
+  challengeOvercome: text("challenge_overcome"),
+  rememberedFor: text("remembered_for"),
+  importantLesson: text("important_lesson"),
+  personalAdditionalInfo: text("personal_additional_info"),
   // College Preferences section
-  idealCollegeEnvironment: text("ideal_college_environment"),
-  importantCollegeFactors: text("important_college_factors"),
-  preferredLocation: text("preferred_location"),
+  collegeExperience: text("college_experience"),
+  schoolSize: text("school_size"),
+  locationExperiences: text("location_experiences"),
+  parentsExpectations: text("parents_expectations"),
+  communityEnvironment: text("community_environment"),
   collegeAdditionalInfo: text("college_additional_info"),
   // Basic academic data
   gpa: real("gpa"),
