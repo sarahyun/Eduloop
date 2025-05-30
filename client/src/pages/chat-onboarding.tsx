@@ -449,10 +449,29 @@ export default function ChatOnboarding() {
                     {message.role === 'assistant' && showContinueButton && index === messages.length - 1 && (
                       <div className="mt-4 text-center">
                         <Button
-                          onClick={() => window.location.href = '/dashboard'}
+                          onClick={() => {
+                            const thankYouMessage = "Thank you! I'm ready to see my college recommendations.";
+                            const userMessage: ChatMessage = {
+                              id: Date.now().toString(),
+                              role: 'user',
+                              content: thankYouMessage,
+                              timestamp: new Date()
+                            };
+                            setMessages(prev => [...prev, userMessage]);
+                            
+                            // Add final AI response
+                            const aiResponse: ChatMessage = {
+                              id: (Date.now() + 1).toString(),
+                              role: 'assistant',
+                              content: "Perfect! I've gathered all the information I need to find colleges that match your interests, goals, and academic profile. You can now visit your dashboard to see personalized recommendations, or continue chatting with me about any questions you have about the college search process.",
+                              timestamp: new Date()
+                            };
+                            setMessages(prev => [...prev, aiResponse]);
+                            setShowContinueButton(false);
+                          }}
                           className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
                         >
-                          🚀 Start Exploring Colleges
+                          Ready for recommendations
                         </Button>
                       </div>
                     )}
