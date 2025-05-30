@@ -11,6 +11,7 @@ import OnboardingPage from "@/pages/onboarding";
 import ChatOnboarding from "@/pages/chat-onboarding";
 import ProfileBuilder from "@/pages/profile-builder";
 import SectionForm from "@/pages/section-form";
+import SampleFormPage from "@/pages/sample-form";
 import NotFound from "@/pages/not-found";
 
 function Router() {
