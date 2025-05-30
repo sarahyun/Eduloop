@@ -83,23 +83,14 @@ export default function LandingPage() {
 
   const signInMutation = useMutation({
     mutationFn: async (data: SignInData) => {
-      const response = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to sign in');
-      }
-      return response.json();
+      await login(data.email, data.password);
     },
     onSuccess: () => {
       toast({
         title: "Welcome back!",
         description: "Redirecting to your dashboard...",
       });
-      window.location.href = "/dashboard";
+      setLocation("/dashboard");
     },
     onError: (error: Error) => {
       toast({
