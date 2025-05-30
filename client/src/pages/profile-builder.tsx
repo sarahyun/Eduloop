@@ -14,6 +14,7 @@ export default function ProfileBuilder() {
   
   // Dynamic sections with completion tracking - all offer both methods
   const sections = [
+    { id: 'Introduction', title: 'Introduction', completed: true, method: 'both', description: 'Name, grade, school, and basic information about yourself', lastUpdated: 'Completed' },
     { id: 'Academic Information', title: 'Academic Information', completed: false, method: 'both', description: 'Favorite classes, subjects, academic interests', lastUpdated: '2 days ago' },
     { id: 'Extracurriculars and Interests', title: 'Extracurriculars and Interests', completed: false, method: 'both', description: 'What you\'re proud of, fields to explore, free time activities', lastUpdated: 'Not started' },
     { id: 'Personal Reflections', title: 'Personal Reflections', completed: false, method: 'both', description: 'What makes you happy, challenges overcome, values', lastUpdated: 'Not started' },
