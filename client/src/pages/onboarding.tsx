@@ -175,15 +175,12 @@ export default function OnboardingPage() {
           // Insert the follow-up step after the current step
           setDynamicSteps(prev => {
             const newSteps = [...prev];
-            newSteps.splice(currentStep + 1, 0, followUpStep);
-
+            // Insert at the correct position relative to base steps
+            const insertPosition = currentStep - baseSteps.length + 1;
+            newSteps.splice(Math.max(0, insertPosition), 0, followUpStep);
             return newSteps;
           });
-        } else {
-          console.log('No questions returned from API');
         }
-      } else {
-        console.log('API call failed with status:', result.status);
       }
     } catch (error) {
       console.error('Error generating follow-up question:', error);
