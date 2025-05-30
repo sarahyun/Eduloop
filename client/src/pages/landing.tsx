@@ -31,7 +31,7 @@ type SignInData = z.infer<typeof signInSchema>;
 
 export default function LandingPage() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("signin");
+  const [activeTab, setActiveTab] = useState("");
 
   const signUpForm = useForm<SignUpData>({
     resolver: zodResolver(signUpSchema),
@@ -122,205 +122,253 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Hero Section */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Side - Hero Content */}
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2 text-blue-600">
-                <GraduationCap className="w-8 h-8" />
-                <span className="font-semibold text-lg">Your College Journey Companion</span>
+    <div className="min-h-screen bg-white">
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <Star className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Find Colleges That
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Fit You</span>
-              </h1>
-              <p className="text-xl text-gray-600 leading-relaxed">
-                Chat with AI to build your student profile, discover colleges through natural language search, and get personalized recommendations based on your interests, goals, and preferences - not just test scores.
-              </p>
+              <span className="text-xl font-bold text-gray-900">CollegeNavigate</span>
             </div>
-
-            {/* Features Grid */}
-            <div className="grid grid-cols-2 gap-6">
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">AI Chat Profile Builder</h3>
-                  <p className="text-sm text-gray-600">Answer questions about your interests, goals, and preferences to build your student profile</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Target className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Smart College Search</h3>
-                  <p className="text-sm text-gray-600">Search like "small liberal arts school with strong poetry program" and get ranked results</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <BookOpen className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Personalized Recommendations</h3>
-                  <p className="text-sm text-gray-600">Get college suggestions based on fit, not just rankings - academic, social, and financial match</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <CheckCircle className="w-5 h-5 text-orange-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">AI College Counselor</h3>
-                  <p className="text-sm text-gray-600">24/7 guidance for college planning, application strategy, and decision making</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Mission Statement */}
-            <div className="pt-6 border-t border-gray-200">
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-bold">★</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 mb-1">
-                      "Access is power. Every student deserves guidance."
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      Supporting students in multiple languages, regardless of zip code or family background
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div className="flex space-x-3">
+              <Button 
+                variant="default" 
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() => setActiveTab("signin")}
+              >
+                Log in
+              </Button>
+              <Button 
+                variant="outline" 
+                className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                onClick={() => setActiveTab("signup")}
+              >
+                Sign Up
+              </Button>
             </div>
           </div>
+        </div>
+      </nav>
 
-          {/* Right Side - Auth Forms */}
-          <div className="flex justify-center">
-            <Card className="w-full max-w-md shadow-xl border-0">
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Begin Your Journey</CardTitle>
-                <CardDescription>
-                  Start growing with your AI companion who learns about you and evolves alongside your story
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="signin">Sign In</TabsTrigger>
-                    <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="signin" className="space-y-4 mt-6">
-                    <form onSubmit={signInForm.handleSubmit(onSignIn)} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="signin-email">Email</Label>
-                        <Input
-                          id="signin-email"
-                          type="email"
-                          placeholder="Enter your email"
-                          {...signInForm.register("email")}
-                        />
-                        {signInForm.formState.errors.email && (
-                          <p className="text-sm text-red-600">{signInForm.formState.errors.email.message}</p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="signin-password">Password</Label>
-                        <Input
-                          id="signin-password"
-                          type="password"
-                          placeholder="Enter your password"
-                          {...signInForm.register("password")}
-                        />
-                        {signInForm.formState.errors.password && (
-                          <p className="text-sm text-red-600">{signInForm.formState.errors.password.message}</p>
-                        )}
-                      </div>
-                      <Button 
-                        type="submit" 
-                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                        disabled={signInMutation.isPending}
-                      >
-                        {signInMutation.isPending ? "Signing In..." : "Sign In"}
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </form>
-                  </TabsContent>
-                  
-                  <TabsContent value="signup" className="space-y-4 mt-6">
-                    <form onSubmit={signUpForm.handleSubmit(onSignUp)} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-name">Full Name</Label>
-                        <Input
-                          id="signup-name"
-                          type="text"
-                          placeholder="Enter your full name"
-                          {...signUpForm.register("fullName")}
-                        />
-                        {signUpForm.formState.errors.fullName && (
-                          <p className="text-sm text-red-600">{signUpForm.formState.errors.fullName.message}</p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-email">Email</Label>
-                        <Input
-                          id="signup-email"
-                          type="email"
-                          placeholder="Enter your email"
-                          {...signUpForm.register("email")}
-                        />
-                        {signUpForm.formState.errors.email && (
-                          <p className="text-sm text-red-600">{signUpForm.formState.errors.email.message}</p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-password">Password</Label>
-                        <Input
-                          id="signup-password"
-                          type="password"
-                          placeholder="Create a password"
-                          {...signUpForm.register("password")}
-                        />
-                        {signUpForm.formState.errors.password && (
-                          <p className="text-sm text-red-600">{signUpForm.formState.errors.password.message}</p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-confirm">Confirm Password</Label>
-                        <Input
-                          id="signup-confirm"
-                          type="password"
-                          placeholder="Confirm your password"
-                          {...signUpForm.register("confirmPassword")}
-                        />
-                        {signUpForm.formState.errors.confirmPassword && (
-                          <p className="text-sm text-red-600">{signUpForm.formState.errors.confirmPassword.message}</p>
-                        )}
-                      </div>
-                      <Button 
-                        type="submit" 
-                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                        disabled={signUpMutation.isPending}
-                      >
-                        {signUpMutation.isPending ? "Creating Account..." : "Create Account"}
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </form>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
+      {/* Hero Section */}
+      <div className="relative">
+        <div 
+          className="bg-cover bg-center bg-gray-900 text-white min-h-[500px] flex items-end rounded-3xl mx-4 mt-8"
+          style={{
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`
+          }}
+        >
+          <div className="p-8 max-w-4xl">
+            <h1 className="text-4xl lg:text-5xl font-bold mb-4">
+              Get the college application insights you need.
+            </h1>
+            <p className="text-xl mb-6 text-gray-100">
+              Get started with our free college matching tool. We'll help you find best-fit schools, based on your unique profile. We'll give personalized insights to help you stand out.
+            </p>
+            <div className="flex items-center bg-white rounded-lg p-2 max-w-md">
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                className="border-0 flex-1"
+                value={signUpForm.watch("email")}
+                onChange={(e) => signUpForm.setValue("email", e.target.value)}
+              />
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700 text-white ml-2"
+                onClick={() => setActiveTab("signup")}
+              >
+                Get started
+              </Button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Features Section */}
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="mb-12">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            How we help you succeed
+          </h2>
+          <p className="text-lg text-gray-600 max-w-3xl">
+            Applying to college is more competitive, expensive, and stressful than ever. 
+            Gain a competitive edge with actionable insights and personalized guidance for a standout application.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[
+            {
+              title: 'Self-Reflection Guidance',
+              description: 'Engage with guided questionnaires that help you uncover personal strengths, passions, and areas for growth, informing your college and career path.',
+              icon: <Users className="w-6 h-6" />
+            },
+            {
+              title: 'School Recommendations',
+              description: 'Receive tailored school suggestions that match your interests, goals, and values, streamlining your search process.',
+              icon: <Target className="w-6 h-6" />
+            },
+            {
+              title: 'Find Your Unique Angle',
+              description: 'Access strategic advice on identifying the approach to showcase your unique profile effectively.',
+              icon: <BookOpen className="w-6 h-6" />
+            },
+            {
+              title: 'Interests Mapping',
+              description: 'Explore potential majors, extracurriculars, and resources that align with your interests and career aspirations, helping you explore your interests deeply.',
+              icon: <CheckCircle className="w-6 h-6" />
+            },
+            {
+              title: 'Strengths and Weaknesses',
+              description: "Get a detailed breakdown of what you're doing well and where you need to improve through personalized insights and data analysis.",
+              icon: <GraduationCap className="w-6 h-6" />
+            },
+            {
+              title: 'Real-Time Progress Tracking',
+              description: 'Monitor your application milestones, reflection completions, and goal achievements in one easy-to-use dashboard.',
+              icon: <ArrowRight className="w-6 h-6" />
+            }
+          ].map((feature, index) => (
+            <Card key={index} className="p-6 border border-gray-200 bg-gray-50 h-64">
+              <div className="text-gray-900 mb-4">
+                {feature.icon}
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {feature.title}
+              </h3>
+              <p className="text-gray-600 text-sm">
+                {feature.description}
+              </p>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Auth Modal/Overlay */}
+      {(activeTab === "signin" || activeTab === "signup") && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-2xl">
+                  {activeTab === "signin" ? "Sign In" : "Create Account"}
+                </CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setActiveTab("")}
+                >
+                  ×
+                </Button>
+              </div>
+              <CardDescription>
+                {activeTab === "signin" 
+                  ? "Welcome back to your college journey" 
+                  : "Start your personalized college discovery journey"
+                }
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {activeTab === "signin" ? (
+                <form onSubmit={signInForm.handleSubmit(onSignIn)} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">Email</Label>
+                    <Input
+                      id="signin-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      {...signInForm.register("email")}
+                    />
+                    {signInForm.formState.errors.email && (
+                      <p className="text-sm text-red-600">{signInForm.formState.errors.email.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password">Password</Label>
+                    <Input
+                      id="signin-password"
+                      type="password"
+                      placeholder="Enter your password"
+                      {...signInForm.register("password")}
+                    />
+                    {signInForm.formState.errors.password && (
+                      <p className="text-sm text-red-600">{signInForm.formState.errors.password.message}</p>
+                    )}
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    disabled={signInMutation.isPending}
+                  >
+                    {signInMutation.isPending ? "Signing In..." : "Sign In"}
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={signUpForm.handleSubmit(onSignUp)} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Input
+                      id="signup-name"
+                      type="text"
+                      placeholder="Enter your full name"
+                      {...signUpForm.register("fullName")}
+                    />
+                    {signUpForm.formState.errors.fullName && (
+                      <p className="text-sm text-red-600">{signUpForm.formState.errors.fullName.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      {...signUpForm.register("email")}
+                    />
+                    {signUpForm.formState.errors.email && (
+                      <p className="text-sm text-red-600">{signUpForm.formState.errors.email.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="Create a password"
+                      {...signUpForm.register("password")}
+                    />
+                    {signUpForm.formState.errors.password && (
+                      <p className="text-sm text-red-600">{signUpForm.formState.errors.password.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-confirm">Confirm Password</Label>
+                    <Input
+                      id="signup-confirm"
+                      type="password"
+                      placeholder="Confirm your password"
+                      {...signUpForm.register("confirmPassword")}
+                    />
+                    {signUpForm.formState.errors.confirmPassword && (
+                      <p className="text-sm text-red-600">{signUpForm.formState.errors.confirmPassword.message}</p>
+                    )}
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    disabled={signUpMutation.isPending}
+                  >
+                    {signUpMutation.isPending ? "Creating Account..." : "Create Account"}
+                  </Button>
+                </form>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
