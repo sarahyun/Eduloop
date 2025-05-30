@@ -169,16 +169,6 @@ export default function ProfileBuilder() {
                       <h3 className={`font-medium ${section.completed ? 'text-green-900' : 'text-gray-900'}`}>
                         {section.title}
                       </h3>
-                      <div className="flex items-center mt-1">
-                        <Badge variant="outline" className="mr-2 text-xs">
-                          <MessageCircle className="w-3 h-3 mr-1" />
-                          Chat
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          <FileText className="w-3 h-3 mr-1" />
-                          Form
-                        </Badge>
-                      </div>
                     </div>
                   </div>
                   
