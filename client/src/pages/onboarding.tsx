@@ -48,6 +48,17 @@ export default function OnboardingPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const form = useForm<ProfileFormData>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      userId: 1,
+      learningStyle: undefined,
+      gpa: undefined,
+      satScore: undefined,
+      actScore: undefined,
+    },
+  });
+
   // Load existing profile data to pre-populate form
   const { data: existingProfile } = useQuery({
     queryKey: ['/api/profile', 1],
@@ -79,17 +90,6 @@ export default function OnboardingPage() {
       });
     }
   }, [existingProfile, form]);
-
-  const form = useForm<ProfileFormData>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      userId: 1,
-      learningStyle: undefined,
-      gpa: undefined,
-      satScore: undefined,
-      actScore: undefined,
-    },
-  });
 
   const createProfileMutation = useMutation({
     mutationFn: async (data: ProfileFormData) => {
