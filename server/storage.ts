@@ -120,20 +120,42 @@ export class MemStorage implements IStorage {
     const profile1: StudentProfile = {
       id: 1,
       userId: 1,
-      // Introduction section
-      name: "Sarah Johnson",
-      grade: "12th",
-      school: "Lincoln High School",
-      basicInfo: "I'm a senior who loves learning and helping others. I'm interested in technology and healthcare.",
-      academicInterests: ["Computer Science", "Medicine"],
-      careerGoals: ["Software Engineer", "Doctor"],
-      values: ["Innovation", "Helping Others"],
-      learningStyle: "Visual",
-      extracurriculars: ["Coding Club", "Volunteer Work"],
-      gpa: 3.8,
-      satScore: 1450,
-      actScore: 32,
-      profileCompletion: 85,
+      // Introduction section - empty for new user
+      careerMajor: null,
+      dreamSchools: null,
+      introFreeTimeActivities: null,
+      introCollegeExperience: null,
+      extracurriculars: null,
+      gpaTestScores: null,
+      // Academic Information section
+      favoriteClasses: null,
+      strugglingSubjects: null,
+      academicFascinations: null,
+      academicAdditionalInfo: null,
+      // Extracurriculars and Interests section
+      proudOfOutsideAcademics: null,
+      fieldsToExplore: null,
+      freeTimeActivities: null,
+      extracurricularsAdditionalInfo: null,
+      // Personal Reflections section
+      whatMakesHappy: null,
+      challengeOvercome: null,
+      rememberedFor: null,
+      importantLesson: null,
+      personalAdditionalInfo: null,
+      // College Preferences section
+      collegeExperience: null,
+      schoolSize: null,
+      locationExperiences: null,
+      parentsExpectations: null,
+      communityEnvironment: null,
+      collegeAdditionalInfo: null,
+      // Basic academic data
+      gpa: null,
+      satScore: null,
+      actScore: null,
+      profileCompletion: 0,
+      createdAt: new Date(),
       updatedAt: new Date()
     };
     this.studentProfiles.set(1, profile1);
