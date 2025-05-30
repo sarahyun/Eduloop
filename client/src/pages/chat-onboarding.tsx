@@ -323,20 +323,10 @@ export default function ChatOnboarding() {
                       className={`max-w-[80%] p-4 rounded-lg relative ${
                         message.role === 'user'
                           ? 'bg-blue-500 text-white'
-                          : 'bg-white text-gray-900 border border-gray-200 shadow-sm'
+                          : 'chat-assistant-message border border-gray-200 shadow-sm'
                       }`}
-                      style={{
-                        backgroundColor: message.role === 'assistant' ? '#ffffff' : undefined,
-                        zIndex: 10
-                      }}
                     >
-                      <div 
-                        className="whitespace-pre-wrap relative"
-                        style={{
-                          backgroundColor: message.role === 'assistant' ? '#ffffff' : 'inherit',
-                          zIndex: 20
-                        }}
-                      >
+                      <div className="whitespace-pre-wrap">
                         {message.content}
                       </div>
                       
