@@ -31,7 +31,6 @@ import {
 export interface IStorage {
   // User management
   getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
 
@@ -460,4 +459,131 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Database storage implementation
+import { db } from "./db";
+import { eq } from "drizzle-orm";
+import { users } from "@shared/schema";
+
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...insertUser,
+        userId: `user_${Date.now()}`, // Generate unique userId
+        createdAt: new Date(),
+      })
+      .returning();
+    return user;
+  }
+
+  // Implement other methods with database operations
+  async getStudentProfile(userId: number): Promise<StudentProfile | undefined> {
+    // Implementation for other methods would go here
+    return undefined;
+  }
+
+  async createStudentProfile(profile: InsertStudentProfile): Promise<StudentProfile> {
+    // Implementation for other methods would go here
+    throw new Error("Not implemented yet");
+  }
+
+  async updateStudentProfile(userId: number, profile: Partial<StudentProfile>): Promise<StudentProfile> {
+    throw new Error("Not implemented yet");
+  }
+
+  async getCollege(id: number): Promise<College | undefined> {
+    return undefined;
+  }
+
+  async getColleges(): Promise<College[]> {
+    return [];
+  }
+
+  async searchColleges(query: string): Promise<College[]> {
+    return [];
+  }
+
+  async createCollege(college: InsertCollege): Promise<College> {
+    throw new Error("Not implemented yet");
+  }
+
+  async getConversation(id: number): Promise<Conversation | undefined> {
+    return undefined;
+  }
+
+  async getUserConversations(userId: number): Promise<Conversation[]> {
+    return [];
+  }
+
+  async createConversation(conversation: InsertConversation): Promise<Conversation> {
+    throw new Error("Not implemented yet");
+  }
+
+  async updateConversation(id: number, conversation: Partial<Conversation>): Promise<Conversation> {
+    throw new Error("Not implemented yet");
+  }
+
+  async getConversationMessages(conversationId: number): Promise<Message[]> {
+    return [];
+  }
+
+  async createMessage(message: InsertMessage): Promise<Message> {
+    throw new Error("Not implemented yet");
+  }
+
+  async getUserRecommendations(userId: number): Promise<CollegeRecommendation[]> {
+    return [];
+  }
+
+  async createRecommendation(recommendation: InsertCollegeRecommendation): Promise<CollegeRecommendation> {
+    throw new Error("Not implemented yet");
+  }
+
+  async getUserSavedColleges(userId: number): Promise<SavedCollege[]> {
+    return [];
+  }
+
+  async createSavedCollege(savedCollege: InsertSavedCollege): Promise<SavedCollege> {
+    throw new Error("Not implemented yet");
+  }
+
+  async deleteSavedCollege(userId: number, collegeId: number): Promise<void> {
+  }
+
+  async createSearchQuery(searchQuery: InsertSearchQuery): Promise<SearchQuery> {
+    throw new Error("Not implemented yet");
+  }
+
+  async getUserSearchHistory(userId: number): Promise<SearchQuery[]> {
+    return [];
+  }
+
+  async createQuestionResponse(response: InsertQuestionResponse): Promise<QuestionResponse> {
+    throw new Error("Not implemented yet");
+  }
+
+  async updateQuestionResponse(userId: number, questionId: string, response: Partial<QuestionResponse>): Promise<QuestionResponse> {
+    throw new Error("Not implemented yet");
+  }
+
+  async getUserQuestionResponses(userId: number, section?: string): Promise<QuestionResponse[]> {
+    return [];
+  }
+
+  async getQuestionResponse(userId: number, questionId: string): Promise<QuestionResponse | undefined> {
+    return undefined;
+  }
+}
+
+export const storage = new DatabaseStorage();
