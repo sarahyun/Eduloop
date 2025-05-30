@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowRight, ArrowLeft, CheckCircle, Sparkles, BookOpen, Target, Heart, Zap } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle, Sparkles, BookOpen, Target, Heart, Zap, Plus, X } from "lucide-react";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { insertStudentProfileSchema } from "../../../shared/schema";
@@ -36,6 +36,8 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+  const [customGoals, setCustomGoals] = useState<string[]>([]);
+  const [customGoalInput, setCustomGoalInput] = useState("");
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const { toast } = useToast();
@@ -79,6 +81,19 @@ export default function OnboardingPage() {
     "Data Scientist", "Marketing Professional", "Finance Professional"
   ];
 
+  const addCustomGoal = () => {
+    if (customGoalInput.trim() && !customGoals.includes(customGoalInput.trim()) && customGoals.length + selectedGoals.length < 3) {
+      setCustomGoals([...customGoals, customGoalInput.trim()]);
+      setCustomGoalInput("");
+    }
+  };
+
+  const removeCustomGoal = (goal: string) => {
+    setCustomGoals(customGoals.filter(g => g !== goal));
+  };
+
+  const getAllSelectedGoals = () => [...selectedGoals, ...customGoals];
+
   const personalValues = [
     "Innovation", "Collaboration", "Leadership", "Social Impact", "Financial Success",
     "Work-Life Balance", "Creativity", "Intellectual Growth", "Community Service",
@@ -104,7 +119,7 @@ export default function OnboardingPage() {
   const toggleSelection = (item: string, list: string[], setList: (items: string[]) => void, max?: number) => {
     if (list.includes(item)) {
       setList(list.filter(i => i !== item));
-    } else if (!max || list.length < max) {
+    } else if (!max || (list === selectedGoals ? getAllSelectedGoals().length < max : list.length < max)) {
       setList([...list, item]);
     }
   };
@@ -130,7 +145,7 @@ export default function OnboardingPage() {
     const formData = {
       userId: 1,
       academicInterests: selectedInterests,
-      careerGoals: selectedGoals,
+      careerGoals: getAllSelectedGoals(),
       values: selectedValues,
       extracurriculars: selectedActivities,
       learningStyle: formValues.learningStyle || null,
@@ -207,7 +222,7 @@ export default function OnboardingPage() {
     {
       id: "career",
       title: "What's your dream career direction?",
-      subtitle: "Select up to 3 career paths that excite you (you can always change your mind!)",
+      subtitle: "Choose from common paths or add your own unique aspirations",
       icon: <Target className="w-8 h-8 text-primary" />,
       component: (
         <div className="space-y-6">
@@ -216,24 +231,83 @@ export default function OnboardingPage() {
               Think about what kind of work would make you excited to get up in the morning.
             </p>
             <p className="text-sm text-gray-500 mt-2">
-              Selected: {selectedGoals.length}/3
+              Selected: {getAllSelectedGoals().length}/3
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {careerGoals.map((goal) => (
-              <Badge
-                key={goal}
-                variant={selectedGoals.includes(goal) ? "default" : "secondary"}
-                className={`cursor-pointer p-3 text-center transition-all hover:scale-105 ${
-                  selectedGoals.includes(goal) 
-                    ? "bg-primary text-white" 
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                } ${selectedGoals.length >= 3 && !selectedGoals.includes(goal) ? "opacity-50" : ""}`}
-                onClick={() => toggleSelection(goal, selectedGoals, setSelectedGoals, 3)}
+
+          {/* Custom Goal Input */}
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <Label htmlFor="customGoal" className="text-sm font-medium text-gray-700 mb-2 block">
+              Add your own career goal:
+            </Label>
+            <div className="flex space-x-2">
+              <Input
+                id="customGoal"
+                placeholder="e.g., Marine Biologist, Film Director, Social Worker..."
+                value={customGoalInput}
+                onChange={(e) => setCustomGoalInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && addCustomGoal()}
+                className="flex-1"
+                disabled={getAllSelectedGoals().length >= 3}
+              />
+              <Button 
+                type="button"
+                size="sm"
+                onClick={addCustomGoal}
+                disabled={!customGoalInput.trim() || getAllSelectedGoals().length >= 3}
+                className="px-3"
               >
-                {goal}
-              </Badge>
-            ))}
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Custom Goals Display */}
+          {customGoals.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">Your custom career goals:</Label>
+              <div className="flex flex-wrap gap-2">
+                {customGoals.map((goal) => (
+                  <Badge
+                    key={goal}
+                    variant="default"
+                    className="bg-green-100 text-green-800 hover:bg-green-200 px-3 py-1 text-sm flex items-center space-x-1"
+                  >
+                    <span>{goal}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 hover:bg-transparent"
+                      onClick={() => removeCustomGoal(goal)}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Predefined Career Options */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-gray-700">Or choose from common career paths:</Label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {careerGoals.map((goal) => (
+                <Badge
+                  key={goal}
+                  variant={selectedGoals.includes(goal) ? "default" : "secondary"}
+                  className={`cursor-pointer p-3 text-center transition-all hover:scale-105 ${
+                    selectedGoals.includes(goal) 
+                      ? "bg-primary text-white" 
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  } ${getAllSelectedGoals().length >= 3 && !selectedGoals.includes(goal) ? "opacity-50" : ""}`}
+                  onClick={() => toggleSelection(goal, selectedGoals, setSelectedGoals, 3)}
+                >
+                  {goal}
+                </Badge>
+              ))}
+            </div>
           </div>
         </div>
       )
