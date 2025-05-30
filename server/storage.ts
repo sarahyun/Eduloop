@@ -1,14 +1,5 @@
-import { 
-  users, 
-  studentProfiles,
-  colleges,
-  conversations,
-  messages,
-  collegeRecommendations,
-  savedColleges,
-  searchQueries,
-  questionResponses,
-  type User, 
+import {
+  type User,
   type InsertUser,
   type StudentProfile,
   type InsertStudentProfile,
@@ -25,13 +16,17 @@ import {
   type SearchQuery,
   type InsertSearchQuery,
   type QuestionResponse,
-  type InsertQuestionResponse
+  type InsertQuestionResponse,
 } from "@shared/schema";
+import { connectToMongoDB } from "./mongodb";
+import { ObjectId } from "mongodb";
 
+// Interface for storage operations
 export interface IStorage {
   // User management
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByUserId(userId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
 
   // Student profiles
@@ -73,545 +68,259 @@ export interface IStorage {
   updateQuestionResponse(userId: number, questionId: string, response: Partial<QuestionResponse>): Promise<QuestionResponse>;
   getUserQuestionResponses(userId: number, section?: string): Promise<QuestionResponse[]>;
   getQuestionResponse(userId: number, questionId: string): Promise<QuestionResponse | undefined>;
-
-
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private studentProfiles: Map<number, StudentProfile>;
-  private colleges: Map<number, College>;
-  private conversations: Map<number, Conversation>;
-  private messages: Map<number, Message>;
-  private collegeRecommendations: Map<number, CollegeRecommendation>;
-  private savedColleges: Map<number, SavedCollege>;
-  private searchQueries: Map<number, SearchQuery>;
-  private questionResponses: Map<string, QuestionResponse>;
-  private currentId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.studentProfiles = new Map();
-    this.colleges = new Map();
-    this.conversations = new Map();
-    this.messages = new Map();
-    this.collegeRecommendations = new Map();
-    this.savedColleges = new Map();
-    this.searchQueries = new Map();
-    this.questionResponses = new Map();
-    this.currentId = 1;
-
-    // Initialize with sample colleges
-    this.initializeSampleData();
+export class MongoDBStorage implements IStorage {
+  private async getDb() {
+    return await connectToMongoDB();
   }
 
-  private initializeSampleData() {
-    // Create sample users
-    const user1: User = {
-      id: 1,
-      userId: "user-1",
-      email: "student1@example.com",
-      password: "password123",
-      name: "Alex Johnson",
-      createdAt: new Date(),
-      lastLogin: null,
-      role: "student",
-      students: null,
-      grade: "12th",
-      counselorId: null,
-      parentId: null,
-    };
-    this.users.set(1, user1);
-
-    // Create sample student profile
-    const profile1: StudentProfile = {
-      id: 1,
-      userId: 1,
-      // Introduction section - empty for new user
-      careerMajor: null,
-      dreamSchools: null,
-      introFreeTimeActivities: null,
-      introCollegeExperience: null,
-      extracurriculars: null,
-      gpaTestScores: null,
-      // Academic Information section
-      favoriteClasses: null,
-      strugglingSubjects: null,
-      academicFascinations: null,
-      academicAdditionalInfo: null,
-      // Extracurriculars and Interests section
-      proudOfOutsideAcademics: null,
-      fieldsToExplore: null,
-      freeTimeActivities: null,
-      extracurricularsAdditionalInfo: null,
-      // Personal Reflections section
-      whatMakesHappy: null,
-      challengeOvercome: null,
-      rememberedFor: null,
-      importantLesson: null,
-      personalAdditionalInfo: null,
-      // College Preferences section
-      collegeExperience: null,
-      schoolSize: null,
-      locationExperiences: null,
-      parentsExpectations: null,
-      communityEnvironment: null,
-      collegeAdditionalInfo: null,
-      // Basic academic data
-      gpa: null,
-      satScore: null,
-      actScore: null,
-      profileCompletion: 0,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    this.studentProfiles.set(1, profile1);
-
-    const sampleColleges: InsertCollege[] = [
-      {
-        name: "Stanford University",
-        location: "Stanford, CA",
-        type: "private",
-        size: "medium",
-        setting: "suburban",
-        acceptanceRate: 0.04,
-        averageSAT: 1500,
-        averageACT: 34,
-        tuition: 58416,
-        description: "A leading research university known for innovation and entrepreneurship",
-        website: "https://www.stanford.edu",
-        imageUrl: "https://images.unsplash.com/photo-1607237138185-eedd9c632b0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
-        programs: ["Computer Science", "Engineering", "Business", "Medicine"],
-        tags: ["Innovation", "Tech", "Research", "Entrepreneurship"]
-      },
-      {
-        name: "Massachusetts Institute of Technology",
-        location: "Cambridge, MA",
-        type: "private",
-        size: "medium",
-        setting: "urban",
-        acceptanceRate: 0.07,
-        averageSAT: 1520,
-        averageACT: 35,
-        tuition: 57986,
-        description: "World-renowned for science, technology, engineering, and innovation",
-        website: "https://www.mit.edu",
-        imageUrl: "https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
-        programs: ["Engineering", "Computer Science", "Physics", "Mathematics"],
-        tags: ["STEM", "Research", "Innovation", "Technology"]
-      },
-      {
-        name: "University of California, Berkeley",
-        location: "Berkeley, CA",
-        type: "public",
-        size: "large",
-        setting: "urban",
-        acceptanceRate: 0.17,
-        averageSAT: 1430,
-        averageACT: 32,
-        tuition: 44066,
-        description: "Top public research university with strong programs across disciplines",
-        website: "https://www.berkeley.edu",
-        imageUrl: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
-        programs: ["Engineering", "Business", "Social Sciences", "Liberal Arts"],
-        tags: ["Public Ivy", "Research", "Diversity", "Innovation"]
-      }
-    ];
-
-    sampleColleges.forEach(college => {
-      this.createCollege(college);
-    });
-  }
-
+  // User operations
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const db = await this.getDb();
+    const user = await db.collection('users').findOne({ id });
+    return user ? { ...user, _id: user._id?.toString() } as User : undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const db = await this.getDb();
+    const user = await db.collection('users').findOne({ email });
+    return user ? { ...user, _id: user._id?.toString() } as User : undefined;
   }
 
   async getUserByUserId(userId: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.userId === userId);
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.email === email);
+    const db = await this.getDb();
+    const user = await db.collection('users').findOne({ userId });
+    return user ? { ...user, _id: user._id?.toString() } as User : undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId++;
-    const user: User = { 
-      ...insertUser, 
-      id,
+    const db = await this.getDb();
+    const user = {
+      ...insertUser,
       createdAt: new Date(),
-      lastLogin: null
+      lastLogin: null,
     };
-    this.users.set(id, user);
-    return user;
+    const result = await db.collection('users').insertOne(user);
+    return { ...user, _id: result.insertedId.toString() } as User;
   }
 
+  // Student profiles
   async getStudentProfile(userId: number): Promise<StudentProfile | undefined> {
-    return Array.from(this.studentProfiles.values()).find(profile => profile.userId === userId);
+    const db = await this.getDb();
+    const profile = await db.collection('studentProfiles').findOne({ userId: userId.toString() });
+    return profile ? { ...profile, _id: profile._id?.toString() } as StudentProfile : undefined;
   }
 
   async createStudentProfile(profile: InsertStudentProfile): Promise<StudentProfile> {
-    const id = this.currentId++;
-    const studentProfile: StudentProfile = {
+    const db = await this.getDb();
+    const studentProfile = {
       ...profile,
-      id,
-      updatedAt: new Date()
+      createdAt: new Date(),
+      updatedAt: null,
     };
-    this.studentProfiles.set(id, studentProfile);
-    return studentProfile;
+    const result = await db.collection('studentProfiles').insertOne(studentProfile);
+    return { ...studentProfile, _id: result.insertedId.toString() } as StudentProfile;
   }
 
   async updateStudentProfile(userId: number, profileUpdate: Partial<StudentProfile>): Promise<StudentProfile> {
-    const existing = await this.getStudentProfile(userId);
-    if (!existing) {
-      throw new Error("Student profile not found");
-    }
-    
-    const updated: StudentProfile = {
-      ...existing,
+    const db = await this.getDb();
+    const updated = {
       ...profileUpdate,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    this.studentProfiles.set(existing.id, updated);
-    return updated;
+    await db.collection('studentProfiles').updateOne(
+      { userId: userId.toString() },
+      { $set: updated }
+    );
+    const profile = await db.collection('studentProfiles').findOne({ userId: userId.toString() });
+    return { ...profile, _id: profile._id?.toString() } as StudentProfile;
   }
 
+  // Colleges
   async getCollege(id: number): Promise<College | undefined> {
-    return this.colleges.get(id);
+    const db = await this.getDb();
+    const college = await db.collection('colleges').findOne({ _id: new ObjectId(id.toString()) });
+    return college ? { ...college, _id: college._id?.toString() } as College : undefined;
   }
 
   async getColleges(): Promise<College[]> {
-    return Array.from(this.colleges.values());
+    const db = await this.getDb();
+    const colleges = await db.collection('colleges').find({}).toArray();
+    return colleges.map(c => ({ ...c, _id: c._id?.toString() })) as College[];
   }
 
   async searchColleges(query: string): Promise<College[]> {
-    const queryLower = query.toLowerCase();
-    return Array.from(this.colleges.values()).filter(college => 
-      college.name.toLowerCase().includes(queryLower) ||
-      college.location.toLowerCase().includes(queryLower) ||
-      college.description?.toLowerCase().includes(queryLower) ||
-      college.programs?.some(program => program.toLowerCase().includes(queryLower)) ||
-      college.tags?.some(tag => tag.toLowerCase().includes(queryLower))
-    );
+    const db = await this.getDb();
+    const colleges = await db.collection('colleges').find({
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { location: { $regex: query, $options: 'i' } }
+      ]
+    }).toArray();
+    return colleges.map(c => ({ ...c, _id: c._id?.toString() })) as College[];
   }
 
   async createCollege(college: InsertCollege): Promise<College> {
-    const id = this.currentId++;
-    const newCollege: College = { ...college, id };
-    this.colleges.set(id, newCollege);
-    return newCollege;
+    const db = await this.getDb();
+    const result = await db.collection('colleges').insertOne(college);
+    return { ...college, _id: result.insertedId.toString() } as College;
   }
 
+  // Conversations
   async getConversation(id: number): Promise<Conversation | undefined> {
-    return this.conversations.get(id);
+    const db = await this.getDb();
+    const conversation = await db.collection('conversations').findOne({ _id: new ObjectId(id.toString()) });
+    return conversation ? { ...conversation, _id: conversation._id?.toString() } as Conversation : undefined;
   }
 
   async getUserConversations(userId: number): Promise<Conversation[]> {
-    return Array.from(this.conversations.values())
-      .filter(conv => conv.userId === userId)
-      .sort((a, b) => (b.updatedAt?.getTime() || 0) - (a.updatedAt?.getTime() || 0));
+    const db = await this.getDb();
+    const conversations = await db.collection('conversations').find({ userId: userId.toString() }).toArray();
+    return conversations.map(c => ({ ...c, _id: c._id?.toString() })) as Conversation[];
   }
 
   async createConversation(conversation: InsertConversation): Promise<Conversation> {
-    const id = this.currentId++;
-    const now = new Date();
-    const newConversation: Conversation = {
+    const db = await this.getDb();
+    const newConversation = {
       ...conversation,
-      id,
-      createdAt: now,
-      updatedAt: now
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
-    this.conversations.set(id, newConversation);
-    return newConversation;
+    const result = await db.collection('conversations').insertOne(newConversation);
+    return { ...newConversation, _id: result.insertedId.toString() } as Conversation;
   }
 
   async updateConversation(id: number, conversationUpdate: Partial<Conversation>): Promise<Conversation> {
-    const existing = this.conversations.get(id);
-    if (!existing) {
-      throw new Error("Conversation not found");
-    }
-    
-    const updated: Conversation = {
-      ...existing,
+    const db = await this.getDb();
+    const updated = {
       ...conversationUpdate,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    this.conversations.set(id, updated);
-    return updated;
+    await db.collection('conversations').updateOne(
+      { _id: new ObjectId(id.toString()) },
+      { $set: updated }
+    );
+    const conversation = await db.collection('conversations').findOne({ _id: new ObjectId(id.toString()) });
+    return { ...conversation, _id: conversation._id?.toString() } as Conversation;
   }
 
+  // Messages
   async getConversationMessages(conversationId: number): Promise<Message[]> {
-    return Array.from(this.messages.values())
-      .filter(msg => msg.conversationId === conversationId)
-      .sort((a, b) => (a.createdAt?.getTime() || 0) - (b.createdAt?.getTime() || 0));
+    const db = await this.getDb();
+    const messages = await db.collection('messages').find({ conversationId: conversationId.toString() }).toArray();
+    return messages.map(m => ({ ...m, _id: m._id?.toString() })) as Message[];
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
-    const id = this.currentId++;
-    const newMessage: Message = {
+    const db = await this.getDb();
+    const newMessage = {
       ...message,
-      id,
-      createdAt: new Date()
-    };
-    this.messages.set(id, newMessage);
-    return newMessage;
-  }
-
-  async getUserRecommendations(userId: number): Promise<CollegeRecommendation[]> {
-    return Array.from(this.collegeRecommendations.values())
-      .filter(rec => rec.userId === userId)
-      .sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
-  }
-
-  async createRecommendation(recommendation: InsertCollegeRecommendation): Promise<CollegeRecommendation> {
-    const id = this.currentId++;
-    const newRecommendation: CollegeRecommendation = {
-      ...recommendation,
-      id,
-      createdAt: new Date()
-    };
-    this.collegeRecommendations.set(id, newRecommendation);
-    return newRecommendation;
-  }
-
-  async getUserSavedColleges(userId: number): Promise<SavedCollege[]> {
-    return Array.from(this.savedColleges.values())
-      .filter(saved => saved.userId === userId)
-      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
-  }
-
-  async createSavedCollege(savedCollege: InsertSavedCollege): Promise<SavedCollege> {
-    const id = this.currentId++;
-    const newSavedCollege: SavedCollege = {
-      ...savedCollege,
-      id,
-      createdAt: new Date()
-    };
-    this.savedColleges.set(id, newSavedCollege);
-    return newSavedCollege;
-  }
-
-  async deleteSavedCollege(userId: number, collegeId: number): Promise<void> {
-    const saved = Array.from(this.savedColleges.values())
-      .find(saved => saved.userId === userId && saved.collegeId === collegeId);
-    if (saved) {
-      this.savedColleges.delete(saved.id);
-    }
-  }
-
-  async createSearchQuery(searchQuery: InsertSearchQuery): Promise<SearchQuery> {
-    const id = this.currentId++;
-    const newSearchQuery: SearchQuery = {
-      ...searchQuery,
-      id,
-      createdAt: new Date()
-    };
-    this.searchQueries.set(id, newSearchQuery);
-    return newSearchQuery;
-  }
-
-  async getUserSearchHistory(userId: number): Promise<SearchQuery[]> {
-    return Array.from(this.searchQueries.values())
-      .filter(query => query.userId === userId)
-      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0))
-      .slice(0, 10);
-  }
-
-  // Question response methods
-  async createQuestionResponse(response: InsertQuestionResponse): Promise<QuestionResponse> {
-    const id = this.currentId++;
-    const newResponse: QuestionResponse = {
-      ...response,
-      id,
       createdAt: new Date(),
-      updatedAt: new Date()
     };
-    const key = `${response.userId}-${response.questionId}`;
-    this.questionResponses.set(key, newResponse);
-    return newResponse;
+    const result = await db.collection('messages').insertOne(newMessage);
+    return { ...newMessage, _id: result.insertedId.toString() } as Message;
   }
 
-  async updateQuestionResponse(userId: number, questionId: string, response: Partial<QuestionResponse>): Promise<QuestionResponse> {
-    const key = `${userId}-${questionId}`;
-    const existing = this.questionResponses.get(key);
-    if (!existing) {
-      throw new Error('Question response not found');
-    }
-    
-    const updated: QuestionResponse = {
-      ...existing,
-      ...response,
-      updatedAt: new Date()
-    };
-    this.questionResponses.set(key, updated);
-    return updated;
-  }
-
-  async getUserQuestionResponses(userId: number, section?: string): Promise<QuestionResponse[]> {
-    return Array.from(this.questionResponses.values())
-      .filter(response => response.userId === userId && (!section || response.section === section));
-  }
-
-  async getQuestionResponse(userId: number, questionId: string): Promise<QuestionResponse | undefined> {
-    const key = `${userId}-${questionId}`;
-    return this.questionResponses.get(key);
-  }
-}
-
-// Database storage implementation
-import { db, pool } from "./db";
-import { eq } from "drizzle-orm";
-
-export class DatabaseStorage implements IStorage {
-  async getUser(id: number): Promise<User | undefined> {
-    try {
-      const result = await pool.query(`
-        SELECT id, username, email, full_name as name, password 
-        FROM users WHERE id = $1
-      `, [id]);
-      
-      return result.rows[0] as User || undefined;
-    } catch (error) {
-      console.error('Database getUser error:', error);
-      return undefined;
-    }
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    try {
-      const result = await pool.query(`
-        SELECT id, username, email, full_name as name, password 
-        FROM users WHERE email = $1
-      `, [email]);
-      
-      return result.rows[0] as User || undefined;
-    } catch (error) {
-      console.error('Database getUserByEmail error:', error);
-      return undefined;
-    }
-  }
-
-  async createUser(insertUser: any): Promise<User> {
-    try {
-      // Use raw SQL to insert into the existing table structure
-      const result = await pool.query(`
-        INSERT INTO users (username, password, email, full_name, grade, created_at) 
-        VALUES ($1, $2, $3, $4, $5, $6) 
-        RETURNING id, email, full_name as name
-      `, [
-        insertUser.username, 
-        insertUser.password, 
-        insertUser.email, 
-        insertUser.fullName, 
-        '12th',
-        new Date()
-      ]);
-      
-      return result.rows[0] as User;
-    } catch (error) {
-      console.error('Database user creation error:', error);
-      throw error;
-    }
-  }
-
-  // Implement other methods with database operations
-  async getStudentProfile(userId: number): Promise<StudentProfile | undefined> {
-    // Implementation for other methods would go here
-    return undefined;
-  }
-
-  async createStudentProfile(profile: InsertStudentProfile): Promise<StudentProfile> {
-    // Implementation for other methods would go here
-    throw new Error("Not implemented yet");
-  }
-
-  async updateStudentProfile(userId: number, profile: Partial<StudentProfile>): Promise<StudentProfile> {
-    throw new Error("Not implemented yet");
-  }
-
-  async getCollege(id: number): Promise<College | undefined> {
-    return undefined;
-  }
-
-  async getColleges(): Promise<College[]> {
-    return [];
-  }
-
-  async searchColleges(query: string): Promise<College[]> {
-    return [];
-  }
-
-  async createCollege(college: InsertCollege): Promise<College> {
-    throw new Error("Not implemented yet");
-  }
-
-  async getConversation(id: number): Promise<Conversation | undefined> {
-    return undefined;
-  }
-
-  async getUserConversations(userId: number): Promise<Conversation[]> {
-    return [];
-  }
-
-  async createConversation(conversation: InsertConversation): Promise<Conversation> {
-    throw new Error("Not implemented yet");
-  }
-
-  async updateConversation(id: number, conversation: Partial<Conversation>): Promise<Conversation> {
-    throw new Error("Not implemented yet");
-  }
-
-  async getConversationMessages(conversationId: number): Promise<Message[]> {
-    return [];
-  }
-
-  async createMessage(message: InsertMessage): Promise<Message> {
-    throw new Error("Not implemented yet");
-  }
-
+  // College recommendations
   async getUserRecommendations(userId: number): Promise<CollegeRecommendation[]> {
-    return [];
+    const db = await this.getDb();
+    const recommendations = await db.collection('collegeRecommendations').find({ userId: userId.toString() }).toArray();
+    return recommendations.map(r => ({ ...r, _id: r._id?.toString() })) as CollegeRecommendation[];
   }
 
   async createRecommendation(recommendation: InsertCollegeRecommendation): Promise<CollegeRecommendation> {
-    throw new Error("Not implemented yet");
+    const db = await this.getDb();
+    const newRecommendation = {
+      ...recommendation,
+      createdAt: new Date(),
+    };
+    const result = await db.collection('collegeRecommendations').insertOne(newRecommendation);
+    return { ...newRecommendation, _id: result.insertedId.toString() } as CollegeRecommendation;
   }
 
+  // Saved colleges
   async getUserSavedColleges(userId: number): Promise<SavedCollege[]> {
-    return [];
+    const db = await this.getDb();
+    const savedColleges = await db.collection('savedColleges').find({ userId: userId.toString() }).toArray();
+    return savedColleges.map(s => ({ ...s, _id: s._id?.toString() })) as SavedCollege[];
   }
 
   async createSavedCollege(savedCollege: InsertSavedCollege): Promise<SavedCollege> {
-    throw new Error("Not implemented yet");
+    const db = await this.getDb();
+    const newSavedCollege = {
+      ...savedCollege,
+      createdAt: new Date(),
+    };
+    const result = await db.collection('savedColleges').insertOne(newSavedCollege);
+    return { ...newSavedCollege, _id: result.insertedId.toString() } as SavedCollege;
   }
 
   async deleteSavedCollege(userId: number, collegeId: number): Promise<void> {
+    const db = await this.getDb();
+    await db.collection('savedColleges').deleteOne({ 
+      userId: userId.toString(), 
+      collegeId: collegeId.toString() 
+    });
   }
 
+  // Search queries
   async createSearchQuery(searchQuery: InsertSearchQuery): Promise<SearchQuery> {
-    throw new Error("Not implemented yet");
+    const db = await this.getDb();
+    const newSearchQuery = {
+      ...searchQuery,
+      createdAt: new Date(),
+    };
+    const result = await db.collection('searchQueries').insertOne(newSearchQuery);
+    return { ...newSearchQuery, _id: result.insertedId.toString() } as SearchQuery;
   }
 
   async getUserSearchHistory(userId: number): Promise<SearchQuery[]> {
-    return [];
+    const db = await this.getDb();
+    const searches = await db.collection('searchQueries').find({ userId: userId.toString() }).toArray();
+    return searches.map(s => ({ ...s, _id: s._id?.toString() })) as SearchQuery[];
   }
 
+  // Question responses
   async createQuestionResponse(response: InsertQuestionResponse): Promise<QuestionResponse> {
-    throw new Error("Not implemented yet");
+    const db = await this.getDb();
+    const newResponse = {
+      ...response,
+      createdAt: new Date(),
+    };
+    const result = await db.collection('questionResponses').insertOne(newResponse);
+    return { ...newResponse, _id: result.insertedId.toString() } as QuestionResponse;
   }
 
   async updateQuestionResponse(userId: number, questionId: string, response: Partial<QuestionResponse>): Promise<QuestionResponse> {
-    throw new Error("Not implemented yet");
+    const db = await this.getDb();
+    await db.collection('questionResponses').updateOne(
+      { userId: userId.toString(), questionId },
+      { $set: response },
+      { upsert: true }
+    );
+    const updated = await db.collection('questionResponses').findOne({ userId: userId.toString(), questionId });
+    return { ...updated, _id: updated._id?.toString() } as QuestionResponse;
   }
 
   async getUserQuestionResponses(userId: number, section?: string): Promise<QuestionResponse[]> {
-    return [];
+    const db = await this.getDb();
+    const filter: any = { userId: userId.toString() };
+    if (section) {
+      filter.sectionId = section;
+    }
+    const responses = await db.collection('questionResponses').find(filter).toArray();
+    return responses.map(r => ({ ...r, _id: r._id?.toString() })) as QuestionResponse[];
   }
 
   async getQuestionResponse(userId: number, questionId: string): Promise<QuestionResponse | undefined> {
-    return undefined;
+    const db = await this.getDb();
+    const response = await db.collection('questionResponses').findOne({ 
+      userId: userId.toString(), 
+      questionId 
+    });
+    return response ? { ...response, _id: response._id?.toString() } as QuestionResponse : undefined;
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MongoDBStorage();

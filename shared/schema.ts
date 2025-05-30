@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // MongoDB User Schema
 export const userSchema = z.object({
-  _id: z.instanceof(ObjectId).optional(),
+  _id: z.string().optional(),
   userId: z.string(), // Firebase UID
   email: z.string().email(),
   name: z.string(),
@@ -17,7 +17,7 @@ export const userSchema = z.object({
 
 // MongoDB Student Profile Schema
 export const studentProfileSchema = z.object({
-  _id: z.instanceof(ObjectId).optional(),
+  _id: z.string().optional(),
   userId: z.string(), // Firebase UID
   // Introduction section
   careerMajor: z.string().nullable().optional(),
@@ -57,7 +57,7 @@ export const studentProfileSchema = z.object({
 
 // MongoDB College Schema
 export const collegeSchema = z.object({
-  _id: z.instanceof(ObjectId).optional(),
+  _id: z.string().optional(),
   name: z.string(),
   size: z.string().nullable().optional(),
   type: z.string().nullable().optional(),
@@ -75,7 +75,7 @@ export const collegeSchema = z.object({
 
 // MongoDB Conversation Schema
 export const conversationSchema = z.object({
-  _id: z.instanceof(ObjectId).optional(),
+  _id: z.string().optional(),
   userId: z.string(), // Firebase UID
   title: z.string().nullable().optional(),
   createdAt: z.date().default(() => new Date()),
@@ -84,7 +84,7 @@ export const conversationSchema = z.object({
 
 // MongoDB Message Schema
 export const messageSchema = z.object({
-  _id: z.instanceof(ObjectId).optional(),
+  _id: z.string().optional(),
   conversationId: z.string(), // ObjectId as string
   role: z.string(),
   content: z.string(),
@@ -94,7 +94,7 @@ export const messageSchema = z.object({
 
 // MongoDB College Recommendation Schema
 export const collegeRecommendationSchema = z.object({
-  _id: z.instanceof(ObjectId).optional(),
+  _id: z.string().optional(),
   userId: z.string(), // Firebase UID
   collegeId: z.string(), // ObjectId as string
   matchScore: z.number(),
@@ -105,7 +105,7 @@ export const collegeRecommendationSchema = z.object({
 
 // MongoDB Saved College Schema
 export const savedCollegeSchema = z.object({
-  _id: z.instanceof(ObjectId).optional(),
+  _id: z.string().optional(),
   userId: z.string(), // Firebase UID
   collegeId: z.string(), // ObjectId as string
   notes: z.string().nullable().optional(),
@@ -114,7 +114,7 @@ export const savedCollegeSchema = z.object({
 
 // MongoDB Search Query Schema
 export const searchQuerySchema = z.object({
-  _id: z.instanceof(ObjectId).optional(),
+  _id: z.string().optional(),
   userId: z.string(), // Firebase UID
   query: z.string(),
   results: z.any().optional(),
@@ -123,7 +123,7 @@ export const searchQuerySchema = z.object({
 
 // MongoDB Question Response Schema
 export const questionResponseSchema = z.object({
-  _id: z.instanceof(ObjectId).optional(),
+  _id: z.string().optional(),
   userId: z.string(), // Firebase UID
   questionId: z.string(),
   sectionId: z.string(),

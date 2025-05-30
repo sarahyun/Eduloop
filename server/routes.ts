@@ -19,22 +19,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId, name, email, role, grade } = req.body;
       
-      // Create user profile in database using Firebase UID
-      const result = await pool.query(`
-        INSERT INTO users (username, email, full_name, grade, user_id, role, created_at) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7) 
-        RETURNING user_id, email, full_name as name, role, grade
-      `, [
-        email.split('@')[0], 
-        email, 
-        name, 
-        grade,
+      // Create user profile using MongoDB storage
+      const user = await storage.createUser({
         userId, // Firebase UID
+        email,
+        name,
         role,
-        new Date()
-      ]);
+        grade,
+      });
 
-      res.json(result.rows[0]);
+      res.json({
+        user_id: user.userId,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        grade: user.grade
+      });
     } catch (error) {
       console.error('Database user creation error:', error);
       res.status(500).json({ message: "Failed to create user profile", error: (error as Error).message });
@@ -45,16 +45,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { uid } = req.params;
       
-      const result = await pool.query(`
-        SELECT user_id, email, full_name as name, role, grade 
-        FROM users WHERE user_id = $1
-      `, [uid]);
+      const user = await storage.getUserByUserId(uid);
 
-      if (result.rows.length === 0) {
+      if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
-      res.json(result.rows[0]);
+      res.json({
+        user_id: user.userId,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        grade: user.grade
+      });
     } catch (error) {
       console.error('Database getUserByUid error:', error);
       res.status(500).json({ message: "Failed to get user", error: (error as Error).message });
