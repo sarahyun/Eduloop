@@ -134,23 +134,23 @@ export default function LandingPage() {
                 <span className="font-semibold text-lg">Your College Journey Companion</span>
               </div>
               <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Grow Into Your
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Future Self</span>
+                Find Colleges That
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Fit You</span>
               </h1>
               <p className="text-xl text-gray-600 leading-relaxed">
-                Your AI mentor who grows with you from 8th grade through college. We help you ask better questions, discover who you're becoming, and find schools where you'll truly thrive.
+                Chat with AI to build your student profile, discover colleges through natural language search, and get personalized recommendations based on your interests, goals, and preferences - not just test scores.
               </p>
             </div>
 
-            {/* Core Values Grid */}
-            <div className="grid grid-cols-1 gap-6">
+            {/* Features Grid */}
+            <div className="grid grid-cols-2 gap-6">
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                   <Users className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Beyond Test Scores</h3>
-                  <p className="text-sm text-gray-600">Your whole story matters - interests, values, dreams, and experiences shape who you're becoming</p>
+                  <h3 className="font-semibold text-gray-900">AI Chat Profile Builder</h3>
+                  <p className="text-sm text-gray-600">Answer questions about your interests, goals, and preferences to build your student profile</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
@@ -158,8 +158,8 @@ export default function LandingPage() {
                   <Target className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Fit Over Prestige</h3>
-                  <p className="text-sm text-gray-600">Find schools where you'll thrive, grow, and belong - not just the highest ranked ones</p>
+                  <h3 className="font-semibold text-gray-900">Smart College Search</h3>
+                  <p className="text-sm text-gray-600">Search like "small liberal arts school with strong poetry program" and get ranked results</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
@@ -167,8 +167,8 @@ export default function LandingPage() {
                   <BookOpen className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Questions, Not Answers</h3>
-                  <p className="text-sm text-gray-600">We help you reflect and discover: Who are you becoming? What matters to you? What are you proud of?</p>
+                  <h3 className="font-semibold text-gray-900">Personalized Recommendations</h3>
+                  <p className="text-sm text-gray-600">Get college suggestions based on fit, not just rankings - academic, social, and financial match</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
@@ -176,8 +176,8 @@ export default function LandingPage() {
                   <CheckCircle className="w-5 h-5 text-orange-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Grows With You</h3>
-                  <p className="text-sm text-gray-600">From 8th grade to graduation - your companion learns and evolves alongside your journey</p>
+                  <h3 className="font-semibold text-gray-900">AI College Counselor</h3>
+                  <p className="text-sm text-gray-600">24/7 guidance for college planning, application strategy, and decision making</p>
                 </div>
               </div>
             </div>
