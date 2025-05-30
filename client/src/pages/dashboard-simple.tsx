@@ -74,7 +74,7 @@ export default function Dashboard() {
   };
 
   const isCollegeSaved = (collegeId: number) => {
-    return savedColleges.some((saved: any) => saved.collegeId === collegeId);
+    return savedColleges.some(saved => saved.collegeId === collegeId);
   };
 
   return (
@@ -108,7 +108,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid gap-4">
-                {aiSearchMutation.data.colleges.map((result: any, index: number) => (
+                {aiSearchMutation.data.colleges.map((result, index) => (
                   <div key={index} className="p-4 border rounded-lg">
                     <h3 className="font-semibold mb-2">{result.name}</h3>
                     <p className="text-gray-600 text-sm mb-2">{result.reasoning}</p>
@@ -139,7 +139,7 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            {(recommendations as any[]).length === 0 ? (
+            {recommendations.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-500 mb-4">No recommendations yet</p>
                 <Button 
@@ -151,7 +151,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="grid gap-4">
-                {(recommendations as any[]).map((rec: any) => (
+                {recommendations.map((rec) => (
                   <CollegeCard
                     key={rec.id}
                     college={rec.college!}
