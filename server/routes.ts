@@ -503,6 +503,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Question responses - handle form submission format
+  app.post("/api/question-responses", async (req, res) => {
+    try {
+      const { response_id, user_id, form_id, submitted_at, responses } = req.body;
+      
+      // Save each individual question response
+      const savedResponses = [];
+      for (const response of responses) {
+        const questionResponseData = {
+          userId: user_id,
+          questionId: response.question_id,
+          section: form_id,
+          userAnswer: response.answer,
+          questionText: response.question_text,
+          source: 'form'
+        };
+        
+        // Check if response already exists and update or create
+        const existing = await storage.getQuestionResponse(user_id, response.question_id);
+        if (existing) {
+          const updated = await storage.updateQuestionResponse(user_id, response.question_id, questionResponseData);
+          savedResponses.push(updated);
+        } else {
+          const created = await storage.createQuestionResponse(questionResponseData);
+          savedResponses.push(created);
+        }
+      }
+      
+      res.json({ 
+        message: "Responses saved successfully", 
+        responses: savedResponses,
+        response_id,
+        form_id,
+        submitted_at 
+      });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to save question responses" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
