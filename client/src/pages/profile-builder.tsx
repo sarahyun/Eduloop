@@ -30,7 +30,7 @@ export default function ProfileBuilder() {
       completed: !!(profile && (profile.careerMajor || profile.dreamSchools || profile.freeTimeActivities)), 
       method: 'both', 
       description: 'Name, grade, school, and basic information about yourself', 
-      lastUpdated: profile?.careerMajor ? 'Recently completed' : 'Not started' 
+      lastUpdated: profile?.careerMajor ? 'Completed' : 'Not started' 
     },
     { 
       id: 'Academic Information', 
@@ -38,7 +38,7 @@ export default function ProfileBuilder() {
       completed: !!(profile && (profile.gpa || profile.satScore || profile.actScore)), 
       method: 'both', 
       description: 'Favorite classes, subjects, academic interests', 
-      lastUpdated: profile?.gpa ? 'Recently completed' : 'Not started' 
+      lastUpdated: profile?.gpa ? 'Completed' : 'Not started' 
     },
     { 
       id: 'Extracurriculars and Interests', 
@@ -46,7 +46,7 @@ export default function ProfileBuilder() {
       completed: !!(profile && profile.extracurricularsAdditionalInfo), 
       method: 'both', 
       description: 'What you\'re proud of, fields to explore, free time activities', 
-      lastUpdated: profile?.extracurricularsAdditionalInfo ? 'Recently completed' : 'Not started' 
+      lastUpdated: profile?.extracurricularsAdditionalInfo ? 'Completed' : 'Not started' 
     },
     { 
       id: 'Personal Reflections', 
@@ -54,7 +54,7 @@ export default function ProfileBuilder() {
       completed: !!(profile && (profile.whatMakesHappy || profile.challengeOvercome)), 
       method: 'both', 
       description: 'What makes you happy, challenges overcome, values', 
-      lastUpdated: profile?.whatMakesHappy ? 'Recently completed' : 'Not started' 
+      lastUpdated: profile?.whatMakesHappy ? 'Completed' : 'Not started' 
     },
     { 
       id: 'College Preferences', 
@@ -62,7 +62,7 @@ export default function ProfileBuilder() {
       completed: !!(profile && (profile.collegeExperience || profile.schoolSize)), 
       method: 'both', 
       description: 'College experience, school size, location preferences', 
-      lastUpdated: profile?.collegeExperience ? 'Recently completed' : 'Not started' 
+      lastUpdated: profile?.collegeExperience ? 'Completed' : 'Not started' 
     },
   ];
 
@@ -287,16 +287,40 @@ export default function ProfileBuilder() {
                     {/* Actions for completed sections - allow updates */}
                     {section.completed && (
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">Updated {section.lastUpdated}</span>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-gray-600 hover:text-blue-600"
-                          onClick={() => handleMethodSelection('chat', section.id)}
-                        >
-                          <Edit className="w-3 h-3 mr-1" />
-                          Edit
-                        </Button>
+                        <span className="text-xs text-gray-500">{section.lastUpdated}</span>
+                        {/* Introduction section only shows Form edit button */}
+                        {section.id === 'Introduction' ? (
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="text-gray-600 hover:text-blue-600"
+                            onClick={() => handleMethodSelection('form', section.id)}
+                          >
+                            <Edit className="w-3 h-3 mr-1" />
+                            Edit
+                          </Button>
+                        ) : (
+                          <>
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              className="text-gray-600 hover:text-blue-600"
+                              onClick={() => handleMethodSelection('chat', section.id)}
+                            >
+                              <MessageCircle className="w-3 h-3 mr-1" />
+                              Chat
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              className="text-gray-600 hover:text-blue-600"
+                              onClick={() => handleMethodSelection('form', section.id)}
+                            >
+                              <Edit className="w-3 h-3 mr-1" />
+                              Form
+                            </Button>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
