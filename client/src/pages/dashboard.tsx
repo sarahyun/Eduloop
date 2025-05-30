@@ -111,7 +111,7 @@ export default function Dashboard() {
         {/* Simple Welcome */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, {user.fullName.split(' ')[0]}!
+            Welcome back, {user.name ? user.name.split(' ')[0] : 'there'}!
           </h1>
           <p className="text-gray-600 mb-4">
             Find colleges that match your interests and goals.
