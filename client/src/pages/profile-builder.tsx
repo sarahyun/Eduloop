@@ -193,11 +193,7 @@ export default function ProfileBuilder() {
                         <span className="text-xs text-gray-500">Updated {section.lastUpdated}</span>
                         <Button size="sm" variant="ghost" className="text-gray-600 hover:text-blue-600">
                           <Edit className="w-3 h-3 mr-1" />
-                          Update
-                        </Button>
-                        <Button size="sm" variant="ghost" className="text-gray-600 hover:text-green-600">
-                          <RefreshCw className="w-3 h-3 mr-1" />
-                          Redo
+                          Edit
                         </Button>
                       </div>
                     )}
