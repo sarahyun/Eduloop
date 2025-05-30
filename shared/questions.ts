@@ -5,7 +5,9 @@ export const PROFILE_SECTIONS = {
     { id: "introFreeTimeActivities", question: "Aside from hanging out with friends, how do you like to spend your time outside of school?" },
     { id: "introCollegeExperience", question: "What are you looking for in your college experience? Also, anything that worries you about this process?" },
     { id: "extracurriculars", question: "If you have a resume or a list of extracurriculars, feel free to paste or enter them here." },
-    { id: "gpaTestScores", question: "What is your GPA and test scores?" }
+    { id: "gpa", question: "What is your GPA?" },
+    { id: "satScore", question: "What is your SAT score?" },
+    { id: "actScore", question: "What is your ACT score?" }
   ],
   "Academic Information": [
     { id: "favoriteClasses", question: "What are your 3 favorite classes?" },

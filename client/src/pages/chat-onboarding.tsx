@@ -297,14 +297,18 @@ export default function ChatOnboarding() {
     }
   }, [messages]);
 
-  // Check if the latest AI message is asking about GPA/test scores
+  // Check if the current question should show a form based on question ID
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
     if (lastMessage && lastMessage.role === 'assistant' && lastMessage.content !== 'ACADEMIC_FORM') {
-      const content = lastMessage.content.toLowerCase();
+      // Only show form for specific individual academic questions
+      const shouldShowForm = lastMessage.content.toLowerCase().includes('what is your gpa') ||
+                            lastMessage.content.toLowerCase().includes('what is your sat') ||
+                            lastMessage.content.toLowerCase().includes('what is your act');
+      
       const hasAcademicForm = messages.some(m => m.content === 'ACADEMIC_FORM');
       
-      if ((content.includes('gpa') || content.includes('test scores') || content.includes('sat') || content.includes('act')) && !hasAcademicForm) {
+      if (shouldShowForm && !hasAcademicForm) {
         // Add the academic form as a message in the chat
         const formMessage: ChatMessage = {
           id: `form-${Date.now()}`,
