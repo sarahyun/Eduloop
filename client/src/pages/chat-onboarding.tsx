@@ -159,7 +159,7 @@ export default function ChatOnboarding() {
         } else if (state.step === 12) {
           const newState = { ...state, step: 13, data: { ...state.data, academicFascinations: response } };
           return {
-            response: `I love hearing about what genuinely excites you intellectually! This gives me great insight into programs and research opportunities you might thrive in.\n\nThis is a great start to building your profile. To give you the best college recommendations, I'll need to learn more about your personal interests, values, and preferences. You can continue building your profile through additional conversations or by filling out the detailed forms on your dashboard.`,
+            response: `I love hearing about what genuinely excites you intellectually! This gives me great insight into programs and research opportunities you might thrive in.\n\nThis is a great start to building your profile. To give you the best college recommendations, I'll need to learn more about your personal interests, values, and preferences. You can continue building your profile or you can begin exploring.\n\nI can help you:\n• Create personalized college recommendations based on your unique profile\n• Find schools that match your academic passions and career aspirations\n• Discover programs with research opportunities in your areas of interest\n• Answer questions about specific colleges, majors, and application processes\n• Guide you through building a comprehensive student profile\n• Search for colleges using natural language queries\n• Provide insights about what makes you stand out as an applicant\n• Help you understand college cultures and find your best fit`,
             newState,
             isComplete: true,
             showContinueButton: true
@@ -464,7 +464,7 @@ export default function ChatOnboarding() {
                           }}
                           className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
                         >
-                          Continue building profile
+                          Let's go
                         </Button>
                       </div>
                     )}
