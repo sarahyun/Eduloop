@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { BookOpen, Target, Heart, Zap, GraduationCap, ArrowLeft, ArrowRight, CheckCircle, MessageCircle } from "lucide-react";
 import { SmartLoading } from "@/components/SmartLoadingStates";
 import { InterestBubbles, StoryPrompt, ProgressMilestone, PersonalityInsight } from "@/components/InteractiveElements";
+import { MarkCharacter } from "@/components/MarkCharacter";
 import { insertStudentProfileSchema } from "../../../shared/schema";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -45,6 +46,7 @@ export default function OnboardingPage() {
   const [dynamicSteps, setDynamicSteps] = useState<OnboardingStep[]>([]);
   const [followUpResponses, setFollowUpResponses] = useState<{[key: string]: string}>({});
   const [isGeneratingNextStep, setIsGeneratingNextStep] = useState(false);
+  const [useMarkOnboarding, setUseMarkOnboarding] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
