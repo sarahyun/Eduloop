@@ -148,43 +148,7 @@ export default function ChatPage() {
               </CardContent>
             </Card>
 
-            {/* Recent Conversation Memories */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Conversation Memory</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-gray-900">Engineering vs CS</span>
-                      <span className="text-xs text-gray-500">Yesterday</span>
-                    </div>
-                    <p className="text-xs text-gray-600">Discussed differences between engineering and computer science programs...</p>
-                  </div>
 
-                  <div className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-gray-900">Essay Brainstorming</span>
-                      <span className="text-xs text-gray-500">3 days ago</span>
-                    </div>
-                    <p className="text-xs text-gray-600">Explored your leadership experience and community service themes...</p>
-                  </div>
-
-                  <div className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-gray-900">School Climate</span>
-                      <span className="text-xs text-gray-500">1 week ago</span>
-                    </div>
-                    <p className="text-xs text-gray-600">Talked about finding schools with collaborative learning environments...</p>
-                  </div>
-                </div>
-
-                <Button variant="ghost" size="sm" className="w-full mt-4 text-primary hover:text-primary-dark">
-                  View All Conversations
-                </Button>
-              </CardContent>
-            </Card>
 
             {/* Language Support */}
             <Card>
