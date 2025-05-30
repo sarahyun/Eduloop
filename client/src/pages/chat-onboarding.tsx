@@ -280,9 +280,21 @@ export default function ChatOnboarding() {
   };
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-    }
+    const scrollToBottom = () => {
+      if (scrollAreaRef.current) {
+        const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+        if (scrollContainer) {
+          scrollContainer.scrollTo({
+            top: scrollContainer.scrollHeight,
+            behavior: 'smooth'
+          });
+        }
+      }
+    };
+
+    // Small delay to ensure DOM has updated
+    const timeoutId = setTimeout(scrollToBottom, 100);
+    return () => clearTimeout(timeoutId);
   }, [messages]);
 
   useEffect(() => {
