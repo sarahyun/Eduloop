@@ -309,93 +309,29 @@ export default function ChatOnboarding() {
         </div>
 
         {/* Chat Interface */}
-        <Card className="h-[700px] flex flex-col">
-          <CardContent className="flex-1 flex flex-col p-6">
-            {/* Messages */}
-            <ScrollArea ref={scrollAreaRef} className="flex-1 pr-4">
-              <div className="space-y-4">
+        <Card className="h-[700px] flex flex-col bg-white">
+          <CardContent className="flex-1 flex flex-col p-0">
+            {/* Messages Container */}
+            <ScrollArea ref={scrollAreaRef} className="flex-1 bg-white">
+              <div className="p-4 space-y-3 bg-white min-h-full">
                 {messages.map((message, index) => (
                   <div
                     key={message.id}
                     className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    <div className="w-full">
-                      {message.role === 'user' ? (
-                        <div className="max-w-[80%] p-4 rounded-lg bg-blue-500 text-white ml-auto">
-                          <div className="whitespace-pre-wrap">
-                            {message.content}
-                          </div>
+                    {message.role === 'user' ? (
+                      <div className="max-w-[75%] p-3 rounded-2xl bg-blue-500 text-white">
+                        <div className="whitespace-pre-wrap text-sm">
+                          {message.content}
                         </div>
-                      ) : (
-                        <div 
-                          className="max-w-[80%] p-4 rounded-lg mr-auto"
-                          style={{ 
-                            backgroundColor: '#ffffff',
-                            border: '1px solid #e5e7eb',
-                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-                            minHeight: 'fit-content',
-                            width: 'fit-content',
-                            display: 'block'
-                          }}
-                        >
-                          <div 
-                            className="whitespace-pre-wrap" 
-                            style={{ 
-                              backgroundColor: '#ffffff', 
-                              color: '#6b7280',
-                              lineHeight: '1.5',
-                              wordWrap: 'break-word'
-                            }}
-                          >
-                            {message.content}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Show expand button for completed sections */}
-                      {message.role === 'assistant' && showExpandButton && index === messages.length - 1 && (
-                        <div className="mt-4 text-center">
-                          <Button
-                            onClick={() => {
-                              setShowExpandButton(false);
-                              const expandMessage: ChatMessage = {
-                                id: Date.now().toString(),
-                                role: 'user',
-                                content: "I'd like to expand on my answers and add more details.",
-                                timestamp: new Date()
-                              };
-                              setMessages(prev => [...prev, expandMessage]);
-                              
-                              // Create context with existing data for better follow-up questions
-                              const existingData = getSectionData(targetSection, profile);
-                              const contextMessage = `I'd like to expand on my answers and add more details. Here's what I've shared so far: ${JSON.stringify(existingData, null, 2)}`;
-                              generateResponseMutation.mutate(contextMessage);
-                            }}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg"
-                          >
-                            Expand on my answers
-                          </Button>
-                        </div>
-                      )}
-
-                      {/* Show continue button at the end */}
-                      {message.role === 'assistant' && showContinueButton && index === messages.length - 1 && (
-                        <div className="mt-4 text-center">
-                          <Button
-                            onClick={() => {
-                              window.location.href = '/dashboard';
-                            }}
-                            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
-                          >
-                            Let's go
-                          </Button>
-                        </div>
-                      )}
-                      
-                      <div className="text-xs opacity-70 mt-2">
-                        {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </div>
-                    </div>
+                    ) : (
+                      <div className="max-w-[75%] p-3 rounded-2xl bg-gray-200">
+                        <div className="whitespace-pre-wrap text-sm text-gray-800">
+                          {message.content}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
                 
@@ -413,7 +349,7 @@ export default function ChatOnboarding() {
             </ScrollArea>
 
             {/* Input Area */}
-            <div className="flex items-center space-x-2 mt-4 pt-4 border-t">
+            <div className="flex items-center space-x-2 p-4 border-t bg-white">
               <Input
                 ref={inputRef}
                 value={input}
@@ -421,12 +357,13 @@ export default function ChatOnboarding() {
                 onKeyPress={handleKeyPress}
                 placeholder="Type your response..."
                 disabled={generateResponseMutation.isPending}
-                className="flex-1"
+                className="flex-1 rounded-full border-gray-300"
               />
               <Button 
                 onClick={handleSend}
                 disabled={!input.trim() || generateResponseMutation.isPending}
                 size="icon"
+                className="rounded-full"
               >
                 <Send className="w-4 h-4" />
               </Button>
