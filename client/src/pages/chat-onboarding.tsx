@@ -35,6 +35,7 @@ export default function ChatOnboarding() {
   const [existingData, setExistingData] = useState<any>(null);
   
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Load existing profile data
@@ -264,33 +265,9 @@ export default function ChatOnboarding() {
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    const scrollToBottom = () => {
-      if (scrollAreaRef.current) {
-        const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-        if (scrollContainer) {
-          // Force scroll to bottom immediately
-          scrollContainer.scrollTop = scrollContainer.scrollHeight;
-          
-          // Also try smooth scroll as backup
-          setTimeout(() => {
-            scrollContainer.scrollTo({
-              top: scrollContainer.scrollHeight,
-              behavior: 'smooth'
-            });
-          }, 50);
-        }
-      }
-    };
-
-    // Multiple attempts to ensure scrolling works
-    scrollToBottom();
-    const timeoutId1 = setTimeout(scrollToBottom, 100);
-    const timeoutId2 = setTimeout(scrollToBottom, 300);
-    
-    return () => {
-      clearTimeout(timeoutId1);
-      clearTimeout(timeoutId2);
-    };
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -358,6 +335,9 @@ export default function ChatOnboarding() {
                     </div>
                   </div>
                 )}
+                
+                {/* Invisible element at the bottom for scrolling */}
+                <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
 
