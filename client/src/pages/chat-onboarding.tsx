@@ -280,7 +280,6 @@ export default function ChatOnboarding() {
 
     setMessages(prev => [...prev, userMessage]);
     generateResponseMutation.mutate(formattedResponse);
-    setShowAcademicsForm(false);
     setAcademicData({ gpa: "", satScore: "", actScore: "" });
   };
 
@@ -301,9 +300,11 @@ export default function ChatOnboarding() {
   // Check if the latest AI message is asking about GPA/test scores
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.role === 'assistant') {
+    if (lastMessage && lastMessage.role === 'assistant' && lastMessage.content !== 'ACADEMIC_FORM') {
       const content = lastMessage.content.toLowerCase();
-      if (content.includes('gpa') || content.includes('test scores') || content.includes('sat') || content.includes('act')) {
+      const hasAcademicForm = messages.some(m => m.content === 'ACADEMIC_FORM');
+      
+      if ((content.includes('gpa') || content.includes('test scores') || content.includes('sat') || content.includes('act')) && !hasAcademicForm) {
         // Add the academic form as a message in the chat
         const formMessage: ChatMessage = {
           id: `form-${Date.now()}`,
