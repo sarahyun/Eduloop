@@ -33,7 +33,7 @@ export default function ChatOnboarding() {
     {
       id: '1',
       role: 'assistant',
-      content: "Hey there! 👋 I'm your college counselor, and I'm here to help you figure out this whole college thing - which, let's be honest, can feel like trying to solve a Rubik's cube blindfolded sometimes! 😅\n\nBut don't worry, I'm here to make it way less overwhelming and maybe even a little fun. Think of this as just a chill conversation where I get to know the awesome person you are.\n\nSo, what should I call you?",
+      content: "Hi! I'm your college counselor, and I'm here to help you discover colleges that would be a great fit for you. I'll ask you some questions to get to know you better.\n\nWhat should I call you?",
       timestamp: new Date()
     }
   ]);
@@ -51,9 +51,7 @@ export default function ChatOnboarding() {
     {
       trigger: (response: string) => true,
       getResponse: (response: string) => {
-        return `Hey ${response}! Great to meet you! 🎉 I'm here to help you navigate this whole college thing - and trust me, it's way less scary than it seems. Think of me as your friendly neighborhood college counselor who actually gets it. 
-
-So, let's dive right in - do you have a career or major in mind? No worries if not - honestly, most people change their minds like 17 times anyway! 😄`;
+        return `Nice to meet you, ${response}! Let's get started.\n\nDo you have a career or major in mind? No worries if not.`;
       },
       dataKey: 'name'
     },
@@ -64,18 +62,18 @@ So, let's dive right in - do you have a career or major in mind? No worries if n
         const lowerResponse = response.toLowerCase();
         
         if (lowerResponse.includes('no') || lowerResponse.includes("don't") || lowerResponse.includes('unsure')) {
-          followUp = "Totally normal! The whole 'what do you want to be when you grow up' question is kind of ridiculous when you think about it. You're not supposed to have your entire life figured out at 17! ";
+          followUp = "That's perfectly normal. Many students are still exploring their options. ";
         } else if (lowerResponse.includes('medicine') || lowerResponse.includes('doctor')) {
-          followUp = "Ooh, future lifesaver! That's awesome. ";
+          followUp = "Medicine is a great field. ";
         } else if (lowerResponse.includes('engineer') || lowerResponse.includes('tech')) {
-          followUp = "Nice! Building the future, I see. ";
+          followUp = "Engineering and tech offer many exciting opportunities. ";
         } else if (lowerResponse.includes('business') || lowerResponse.includes('entrepreneur')) {
-          followUp = "Future CEO vibes! Love it. ";
+          followUp = "Business is a versatile field with many paths. ";
         } else {
-          followUp = "That sounds really cool! ";
+          followUp = "That sounds interesting. ";
         }
         
-        return followUp + "Alright, next question - got any dream schools in mind? And if so, what's drawing you to them? Is it the campus vibes, the programs, or did you just see them in a movie once? 😂";
+        return followUp + "Got any dream schools in mind? If so, what's drawing you to them?";
       },
       dataKey: 'career'
     },
@@ -86,14 +84,14 @@ So, let's dive right in - do you have a career or major in mind? No worries if n
         const lowerResponse = response.toLowerCase();
         
         if (lowerResponse.includes('harvard') || lowerResponse.includes('stanford') || lowerResponse.includes('mit')) {
-          response_text = "Shooting for the stars! I respect that. Those places are definitely prestigious, but let's make sure we find schools that are great fits for YOU specifically. ";
+          response_text = "Those are highly selective schools. We'll make sure to find good fits for you. ";
         } else if (lowerResponse.includes('no') || lowerResponse.includes("don't")) {
-          response_text = "Honestly? That's probably healthier than being obsessed with one school since you were 12. Keeps your options open! ";
+          response_text = "That's fine - keeping your options open is smart. ";
         } else {
-          response_text = "Cool choices! It's great that you've done some thinking about this. ";
+          response_text = "Good to know you've been thinking about this. ";
         }
         
-        return response_text + "Now, aside from hanging out with friends (because duh, that's always fun), how do you like to spend your time outside of school? What gets you excited on weekends?";
+        return response_text + "Aside from hanging out with friends, how do you like to spend your time outside of school?";
       },
       dataKey: 'dreamSchools'
     },
@@ -104,16 +102,16 @@ So, let's dive right in - do you have a career or major in mind? No worries if n
         const lowerResponse = response.toLowerCase();
         
         if (lowerResponse.includes('sleep') || lowerResponse.includes('netflix')) {
-          encouragement = "Ha! Okay, I appreciate the honesty. Self-care is important too. But seriously, ";
+          encouragement = "Rest and relaxation are important too. ";
         } else if (lowerResponse.includes('work') || lowerResponse.includes('job')) {
-          encouragement = "Wow, you're already hustling! That shows real responsibility. ";
+          encouragement = "Working shows responsibility and time management skills. ";
         } else if (lowerResponse.includes('sport') || lowerResponse.includes('music') || lowerResponse.includes('art')) {
-          encouragement = "That's awesome! Having creative/athletic outlets is so important. ";
+          encouragement = "Creative and athletic activities are valuable. ";
         } else {
-          encouragement = "I love that! ";
+          encouragement = "That's interesting. ";
         }
         
-        return encouragement + "Alright, here's a big one - what are you looking for in your college experience? Like, what would make you think 'yeah, this was totally worth it'? Also, real talk - anything that worries you about this whole process?";
+        return encouragement + "What are you looking for in your college experience? Also, anything that worries you about this process?";
       },
       dataKey: 'freeTime'
     },
