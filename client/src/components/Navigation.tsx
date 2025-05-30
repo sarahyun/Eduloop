@@ -15,8 +15,7 @@ export function Navigation({ user }: NavigationProps) {
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard" },
-    { name: "Explore", href: "/explore" },
-    { name: "My Schools", href: "/saved" },
+    { name: "Profile", href: "/profile" },
     { name: "Mentor", href: "/chat" },
   ];
 

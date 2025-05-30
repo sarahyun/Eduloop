@@ -5,7 +5,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { CollegeCard } from "@/components/CollegeCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { api, type User } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -199,13 +199,6 @@ export default function Dashboard() {
           >
             <MessageCircle className="w-4 h-4 mr-2" />
             Chat with AI
-          </Button>
-          <Button 
-            variant="outline"
-            onClick={() => window.location.href = '/explore'}
-          >
-            <Search className="w-4 h-4 mr-2" />
-            Explore More
           </Button>
         </div>
       </div>
