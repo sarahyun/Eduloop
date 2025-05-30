@@ -23,7 +23,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.createUser(userData);
-      res.json({ user: { id: user.id, username: user.username, email: user.email, fullName: user.fullName } });
+      res.json({ user: { id: user.id, email: user.email, name: user.name } });
     } catch (error) {
       res.status(400).json({ message: "Invalid user data", error: error.message });
     }
@@ -39,9 +39,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       req.session.userId = user.id;
-      res.json({ user: { id: user.id, username: user.username, email: user.email, fullName: user.fullName } });
+      res.json({ user: { id: user.id, email: user.email, name: user.name } });
     } catch (error) {
-      res.status(500).json({ message: "Sign in failed", error: error.message });
+      res.status(500).json({ message: "Sign in failed", error: (error as Error).message });
     }
   });
 
@@ -59,14 +59,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const username = email.split('@')[0];
       
       const user = await storage.createUser({
-        username,
+        userId: `user-${Date.now()}`,
         email,
         password,
-        fullName
+        name: fullName,
+        role: "student"
       });
 
-      req.session.userId = user.id;
-      res.json({ user: { id: user.id, username: user.username, email: user.email, fullName: user.fullName } });
+      (req.session as any).userId = user.id;
+      res.json({ user: { id: user.id, email: user.email, name: user.name } });
     } catch (error) {
       res.status(500).json({ message: "Failed to create account", error: error.message });
     }
