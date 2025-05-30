@@ -188,13 +188,14 @@ export default function OnboardingPage() {
 
     const formData = {
       userId: 1,
-      academicInterests: responses.careerMajor ? [responses.careerMajor] : undefined,
-      careerGoals: responses.careerMajor ? [responses.careerMajor] : undefined,
-      values: responses.collegeExperience ? [responses.collegeExperience] : undefined,
-      extracurriculars: responses.extracurriculars ? [responses.extracurriculars] : undefined,
-      gpa: formValues.gpa || undefined,
-      satScore: formValues.satScore || undefined,
-      actScore: formValues.actScore || undefined,
+      careerMajor: responses.careerMajor || null,
+      dreamSchools: responses.dreamSchools || null,
+      freeTimeActivities: responses.freeTime || null,
+      collegeExperience: responses.collegeExperience || null,
+      extracurricularsAdditionalInfo: responses.extracurriculars || null,
+      gpa: formValues.gpa || null,
+      satScore: formValues.satScore || null,
+      actScore: formValues.actScore || null,
     };
     createProfileMutation.mutate(formData);
   };

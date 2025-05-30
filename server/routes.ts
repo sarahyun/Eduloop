@@ -99,10 +99,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/profile", async (req, res) => {
     try {
-      const profileData = insertStudentProfileSchema.parse(req.body);
+      // Transform the incoming data to match our schema
+      const {
+        userId,
+        careerMajor,
+        dreamSchools,
+        freeTimeActivities,
+        collegeExperience,
+        extracurricularsAdditionalInfo,
+        gpa,
+        satScore,
+        actScore,
+        ...otherFields
+      } = req.body;
+
+      const profileData = {
+        userId,
+        careerMajor: careerMajor || null,
+        dreamSchools: dreamSchools || null,
+        freeTimeActivities: freeTimeActivities || null,
+        collegeExperience: collegeExperience || null,
+        extracurricularsAdditionalInfo: extracurricularsAdditionalInfo || null,
+        gpa: gpa ? parseFloat(gpa) : null,
+        satScore: satScore ? parseInt(satScore) : null,
+        actScore: actScore ? parseInt(actScore) : null,
+        profileCompletion: 25, // Initial completion percentage
+        ...otherFields
+      };
+
       const profile = await storage.createStudentProfile(profileData);
       res.json(profile);
     } catch (error) {
+      console.error('Profile creation error:', error);
       res.status(400).json({ message: "Invalid profile data", error: error.message });
     }
   });
