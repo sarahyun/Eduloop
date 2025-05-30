@@ -60,17 +60,35 @@ export default function OnboardingPage() {
   });
 
   const createProfileMutation = useMutation({
-    mutationFn: (data: ProfileFormData) => api.createProfile(data),
+    mutationFn: async (data: ProfileFormData) => {
+      // First, try to update existing profile
+      try {
+        const response = await fetch(`/api/profile/${data.userId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        if (response.ok) {
+          return response.json();
+        }
+        // If update fails, try creating new profile
+        return api.createProfile(data);
+      } catch (error) {
+        // If update fails, try creating new profile
+        return api.createProfile(data);
+      }
+    },
     onSuccess: () => {
       toast({
-        title: "Profile created successfully!",
-        description: "Welcome to your personalized college journey.",
+        title: "Profile updated successfully!",
+        description: "Your information has been saved.",
       });
+      queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
       window.location.href = "/dashboard";
     },
     onError: (error) => {
       toast({
-        title: "Error creating profile",
+        title: "Error saving profile",
         description: "Please try again.",
         variant: "destructive",
       });
