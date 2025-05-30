@@ -68,11 +68,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hashedPassword = await bcrypt.hash(password, 10);
       
       const user = await storage.createUser({
-        userId: `user-${Date.now()}`,
+        username: email.split('@')[0],
         email,
         password: hashedPassword,
-        name: fullName,
-        role: "student"
+        fullName: fullName
       });
 
       (req.session as any).userId = user.id;
