@@ -99,6 +99,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Chat onboarding with OpenAI
+  app.post("/api/chat/onboarding", async (req, res) => {
+    try {
+      const { message, section, conversationHistory, questions } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      // Generate AI response using OpenAI
+      const aiResponse = await aiService.generateOnboardingResponse({
+        userMessage: message,
+        section,
+        conversationHistory,
+        questions
+      });
+
+      res.json(aiResponse);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate response", error: error.message });
+    }
+  });
+
   // College routes
   app.get("/api/colleges", async (req, res) => {
     try {
