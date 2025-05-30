@@ -114,6 +114,18 @@ export const searchQueries = pgTable("search_queries", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const questionResponses = pgTable("question_responses", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  section: text("section").notNull(),
+  questionId: text("question_id").notNull(),
+  questionText: text("question_text").notNull(),
+  userAnswer: text("user_answer").notNull(),
+  source: text("source").notNull(), // 'chat' or 'form'
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -158,6 +170,12 @@ export const insertSearchQuerySchema = createInsertSchema(searchQueries).omit({
   createdAt: true,
 });
 
+export const insertQuestionResponseSchema = createInsertSchema(questionResponses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -175,3 +193,5 @@ export type SavedCollege = typeof savedColleges.$inferSelect;
 export type InsertSavedCollege = z.infer<typeof insertSavedCollegeSchema>;
 export type SearchQuery = typeof searchQueries.$inferSelect;
 export type InsertSearchQuery = z.infer<typeof insertSearchQuerySchema>;
+export type QuestionResponse = typeof questionResponses.$inferSelect;
+export type InsertQuestionResponse = z.infer<typeof insertQuestionResponseSchema>;
