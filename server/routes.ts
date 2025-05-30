@@ -29,19 +29,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/auth/signin", async (req, res) => {
     try {
-      const { username, password } = req.body;
-      const user = await storage.getUserByUsername(username);
+      const { email, password } = req.body;
+      const user = await storage.getUserByEmail(email);
       
       if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        return res.status(401).json({ message: "Invalid email or password" });
       }
 
+      req.session.userId = user.id;
       res.json({ user: { id: user.id, username: user.username, email: user.email, fullName: user.fullName } });
     } catch (error) {
-      res.status(500).json({ message: "Login failed", error: error.message });
+      res.status(500).json({ message: "Sign in failed", error: error.message });
     }
+  });
+
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const { email, password, fullName } = req.body;
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Account with this email already exists" });
+      }
+
+      // Create username from email
+      const username = email.split('@')[0];
+      
+      const user = await storage.createUser({
+        username,
+        email,
+        password,
+        fullName
+      });
+
+      req.session.userId = user.id;
+      res.json({ user: { id: user.id, username: user.username, email: user.email, fullName: user.fullName } });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create account", error: error.message });
+    }
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Failed to logout" });
+      }
+      res.json({ message: "Logged out successfully" });
+    });
   });
 
   // Student profile routes
