@@ -37,6 +37,9 @@ export default function ChatOnboarding() {
 
   function getInitialMessage() {
     switch (targetSection) {
+      case 'Introduction':
+        return `Hi! I'm excited to get to know you better. Let's start with some basic information.\n\nWhat's your name?`;
+      
       case 'Academic Information':
         return `Hi Sarah! Let's dive into your academic experience to help me understand what drives your intellectual curiosity.\n\nWhat are your 3 favorite classes you've taken so far? Tell me what makes them special to you.`;
       
