@@ -31,6 +31,14 @@ export interface ProfileInsight {
 }
 
 export class AIService {
+  private openai: OpenAI;
+
+  constructor() {
+    this.openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+
   async generateMentorResponse(context: ConversationContext): Promise<string> {
     try {
       const systemPrompt = `You are an expert college counselor and AI mentor. You have deep knowledge about colleges, admissions, student development, and career guidance. Your role is to:
