@@ -15,11 +15,27 @@ export const users = pgTable("users", {
 export const studentProfiles = pgTable("student_profiles", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
-  academicInterests: text("academic_interests").array(),
-  careerGoals: text("career_goals").array(),
-  values: text("values").array(),
-  learningStyle: text("learning_style"),
-  extracurriculars: text("extracurriculars").array(),
+  // Academic Information section
+  favoriteClasses: text("favorite_classes"),
+  strugglingSubjects: text("struggling_subjects"), 
+  academicFascinations: text("academic_fascinations"),
+  academicAdditionalInfo: text("academic_additional_info"),
+  // Personal Interests section
+  hobbiesAndInterests: text("hobbies_and_interests"),
+  passionProjects: text("passion_projects"),
+  personalValues: text("personal_values"),
+  interestsAdditionalInfo: text("interests_additional_info"),
+  // Background & Goals section
+  careerAspirations: text("career_aspirations"),
+  lifeGoals: text("life_goals"),
+  personalChallenges: text("personal_challenges"),
+  goalsAdditionalInfo: text("goals_additional_info"),
+  // College Preferences section
+  idealCollegeEnvironment: text("ideal_college_environment"),
+  importantCollegeFactors: text("important_college_factors"),
+  preferredLocation: text("preferred_location"),
+  collegeAdditionalInfo: text("college_additional_info"),
+  // Basic academic data
   gpa: real("gpa"),
   satScore: integer("sat_score"),
   actScore: integer("act_score"),
