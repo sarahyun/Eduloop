@@ -59,7 +59,7 @@ export function Navigation({ user }: NavigationProps) {
             {user && (
               <Avatar className="w-8 h-8">
                 <AvatarFallback className="bg-gray-300 text-gray-700">
-                  {user.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                  {user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
                 </AvatarFallback>
               </Avatar>
             )}
