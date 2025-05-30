@@ -65,7 +65,7 @@ Guidelines:
         model: "gpt-4o",
         messages: [
           { role: "system", content: systemPrompt },
-          ...context.conversationHistory
+          ...context.conversationHistory.map(msg => ({ role: msg.role as 'user' | 'assistant', content: msg.content }))
         ],
         max_tokens: 300,
       });
