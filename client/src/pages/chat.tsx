@@ -48,8 +48,9 @@ export default function ChatPage() {
   const sendMessageMutation = useMutation({
     mutationFn: ({ conversationId, content }: { conversationId: number; content: string }) =>
       api.sendMessage(conversationId, { role: 'user', content }),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/conversations', variables.conversationId, 'messages'] });
     },
   });
 
