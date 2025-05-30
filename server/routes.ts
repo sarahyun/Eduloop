@@ -368,17 +368,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Mark conversation endpoint
-  app.post("/api/mark-conversation", async (req, res) => {
-    try {
-      const { messages, currentTopic, profileData } = req.body;
-      const result = await aiService.generateMarkConversation(messages, currentTopic, profileData);
-      res.json(result);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to generate response", error: error.message });
-    }
-  });
-
   // Generate follow-up questions
   app.post("/api/generate-followup-questions", async (req, res) => {
     try {

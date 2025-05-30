@@ -7,7 +7,6 @@ import Dashboard from "@/pages/dashboard";
 import ChatPage from "@/pages/chat";
 import ExplorePage from "@/pages/explore";
 import OnboardingPage from "@/pages/onboarding";
-import TestPage from "@/pages/test";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,7 +17,6 @@ function Router() {
       <Route path="/chat" component={ChatPage} />
       <Route path="/explore" component={ExplorePage} />
       <Route path="/onboarding" component={OnboardingPage} />
-      <Route path="/test" component={TestPage} />
       <Route component={NotFound} />
     </Switch>
   );
