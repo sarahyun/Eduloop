@@ -35,7 +35,7 @@ export default function SectionForm() {
       
       questions.forEach(question => {
         if (question.id !== 'additionalInfo') {
-          initialAnswers[question.id] = profile[question.id] || '';
+          initialAnswers[question.id] = (profile as any)[question.id] || '';
         }
       });
       

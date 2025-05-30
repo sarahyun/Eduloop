@@ -14,11 +14,10 @@ export default function ProfileBuilder() {
   
   // Dynamic sections with completion tracking - all offer both methods
   const sections = [
-    { id: 'onboarding', title: 'Introductions', completed: true, method: 'both', lastUpdated: '2 days ago', description: 'Name, school, basic background' },
-    { id: 'academics', title: 'Academics', completed: false, method: 'both', description: 'Favorite classes, subjects, academic interests' },
-    { id: 'interests', title: 'Interests', completed: false, method: 'both', description: 'What you\'re proud of, fields to explore, free time' },
-    { id: 'reflections', title: 'Personal Reflections', completed: false, method: 'both', description: 'What makes you happy, challenges overcome, values' },
-    { id: 'college-preferences', title: 'College Preferences', completed: false, method: 'both', description: 'School size, location, community, family expectations' },
+    { id: 'Academic Information', title: 'Academic Information', completed: false, method: 'both', description: 'Favorite classes, subjects, academic interests' },
+    { id: 'Personal Interests', title: 'Personal Interests', completed: false, method: 'both', description: 'Hobbies, passion projects, personal values' },
+    { id: 'Background & Goals', title: 'Background & Goals', completed: false, method: 'both', description: 'Career aspirations, life goals, personal challenges' },
+    { id: 'College Preferences', title: 'College Preferences', completed: false, method: 'both', description: 'Ideal environment, important factors, location preferences' },
   ];
 
   // Find first incomplete section
@@ -35,7 +34,7 @@ export default function ProfileBuilder() {
       window.location.href = `/chat-onboarding?section=${targetSection?.id || 'interests'}`;
     } else {
       // Navigate to form with specific section
-      window.location.href = `/onboarding?section=${targetSection?.id || 'interests'}`;
+      window.location.href = `/section-form?section=${targetSection?.id || 'Academic Information'}`;
     }
   };
 
