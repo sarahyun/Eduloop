@@ -25,7 +25,7 @@ import {
   type InsertSearchQuery
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, like, desc } from "drizzle-orm";
+import { eq, like, desc, and } from "drizzle-orm";
 
 export interface IStorage {
   // User management
@@ -70,272 +70,186 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-
-  constructor() {
-    this.users = new Map();
-    this.studentProfiles = new Map();
-    this.colleges = new Map();
-    this.conversations = new Map();
-    this.messages = new Map();
-    this.collegeRecommendations = new Map();
-    this.savedColleges = new Map();
-    this.searchQueries = new Map();
-    this.currentId = 1;
-
-    // Initialize with sample colleges
-    this.initializeSampleData();
-  }
-
-  private initializeSampleData() {
-    const sampleColleges: InsertCollege[] = [
-      {
-        name: "Stanford University",
-        location: "Stanford, CA",
-        type: "private",
-        size: "medium",
-        setting: "suburban",
-        acceptanceRate: 0.04,
-        averageSAT: 1500,
-        averageACT: 34,
-        tuition: 58416,
-        description: "A leading research university known for innovation and entrepreneurship",
-        website: "https://www.stanford.edu",
-        imageUrl: "https://images.unsplash.com/photo-1607237138185-eedd9c632b0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
-        programs: ["Computer Science", "Engineering", "Business", "Medicine"],
-        tags: ["Innovation", "Tech", "Research", "Entrepreneurship"]
-      },
-      {
-        name: "Massachusetts Institute of Technology",
-        location: "Cambridge, MA",
-        type: "private",
-        size: "medium",
-        setting: "urban",
-        acceptanceRate: 0.07,
-        averageSAT: 1520,
-        averageACT: 35,
-        tuition: 57986,
-        description: "World-renowned for science, technology, engineering, and innovation",
-        website: "https://www.mit.edu",
-        imageUrl: "https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
-        programs: ["Engineering", "Computer Science", "Physics", "Mathematics"],
-        tags: ["STEM", "Research", "Innovation", "Technology"]
-      },
-      {
-        name: "University of California, Berkeley",
-        location: "Berkeley, CA",
-        type: "public",
-        size: "large",
-        setting: "urban",
-        acceptanceRate: 0.17,
-        averageSAT: 1430,
-        averageACT: 32,
-        tuition: 44066,
-        description: "Top public research university with strong programs across disciplines",
-        website: "https://www.berkeley.edu",
-        imageUrl: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
-        programs: ["Engineering", "Business", "Social Sciences", "Liberal Arts"],
-        tags: ["Public Ivy", "Research", "Diversity", "Innovation"]
-      }
-    ];
-
-    sampleColleges.forEach(college => {
-      this.createCollege(college);
-    });
-  }
-
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.email === email);
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId++;
-    const user: User = { 
-      ...insertUser, 
-      id,
-      createdAt: new Date()
-    };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
     return user;
   }
 
   async getStudentProfile(userId: number): Promise<StudentProfile | undefined> {
-    return Array.from(this.studentProfiles.values()).find(profile => profile.userId === userId);
+    const [profile] = await db
+      .select()
+      .from(studentProfiles)
+      .where(eq(studentProfiles.userId, userId));
+    return profile || undefined;
   }
 
   async createStudentProfile(profile: InsertStudentProfile): Promise<StudentProfile> {
-    const id = this.currentId++;
-    const studentProfile: StudentProfile = {
-      ...profile,
-      id,
-      updatedAt: new Date()
-    };
-    this.studentProfiles.set(id, studentProfile);
+    const [studentProfile] = await db
+      .insert(studentProfiles)
+      .values(profile)
+      .returning();
     return studentProfile;
   }
 
   async updateStudentProfile(userId: number, profileUpdate: Partial<StudentProfile>): Promise<StudentProfile> {
-    const existing = await this.getStudentProfile(userId);
-    if (!existing) {
-      throw new Error("Student profile not found");
-    }
-    
-    const updated: StudentProfile = {
-      ...existing,
-      ...profileUpdate,
-      updatedAt: new Date()
-    };
-    this.studentProfiles.set(existing.id, updated);
+    const [updated] = await db
+      .update(studentProfiles)
+      .set({ ...profileUpdate, updatedAt: new Date() })
+      .where(eq(studentProfiles.userId, userId))
+      .returning();
     return updated;
   }
 
   async getCollege(id: number): Promise<College | undefined> {
-    return this.colleges.get(id);
+    const [college] = await db.select().from(colleges).where(eq(colleges.id, id));
+    return college || undefined;
   }
 
   async getColleges(): Promise<College[]> {
-    return Array.from(this.colleges.values());
+    return await db.select().from(colleges);
   }
 
   async searchColleges(query: string): Promise<College[]> {
-    const queryLower = query.toLowerCase();
-    return Array.from(this.colleges.values()).filter(college => 
-      college.name.toLowerCase().includes(queryLower) ||
-      college.location.toLowerCase().includes(queryLower) ||
-      college.description?.toLowerCase().includes(queryLower) ||
-      college.programs?.some(program => program.toLowerCase().includes(queryLower)) ||
-      college.tags?.some(tag => tag.toLowerCase().includes(queryLower))
-    );
+    const searchTerm = `%${query.toLowerCase()}%`;
+    return await db
+      .select()
+      .from(colleges)
+      .where(like(colleges.name, searchTerm));
   }
 
   async createCollege(college: InsertCollege): Promise<College> {
-    const id = this.currentId++;
-    const newCollege: College = { ...college, id };
-    this.colleges.set(id, newCollege);
+    const [newCollege] = await db
+      .insert(colleges)
+      .values(college)
+      .returning();
     return newCollege;
   }
 
   async getConversation(id: number): Promise<Conversation | undefined> {
-    return this.conversations.get(id);
+    const [conversation] = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.id, id));
+    return conversation || undefined;
   }
 
   async getUserConversations(userId: number): Promise<Conversation[]> {
-    return Array.from(this.conversations.values())
-      .filter(conv => conv.userId === userId)
-      .sort((a, b) => (b.updatedAt?.getTime() || 0) - (a.updatedAt?.getTime() || 0));
+    return await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.userId, userId))
+      .orderBy(desc(conversations.updatedAt));
   }
 
   async createConversation(conversation: InsertConversation): Promise<Conversation> {
-    const id = this.currentId++;
-    const now = new Date();
-    const newConversation: Conversation = {
-      ...conversation,
-      id,
-      createdAt: now,
-      updatedAt: now
-    };
-    this.conversations.set(id, newConversation);
+    const [newConversation] = await db
+      .insert(conversations)
+      .values(conversation)
+      .returning();
     return newConversation;
   }
 
   async updateConversation(id: number, conversationUpdate: Partial<Conversation>): Promise<Conversation> {
-    const existing = this.conversations.get(id);
-    if (!existing) {
-      throw new Error("Conversation not found");
-    }
-    
-    const updated: Conversation = {
-      ...existing,
-      ...conversationUpdate,
-      updatedAt: new Date()
-    };
-    this.conversations.set(id, updated);
+    const [updated] = await db
+      .update(conversations)
+      .set({ ...conversationUpdate, updatedAt: new Date() })
+      .where(eq(conversations.id, id))
+      .returning();
     return updated;
   }
 
   async getConversationMessages(conversationId: number): Promise<Message[]> {
-    return Array.from(this.messages.values())
-      .filter(msg => msg.conversationId === conversationId)
-      .sort((a, b) => (a.createdAt?.getTime() || 0) - (b.createdAt?.getTime() || 0));
+    return await db
+      .select()
+      .from(messages)
+      .where(eq(messages.conversationId, conversationId))
+      .orderBy(messages.createdAt);
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
-    const id = this.currentId++;
-    const newMessage: Message = {
-      ...message,
-      id,
-      createdAt: new Date()
-    };
-    this.messages.set(id, newMessage);
+    const [newMessage] = await db
+      .insert(messages)
+      .values(message)
+      .returning();
     return newMessage;
   }
 
   async getUserRecommendations(userId: number): Promise<CollegeRecommendation[]> {
-    return Array.from(this.collegeRecommendations.values())
-      .filter(rec => rec.userId === userId)
-      .sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+    return await db
+      .select()
+      .from(collegeRecommendations)
+      .where(eq(collegeRecommendations.userId, userId))
+      .orderBy(desc(collegeRecommendations.createdAt));
   }
 
   async createRecommendation(recommendation: InsertCollegeRecommendation): Promise<CollegeRecommendation> {
-    const id = this.currentId++;
-    const newRecommendation: CollegeRecommendation = {
-      ...recommendation,
-      id,
-      createdAt: new Date()
-    };
-    this.collegeRecommendations.set(id, newRecommendation);
+    const [newRecommendation] = await db
+      .insert(collegeRecommendations)
+      .values(recommendation)
+      .returning();
     return newRecommendation;
   }
 
   async getUserSavedColleges(userId: number): Promise<SavedCollege[]> {
-    return Array.from(this.savedColleges.values())
-      .filter(saved => saved.userId === userId)
-      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+    return await db
+      .select()
+      .from(savedColleges)
+      .where(eq(savedColleges.userId, userId))
+      .orderBy(desc(savedColleges.createdAt));
   }
 
   async createSavedCollege(savedCollege: InsertSavedCollege): Promise<SavedCollege> {
-    const id = this.currentId++;
-    const newSavedCollege: SavedCollege = {
-      ...savedCollege,
-      id,
-      createdAt: new Date()
-    };
-    this.savedColleges.set(id, newSavedCollege);
+    const [newSavedCollege] = await db
+      .insert(savedColleges)
+      .values(savedCollege)
+      .returning();
     return newSavedCollege;
   }
 
   async deleteSavedCollege(userId: number, collegeId: number): Promise<void> {
-    const saved = Array.from(this.savedColleges.values())
-      .find(saved => saved.userId === userId && saved.collegeId === collegeId);
-    if (saved) {
-      this.savedColleges.delete(saved.id);
-    }
+    await db
+      .delete(savedColleges)
+      .where(
+        and(
+          eq(savedColleges.userId, userId),
+          eq(savedColleges.collegeId, collegeId)
+        )
+      );
   }
 
   async createSearchQuery(searchQuery: InsertSearchQuery): Promise<SearchQuery> {
-    const id = this.currentId++;
-    const newSearchQuery: SearchQuery = {
-      ...searchQuery,
-      id,
-      createdAt: new Date()
-    };
-    this.searchQueries.set(id, newSearchQuery);
+    const [newSearchQuery] = await db
+      .insert(searchQueries)
+      .values(searchQuery)
+      .returning();
     return newSearchQuery;
   }
 
   async getUserSearchHistory(userId: number): Promise<SearchQuery[]> {
-    return Array.from(this.searchQueries.values())
-      .filter(query => query.userId === userId)
-      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0))
-      .slice(0, 10);
+    return await db
+      .select()
+      .from(searchQueries)
+      .where(eq(searchQueries.userId, userId))
+      .orderBy(desc(searchQueries.createdAt));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
