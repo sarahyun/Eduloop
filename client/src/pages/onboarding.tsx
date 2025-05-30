@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { BookOpen, Target, Heart, Zap, GraduationCap, ArrowLeft, ArrowRight, CheckCircle, MessageCircle } from "lucide-react";
 import { SmartLoading } from "@/components/SmartLoadingStates";
+import { InterestBubbles, StoryPrompt, ProgressMilestone, PersonalityInsight } from "@/components/InteractiveElements";
 import { insertStudentProfileSchema } from "../../../shared/schema";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
