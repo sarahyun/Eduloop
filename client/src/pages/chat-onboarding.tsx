@@ -61,142 +61,75 @@ export default function ChatOnboarding() {
   const conversationFlow = [
     {
       trigger: (response: string) => true,
-      getResponse: (response: string) => {
-        return `Nice to meet you, ${response}! Let's get started.\n\nDo you have a career or major in mind? No worries if not.`;
-      },
-      dataKey: 'name'
-    },
-    {
-      trigger: (response: string) => response.length > 3,
-      getResponse: (response: string) => {
-        let followUp = "";
-        const lowerResponse = response.toLowerCase();
-        
-        if (lowerResponse.includes('no') || lowerResponse.includes("don't") || lowerResponse.includes('unsure')) {
-          followUp = "That's perfectly normal. Many students are still exploring their options. ";
-        } else if (lowerResponse.includes('medicine') || lowerResponse.includes('doctor')) {
-          followUp = "Medicine is a great field. ";
-        } else if (lowerResponse.includes('engineer') || lowerResponse.includes('tech')) {
-          followUp = "Engineering and tech offer many exciting opportunities. ";
-        } else if (lowerResponse.includes('business') || lowerResponse.includes('entrepreneur')) {
-          followUp = "Business is a versatile field with many paths. ";
-        } else {
-          followUp = "That sounds interesting. ";
-        }
-        
-        return followUp + "Got any dream schools in mind? If so, what's drawing you to them?";
-      },
-      dataKey: 'career'
-    },
-    {
-      trigger: (response: string) => response.length > 3,
-      getResponse: (response: string) => {
-        let response_text = "";
-        const lowerResponse = response.toLowerCase();
-        
-        if (lowerResponse.includes('harvard') || lowerResponse.includes('stanford') || lowerResponse.includes('mit')) {
-          response_text = "Those are highly selective schools. We'll make sure to find good fits for you. ";
-        } else if (lowerResponse.includes('no') || lowerResponse.includes("don't")) {
-          response_text = "That's fine - keeping your options open is smart. ";
-        } else {
-          response_text = "Good to know you've been thinking about this. ";
-        }
-        
-        return response_text + "Aside from hanging out with friends, how do you like to spend your time outside of school?";
-      },
-      dataKey: 'dreamSchools'
-    },
-    {
-      trigger: (response: string) => response.length > 5,
-      getResponse: (response: string) => {
-        let encouragement = "";
-        const lowerResponse = response.toLowerCase();
-        
-        if (lowerResponse.includes('sleep') || lowerResponse.includes('netflix')) {
-          encouragement = "Rest and relaxation are important too. ";
-        } else if (lowerResponse.includes('work') || lowerResponse.includes('job')) {
-          encouragement = "Working shows responsibility and time management skills. ";
-        } else if (lowerResponse.includes('sport') || lowerResponse.includes('music') || lowerResponse.includes('art')) {
-          encouragement = "Creative and athletic activities are valuable. ";
-        } else {
-          encouragement = "That's interesting. ";
-        }
-        
-        return encouragement + "What are you looking for in your college experience? Also, anything that worries you about this process?";
-      },
-      dataKey: 'freeTime'
-    },
-    {
-      trigger: (response: string) => response.length > 10,
-      getResponse: (response: string) => {
-        let validation = "";
-        const lowerResponse = response.toLowerCase();
-        
-        if (lowerResponse.includes('worried') || lowerResponse.includes('scared') || lowerResponse.includes('anxious')) {
-          validation = "Thanks for being real with me about your worries - that takes guts, and honestly, everyone feels that way even if they don't admit it. ";
-        } else if (lowerResponse.includes('friend') || lowerResponse.includes('social')) {
-          validation = "Social connections are huge! College is definitely about the people you meet. ";
-        } else if (lowerResponse.includes('academic') || lowerResponse.includes('learn')) {
-          validation = "I love that you're thinking about the actual learning part - that's what it's all about! ";
-        } else {
-          validation = "That's a great way to think about it! ";
-        }
-        
-        return validation + "Okay, last question and then we can start finding your perfect matches - if you have a resume or a list of extracurriculars, feel free to paste or enter them here. Don't stress if it's not super polished - I just want to see what you're involved in!";
-      },
-      dataKey: 'collegeExperience'
-    },
-    {
-      trigger: (response: string) => response.length > 3,
-      getResponse: (response: string) => {
-        return "Perfect! And real quick - what's your GPA and any test scores you want to share? This helps me find schools where you'll be competitive. Don't worry if they're not perfect - there are amazing schools for every student! 📊";
-      },
-      dataKey: 'extracurriculars'
-    },
-    {
-      trigger: (response: string) => response.length > 1,
       getResponse: (response: string, state: OnboardingState) => {
-        return `Awesome, ${state.data.name}! 🎊 You've given me such a great picture of who you are. Here's what I've learned about you:
-
-💭 Career thoughts: ${state.data.career}
-🎯 Dream schools: ${state.data.dreamSchools}
-🎮 Outside interests: ${state.data.freeTime}
-🏫 College goals: ${state.data.collegeExperience}
-⭐ Activities: ${state.data.extracurriculars}
-📈 Academic stats: ${response}
-
-I'm going to create your personalized profile now and then we can start exploring colleges that would be absolutely perfect for you. Ready to find your future home? 🏠✨`;
-      },
-      dataKey: 'academics',
-      isComplete: true
+        if (state.step === 0) {
+          const newState = { ...state, step: 1, data: { ...state.data, name: response } };
+          return {
+            response: `Nice to meet you, ${response}! I'm here to help you find colleges that match your interests and goals.\n\nWhat career path are you most excited about exploring?`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 1) {
+          const newState = { ...state, step: 2, data: { ...state.data, career: response } };
+          return {
+            response: `${response} sounds fascinating! There are so many great colleges with strong programs in that field.\n\nAre there any specific colleges or universities you've been dreaming about? What draws you to them?`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 2) {
+          const newState = { ...state, step: 3, data: { ...state.data, dreamSchools: response } };
+          return {
+            response: `Those are excellent choices! It's great that you're thinking about what excites you about different schools.\n\nWhen you're not studying, what do you love to do? I'm curious about your hobbies and interests outside of academics.`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 3) {
+          const newState = { ...state, step: 4, data: { ...state.data, freeTime: response } };
+          return {
+            response: `That's really cool! Those interests could connect to some amazing opportunities in college.\n\nWhat kind of college experience are you hoping for? Think about things like campus size, location, campus culture, or any specific programs that matter to you.`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 4) {
+          const newState = { ...state, step: 5, data: { ...state.data, collegeExperience: response } };
+          return {
+            response: `I can already see some great college matches forming! One more question to help me understand you better.\n\nWhat activities, clubs, or leadership roles have been meaningful to you? This could be anything from sports to volunteering to creative projects.`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 5) {
+          const newState = { ...state, step: 6, data: { ...state.data, extracurriculars: response } };
+          return {
+            response: `That's wonderful! Now I'd like to get a sense of your academic profile to help match you with the right colleges.\n\nPlease fill out the form below with your GPA and any test scores you have.`,
+            newState,
+            isComplete: false,
+            showAcademicForm: true
+          } as any;
+        } else if (state.step === 6) {
+          const newState = { ...state, step: 7, data: { ...state.data, academicInfo: response } };
+          return {
+            response: `Perfect! I have a great sense of who you are and what you're looking for. Thank you for sharing so much with me.\n\nI'm excited to help you discover colleges that would be an amazing fit for your interests, goals, and personality. Let's start exploring your personalized recommendations!`,
+            newState,
+            isComplete: true
+          };
+        }
+        
+        return {
+          response: "Thank you for sharing! Let me process this information.",
+          newState: state,
+          isComplete: true
+        };
+      }
     }
   ];
 
   const generateResponseMutation = useMutation({
     mutationFn: async (userMessage: string) => {
-      const currentStep = conversationFlow[onboardingState.step];
-      
-      if (currentStep && currentStep.trigger(userMessage)) {
-        const newData = { ...onboardingState.data, [currentStep.dataKey]: userMessage };
-        const response = currentStep.getResponse(userMessage, { ...onboardingState, data: newData });
-        
-        return {
-          response,
-          newState: {
-            step: onboardingState.step + 1,
-            data: newData
-          },
-          isComplete: currentStep.isComplete || false
-        };
-      }
-      
-      return {
-        response: "I'd love to hear more about that. Could you share a bit more detail?",
-        newState: onboardingState,
-        isComplete: false
-      };
+      const currentFlow = conversationFlow[0];
+      const response = currentFlow.getResponse(userMessage, onboardingState);
+      return response;
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       const assistantMessage: ChatMessage = {
         id: Date.now().toString(),
         role: 'assistant',
@@ -213,7 +146,6 @@ I'm going to create your personalized profile now and then we can start explorin
       
       if (data.isComplete) {
         setIsComplete(true);
-        // Here we could save the profile data
         createProfileMutation.mutate(data.newState.data);
       }
     }
