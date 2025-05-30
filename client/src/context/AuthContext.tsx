@@ -1,16 +1,27 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { 
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  updateProfile,
+  User as FirebaseUser
+} from 'firebase/auth';
+import { auth } from '../lib/firebase';
+import { apiRequest } from '@/lib/queryClient';
 
-interface User {
-  id: number;
-  email: string;
-  name: string;
+interface User extends FirebaseUser {
+  role?: string;
+  grade?: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, fullName: string) => Promise<void>;
+  signup: (email: string, password: string, name: string, role?: string, grade?: string) => Promise<any>;
+  login: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   loading: boolean;
 }
 
@@ -21,79 +32,91 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already authenticated on app load
-    checkAuthStatus();
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          // Try to fetch the user's profile from backend
+          const response = await fetch(`/api/users/${firebaseUser.uid}`);
+          const userProfile = await response.json();
+          
+          // Combine Firebase user data with backend profile data
+          setUser({
+            ...firebaseUser,
+            role: userProfile.role,
+            grade: userProfile.grade,
+          } as User);
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+          setUser(firebaseUser as User); // Fallback to basic Firebase user data
+        }
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+    return unsubscribe;
   }, []);
 
-  const checkAuthStatus = async () => {
+  const signup = async (email: string, password: string, name: string, role = 'student', grade = '12th') => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    
+    await updateProfile(userCredential.user, { displayName: name });
+    
     try {
-      const response = await fetch('/api/auth/me');
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData.user);
-      }
+      // Create the user profile in backend
+      await apiRequest('/api/users/', {
+        method: 'POST',
+        body: {
+          userId: userCredential.user.uid,
+          name,
+          email,
+          role,
+          grade,
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString()
+        }
+      });
+
+      // Set the user state with the role immediately
+      setUser({
+        ...userCredential.user,
+        role,
+        grade
+      } as User);
     } catch (error) {
-      console.error('Error checking auth status:', error);
-    } finally {
-      setLoading(false);
+      await userCredential.user.delete();
+      throw new Error('Failed to create user profile');
     }
+     
+    return userCredential;
   };
 
-  const login = async (email: string, password: string) => {
-    const response = await fetch('/api/auth/signin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Login failed');
-    }
-
-    const data = await response.json();
-    setUser(data.user);
+  const login = (email: string, password: string) => {
+    return signInWithEmailAndPassword(auth, email, password);
   };
 
-  const signup = async (email: string, password: string, fullName: string) => {
-    const response = await fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password, fullName }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Signup failed');
-    }
-
-    const data = await response.json();
-    setUser(data.user);
+  const logout = () => {
+    return signOut(auth);
   };
 
-  const logout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      setUser(null);
-    }
+  const resetPassword = (email: string) => {
+    return sendPasswordResetEmail(auth, email);
   };
 
   const value = {
     user,
-    login,
     signup,
+    login,
     logout,
-    loading,
+    resetPassword,
+    loading
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
