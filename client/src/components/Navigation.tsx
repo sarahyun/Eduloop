@@ -38,15 +38,15 @@ export function Navigation({ user }: NavigationProps) {
           <nav className="hidden md:flex items-center space-x-8">
             {navigation.map((item) => (
               <Link key={item.name} href={item.href}>
-                <a
-                  className={`transition-colors ${
+                <span
+                  className={`transition-colors cursor-pointer ${
                     isActive(item.href)
                       ? "text-primary font-medium"
                       : "text-gray-600 hover:text-gray-900"
                   }`}
                 >
                   {item.name}
-                </a>
+                </span>
               </Link>
             ))}
           </nav>
@@ -76,8 +76,8 @@ export function Navigation({ user }: NavigationProps) {
                 <div className="flex flex-col space-y-4 mt-8">
                   {navigation.map((item) => (
                     <Link key={item.name} href={item.href}>
-                      <a
-                        className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                      <span
+                        className={`block px-3 py-2 rounded-md text-base font-medium transition-colors cursor-pointer ${
                           isActive(item.href)
                             ? "text-primary bg-primary/10"
                             : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
@@ -85,7 +85,7 @@ export function Navigation({ user }: NavigationProps) {
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         {item.name}
-                      </a>
+                      </span>
                     </Link>
                   ))}
                 </div>
