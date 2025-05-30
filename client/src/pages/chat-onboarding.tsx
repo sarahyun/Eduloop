@@ -319,16 +319,20 @@ export default function ChatOnboarding() {
                     key={message.id}
                     className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    <div
-                      className={`max-w-[80%] p-4 rounded-lg ${
-                        message.role === 'user'
-                          ? 'bg-blue-500 text-white ml-auto'
-                          : 'bg-gray-100 text-gray-800 mr-auto'
-                      }`}
-                    >
-                      <div className="whitespace-pre-wrap">
-                        {message.content}
-                      </div>
+                    <div className="w-full">
+                      {message.role === 'user' ? (
+                        <div className="max-w-[80%] p-4 rounded-lg bg-blue-500 text-white ml-auto">
+                          <div className="whitespace-pre-wrap">
+                            {message.content}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="max-w-[80%] p-4 rounded-lg mr-auto" style={{ backgroundColor: '#f3f4f6', color: '#374151' }}>
+                          <div className="whitespace-pre-wrap">
+                            {message.content}
+                          </div>
+                        </div>
+                      )}
                       
                       {/* Show expand button for completed sections */}
                       {message.role === 'assistant' && showExpandButton && index === messages.length - 1 && (
