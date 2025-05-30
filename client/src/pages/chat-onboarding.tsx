@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { Navigation } from '@/components/Navigation';
 import { Send, ArrowLeft } from 'lucide-react';
 import { PROFILE_SECTIONS } from '@shared/questions';
@@ -33,6 +35,12 @@ export default function ChatOnboarding() {
   const [showContinueButton, setShowContinueButton] = useState(false);
   const [showExpandButton, setShowExpandButton] = useState(false);
   const [existingData, setExistingData] = useState<any>(null);
+  const [showAcademicsForm, setShowAcademicsForm] = useState(false);
+  const [academicData, setAcademicData] = useState({
+    gpa: "",
+    satScore: "",
+    actScore: ""
+  });
   
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -256,6 +264,27 @@ export default function ChatOnboarding() {
     setInput("");
   };
 
+  const handleAcademicFormSubmit = () => {
+    if (!academicData.gpa && !academicData.satScore && !academicData.actScore) return;
+    
+    let formattedResponse = "Here are my academic scores:\n";
+    if (academicData.gpa) formattedResponse += `GPA: ${academicData.gpa}\n`;
+    if (academicData.satScore) formattedResponse += `SAT: ${academicData.satScore}\n`;
+    if (academicData.actScore) formattedResponse += `ACT: ${academicData.actScore}`;
+
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: formattedResponse,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    generateResponseMutation.mutate(formattedResponse);
+    setShowAcademicsForm(false);
+    setAcademicData({ gpa: "", satScore: "", actScore: "" });
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -267,6 +296,17 @@ export default function ChatOnboarding() {
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
+  // Check if the latest AI message is asking about GPA/test scores
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.role === 'assistant') {
+      const content = lastMessage.content.toLowerCase();
+      if (content.includes('gpa') || content.includes('test scores') || content.includes('sat') || content.includes('act')) {
+        setShowAcademicsForm(true);
+      }
     }
   }, [messages]);
 
@@ -342,25 +382,134 @@ export default function ChatOnboarding() {
             </ScrollArea>
 
             {/* Input Area */}
-            <div className="flex items-center space-x-2 p-4 border-t bg-white">
-              <Input
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your response..."
-                disabled={generateResponseMutation.isPending}
-                className="flex-1 rounded-full border-gray-300"
-              />
-              <Button 
-                onClick={handleSend}
-                disabled={!input.trim() || generateResponseMutation.isPending}
-                size="icon"
-                className="rounded-full"
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
+            {showAcademicsForm ? (
+              <div className="p-4 border-t bg-white space-y-4">
+                <div className="text-sm font-medium text-gray-700 mb-3">
+                  Please fill in your academic information:
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="gpa" className="text-sm font-medium">GPA</Label>
+                    <Select value={academicData.gpa} onValueChange={(value) => setAcademicData(prev => ({ ...prev, gpa: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select GPA" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="4.0">4.0</SelectItem>
+                        <SelectItem value="3.9">3.9</SelectItem>
+                        <SelectItem value="3.8">3.8</SelectItem>
+                        <SelectItem value="3.7">3.7</SelectItem>
+                        <SelectItem value="3.6">3.6</SelectItem>
+                        <SelectItem value="3.5">3.5</SelectItem>
+                        <SelectItem value="3.4">3.4</SelectItem>
+                        <SelectItem value="3.3">3.3</SelectItem>
+                        <SelectItem value="3.2">3.2</SelectItem>
+                        <SelectItem value="3.1">3.1</SelectItem>
+                        <SelectItem value="3.0">3.0</SelectItem>
+                        <SelectItem value="2.9">2.9</SelectItem>
+                        <SelectItem value="2.8">2.8</SelectItem>
+                        <SelectItem value="2.7">2.7</SelectItem>
+                        <SelectItem value="2.6">2.6</SelectItem>
+                        <SelectItem value="2.5">2.5</SelectItem>
+                        <SelectItem value="below_2.5">Below 2.5</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="sat" className="text-sm font-medium">SAT Score</Label>
+                    <Select value={academicData.satScore} onValueChange={(value) => setAcademicData(prev => ({ ...prev, satScore: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select SAT" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1600">1600</SelectItem>
+                        <SelectItem value="1550-1590">1550-1590</SelectItem>
+                        <SelectItem value="1500-1540">1500-1540</SelectItem>
+                        <SelectItem value="1450-1490">1450-1490</SelectItem>
+                        <SelectItem value="1400-1440">1400-1440</SelectItem>
+                        <SelectItem value="1350-1390">1350-1390</SelectItem>
+                        <SelectItem value="1300-1340">1300-1340</SelectItem>
+                        <SelectItem value="1250-1290">1250-1290</SelectItem>
+                        <SelectItem value="1200-1240">1200-1240</SelectItem>
+                        <SelectItem value="1150-1190">1150-1190</SelectItem>
+                        <SelectItem value="1100-1140">1100-1140</SelectItem>
+                        <SelectItem value="1050-1090">1050-1090</SelectItem>
+                        <SelectItem value="1000-1040">1000-1040</SelectItem>
+                        <SelectItem value="below_1000">Below 1000</SelectItem>
+                        <SelectItem value="not_taken">Not taken</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="act" className="text-sm font-medium">ACT Score</Label>
+                    <Select value={academicData.actScore} onValueChange={(value) => setAcademicData(prev => ({ ...prev, actScore: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select ACT" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="36">36</SelectItem>
+                        <SelectItem value="35">35</SelectItem>
+                        <SelectItem value="34">34</SelectItem>
+                        <SelectItem value="33">33</SelectItem>
+                        <SelectItem value="32">32</SelectItem>
+                        <SelectItem value="31">31</SelectItem>
+                        <SelectItem value="30">30</SelectItem>
+                        <SelectItem value="29">29</SelectItem>
+                        <SelectItem value="28">28</SelectItem>
+                        <SelectItem value="27">27</SelectItem>
+                        <SelectItem value="26">26</SelectItem>
+                        <SelectItem value="25">25</SelectItem>
+                        <SelectItem value="24">24</SelectItem>
+                        <SelectItem value="23">23</SelectItem>
+                        <SelectItem value="22">22</SelectItem>
+                        <SelectItem value="21">21</SelectItem>
+                        <SelectItem value="20">20</SelectItem>
+                        <SelectItem value="below_20">Below 20</SelectItem>
+                        <SelectItem value="not_taken">Not taken</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between">
+                  <Button 
+                    variant="outline"
+                    onClick={() => setShowAcademicsForm(false)}
+                  >
+                    Use text input instead
+                  </Button>
+                  <Button 
+                    onClick={handleAcademicFormSubmit}
+                    disabled={!academicData.gpa && !academicData.satScore && !academicData.actScore}
+                  >
+                    Submit Academic Info
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2 p-4 border-t bg-white">
+                <Input
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Type your response..."
+                  disabled={generateResponseMutation.isPending}
+                  className="flex-1 rounded-full border-gray-300"
+                />
+                <Button 
+                  onClick={handleSend}
+                  disabled={!input.trim() || generateResponseMutation.isPending}
+                  size="icon"
+                  className="rounded-full"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
