@@ -268,16 +268,29 @@ export default function ChatOnboarding() {
       if (scrollAreaRef.current) {
         const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
         if (scrollContainer) {
-          scrollContainer.scrollTo({
-            top: scrollContainer.scrollHeight,
-            behavior: 'smooth'
-          });
+          // Force scroll to bottom immediately
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+          
+          // Also try smooth scroll as backup
+          setTimeout(() => {
+            scrollContainer.scrollTo({
+              top: scrollContainer.scrollHeight,
+              behavior: 'smooth'
+            });
+          }, 50);
         }
       }
     };
 
-    const timeoutId = setTimeout(scrollToBottom, 100);
-    return () => clearTimeout(timeoutId);
+    // Multiple attempts to ensure scrolling works
+    scrollToBottom();
+    const timeoutId1 = setTimeout(scrollToBottom, 100);
+    const timeoutId2 = setTimeout(scrollToBottom, 300);
+    
+    return () => {
+      clearTimeout(timeoutId1);
+      clearTimeout(timeoutId2);
+    };
   }, [messages]);
 
   useEffect(() => {
