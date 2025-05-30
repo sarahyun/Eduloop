@@ -158,26 +158,7 @@ export default function SectionForm() {
               </div>
             ))}
 
-            {/* Additional Information Section */}
-            {additionalInfoQuestion && (
-              <div className="border-t pt-6 mt-6">
-                <div className="space-y-2">
-                  <Label htmlFor={additionalInfoQuestion.id} className="text-base font-medium">
-                    {additionalInfoQuestion.question}
-                  </Label>
-                  <p className="text-sm text-gray-500 mb-3">
-                    Anything else you'd like to share about this topic? This section is updated automatically as you chat with our AI.
-                  </p>
-                  <Textarea
-                    id={additionalInfoQuestion.id}
-                    value={answers[additionalInfoQuestion.id] || ''}
-                    onChange={(e) => handleAnswerChange(additionalInfoQuestion.id, e.target.value)}
-                    placeholder="Additional insights will appear here from your conversations..."
-                    className="min-h-[80px]"
-                  />
-                </div>
-              </div>
-            )}
+
           </CardContent>
         </Card>
 
