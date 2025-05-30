@@ -75,13 +75,7 @@ export interface IStorage {
   getUserQuestionResponses(userId: number, section?: string): Promise<QuestionResponse[]>;
   getQuestionResponse(userId: number, questionId: string): Promise<QuestionResponse | undefined>;
 
-  // User feedback tracking
-  createUserFeedback(feedback: InsertUserFeedback): Promise<UserFeedback>;
-  getUserFeedback(userId: number): Promise<UserFeedback[]>;
 
-  // Recommendation sessions
-  createRecommendationSession(session: InsertRecommendationSession): Promise<RecommendationSession>;
-  getUserRecommendationSessions(userId: number): Promise<RecommendationSession[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -93,8 +87,7 @@ export class MemStorage implements IStorage {
   private collegeRecommendations: Map<number, CollegeRecommendation>;
   private savedColleges: Map<number, SavedCollege>;
   private searchQueries: Map<number, SearchQuery>;
-  private userFeedback: Map<number, UserFeedback>;
-  private recommendationSessions: Map<number, RecommendationSession>;
+  private questionResponses: Map<string, QuestionResponse>;
   private currentId: number;
 
   constructor() {
@@ -106,6 +99,7 @@ export class MemStorage implements IStorage {
     this.collegeRecommendations = new Map();
     this.savedColleges = new Map();
     this.searchQueries = new Map();
+    this.questionResponses = new Map();
     this.currentId = 1;
 
     // Initialize with sample colleges
@@ -417,6 +411,46 @@ export class MemStorage implements IStorage {
       .filter(query => query.userId === userId)
       .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0))
       .slice(0, 10);
+  }
+
+  // Question response methods
+  async createQuestionResponse(response: InsertQuestionResponse): Promise<QuestionResponse> {
+    const id = this.currentId++;
+    const newResponse: QuestionResponse = {
+      ...response,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    const key = `${response.userId}-${response.questionId}`;
+    this.questionResponses.set(key, newResponse);
+    return newResponse;
+  }
+
+  async updateQuestionResponse(userId: number, questionId: string, response: Partial<QuestionResponse>): Promise<QuestionResponse> {
+    const key = `${userId}-${questionId}`;
+    const existing = this.questionResponses.get(key);
+    if (!existing) {
+      throw new Error('Question response not found');
+    }
+    
+    const updated: QuestionResponse = {
+      ...existing,
+      ...response,
+      updatedAt: new Date()
+    };
+    this.questionResponses.set(key, updated);
+    return updated;
+  }
+
+  async getUserQuestionResponses(userId: number, section?: string): Promise<QuestionResponse[]> {
+    return Array.from(this.questionResponses.values())
+      .filter(response => response.userId === userId && (!section || response.section === section));
+  }
+
+  async getQuestionResponse(userId: number, questionId: string): Promise<QuestionResponse | undefined> {
+    const key = `${userId}-${questionId}`;
+    return this.questionResponses.get(key);
   }
 }
 
