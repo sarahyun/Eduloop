@@ -81,6 +81,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update specific form answer
+  app.patch("/api/profile/:userId/answer", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const { questionId, answer } = req.body;
+      
+      if (!questionId || answer === undefined) {
+        return res.status(400).json({ message: "questionId and answer are required" });
+      }
+
+      const updates = { [questionId]: answer };
+      const updatedProfile = await storage.updateStudentProfile(userId, updates);
+      res.json(updatedProfile);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to update answer", error: error.message });
+    }
+  });
+
   // College routes
   app.get("/api/colleges", async (req, res) => {
     try {
