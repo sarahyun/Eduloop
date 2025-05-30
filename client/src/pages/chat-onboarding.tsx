@@ -152,26 +152,31 @@ export default function ChatOnboarding() {
             showContinueButton: true
           };
         } else if (state.step === 20) {
-          // Expand on career interests
-          const newState = { ...state, step: 21, data: { ...state.data, careerDetails: response } };
-          return {
-            response: `That's really insightful! It's clear you've thought deeply about your future.\n\nYou mentioned ${state.data.dreamSchools} as schools you're interested in. Beyond the programs, what kind of campus culture or environment do you think would help you thrive? What matters most to you in a college community?`,
-            newState,
-            isComplete: false
-          };
+          // Expand on career interests - determine if we need more info or can move on
+          const responseLength = response.trim().length;
+          
+          if (responseLength < 50) {
+            // Brief response, ask one focused follow-up
+            const newState = { ...state, step: 21, data: { ...state.data, careerDetails: response } };
+            return {
+              response: `I'd love to understand what specifically draws you to ${state.data.career}. Is there a particular problem you'd want to solve or aspect that excites you most?`,
+              newState,
+              isComplete: false
+            };
+          } else {
+            // Detailed response, move to academics
+            const newState = { ...state, step: 10, data: { ...state.data, careerDetails: response } };
+            return {
+              response: `Thank you for sharing that detail about your career interests. That gives me great insight into what programs might excite you.\n\nNow let's explore your academic experience. What are your 3 favorite classes you've taken so far, and what makes them special to you?`,
+              newState,
+              isComplete: false
+            };
+          }
         } else if (state.step === 21) {
-          // Expand on college environment
-          const newState = { ...state, step: 22, data: { ...state.data, environmentDetails: response } };
+          // Single follow-up, then move to academics
+          const newState = { ...state, step: 10, data: { ...state.data, careerExpansion: response } };
           return {
-            response: `I can see you really know what you're looking for in a college experience. That's so valuable!\n\nWhen you mentioned ${state.data.freeTime}, it caught my attention. How do you see yourself continuing or expanding these interests in college? Are there specific opportunities or communities you'd want to be part of?`,
-            newState,
-            isComplete: false
-          };
-        } else if (state.step === 22) {
-          // Expand on interests and transition to academics
-          const newState = { ...state, step: 10, data: { ...state.data, interestExpansion: response } };
-          return {
-            response: `This gives me such a rich picture of who you are and what drives you. I can already see some amazing possibilities for college matches!\n\nNow let's dive into your academic interests. What are your 3 favorite classes you've taken so far, and what makes them special to you?`,
+            response: `Perfect! That gives me a much clearer picture of your goals and motivations.\n\nNow let's dive into your academic interests. What are your 3 favorite classes you've taken so far, and what makes them special to you?`,
             newState,
             isComplete: false
           };
