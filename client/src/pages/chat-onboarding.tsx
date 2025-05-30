@@ -53,8 +53,8 @@ export default function ChatOnboarding() {
     // Check if this section has existing data
     const hasExistingData = getSectionData(targetSection, profile);
     
-    if (hasExistingData && Object.values(hasExistingData).some(value => value)) {
-      // Section is completed - show recap
+    if (hasExistingData && Object.values(hasExistingData).some(value => value) && hasUserProvidedData(hasExistingData)) {
+      // Section is completed with real user data - show recap
       setShowExpandButton(true);
       return getSectionRecap(targetSection, hasExistingData);
     } else {
@@ -149,6 +149,21 @@ export default function ChatOnboarding() {
     
     const question = sectionQuestions.find(q => q.id === key);
     return question?.question || null;
+  }
+
+  function hasUserProvidedData(data: any) {
+    if (!data) return false;
+    
+    // Check if data contains sample/default values that indicate it's not user-provided
+    const sampleValues = [
+      "Sarah Johnson", 
+      "12th", 
+      "Lincoln High School", 
+      "I'm a senior who loves learning and helping others. I'm interested in technology and healthcare."
+    ];
+    
+    const values = Object.values(data).filter(v => v);
+    return !values.some(value => sampleValues.includes(value as string));
   }
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
