@@ -33,7 +33,7 @@ export default function ChatOnboarding() {
     {
       id: '1',
       role: 'assistant',
-      content: "Hi there! I'm your college counselor, and I'm here to help you discover the perfect colleges for your journey. Think of this as a friendly conversation where I'll get to know you better. What should I call you?",
+      content: "Hey there! 👋 I'm your college counselor, and I'm here to help you figure out this whole college thing - which, let's be honest, can feel like trying to solve a Rubik's cube blindfolded sometimes! 😅\n\nBut don't worry, I'm here to make it way less overwhelming and maybe even a little fun. Think of this as just a chill conversation where I get to know the awesome person you are.\n\nSo, what should I call you?",
       timestamp: new Date()
     }
   ]);
@@ -51,65 +51,114 @@ export default function ChatOnboarding() {
     {
       trigger: (response: string) => true,
       getResponse: (response: string) => {
-        return `Nice to meet you, ${response}! I'm excited to help you explore colleges that could be a great fit. Let's start with what makes you tick - what subjects, activities, or ideas genuinely excite you? Don't worry about whether they're "academic" enough - I want to know what you're passionate about.`;
+        return `Hey ${response}! Great to meet you! 🎉 I'm here to help you navigate this whole college thing - and trust me, it's way less scary than it seems. Think of me as your friendly neighborhood college counselor who actually gets it. 
+
+So, let's dive right in - do you have a career or major in mind? No worries if not - honestly, most people change their minds like 17 times anyway! 😄`;
       },
       dataKey: 'name'
     },
     {
-      trigger: (response: string) => response.length > 10,
+      trigger: (response: string) => response.length > 3,
       getResponse: (response: string) => {
-        const interests = response.toLowerCase();
-        let followUp = "That's fascinating! ";
+        let followUp = "";
+        const lowerResponse = response.toLowerCase();
         
-        if (interests.includes('science') || interests.includes('research')) {
-          followUp += "I can tell you're drawn to discovery and understanding how things work. ";
-        }
-        if (interests.includes('art') || interests.includes('creative')) {
-          followUp += "Your creative side really comes through! ";
-        }
-        if (interests.includes('help') || interests.includes('people')) {
-          followUp += "You seem to have a real drive to make a difference in people's lives. ";
+        if (lowerResponse.includes('no') || lowerResponse.includes("don't") || lowerResponse.includes('unsure')) {
+          followUp = "Totally normal! The whole 'what do you want to be when you grow up' question is kind of ridiculous when you think about it. You're not supposed to have your entire life figured out at 17! ";
+        } else if (lowerResponse.includes('medicine') || lowerResponse.includes('doctor')) {
+          followUp = "Ooh, future lifesaver! That's awesome. ";
+        } else if (lowerResponse.includes('engineer') || lowerResponse.includes('tech')) {
+          followUp = "Nice! Building the future, I see. ";
+        } else if (lowerResponse.includes('business') || lowerResponse.includes('entrepreneur')) {
+          followUp = "Future CEO vibes! Love it. ";
+        } else {
+          followUp = "That sounds really cool! ";
         }
         
-        return followUp + "Now, thinking about school - are there any subjects where you find yourself naturally curious or where time just flies by? Or maybe subjects you're struggling with but still find intriguing?";
+        return followUp + "Alright, next question - got any dream schools in mind? And if so, what's drawing you to them? Is it the campus vibes, the programs, or did you just see them in a movie once? 😂";
       },
-      dataKey: 'interests'
+      dataKey: 'career'
+    },
+    {
+      trigger: (response: string) => response.length > 3,
+      getResponse: (response: string) => {
+        let response_text = "";
+        const lowerResponse = response.toLowerCase();
+        
+        if (lowerResponse.includes('harvard') || lowerResponse.includes('stanford') || lowerResponse.includes('mit')) {
+          response_text = "Shooting for the stars! I respect that. Those places are definitely prestigious, but let's make sure we find schools that are great fits for YOU specifically. ";
+        } else if (lowerResponse.includes('no') || lowerResponse.includes("don't")) {
+          response_text = "Honestly? That's probably healthier than being obsessed with one school since you were 12. Keeps your options open! ";
+        } else {
+          response_text = "Cool choices! It's great that you've done some thinking about this. ";
+        }
+        
+        return response_text + "Now, aside from hanging out with friends (because duh, that's always fun), how do you like to spend your time outside of school? What gets you excited on weekends?";
+      },
+      dataKey: 'dreamSchools'
     },
     {
       trigger: (response: string) => response.length > 5,
       getResponse: (response: string) => {
-        return "That gives me great insight into how you learn and what engages you academically. Let's talk about the future - when you imagine yourself in 5-10 years, what kind of impact do you want to be making? What would make you feel fulfilled in your career?";
+        let encouragement = "";
+        const lowerResponse = response.toLowerCase();
+        
+        if (lowerResponse.includes('sleep') || lowerResponse.includes('netflix')) {
+          encouragement = "Ha! Okay, I appreciate the honesty. Self-care is important too. But seriously, ";
+        } else if (lowerResponse.includes('work') || lowerResponse.includes('job')) {
+          encouragement = "Wow, you're already hustling! That shows real responsibility. ";
+        } else if (lowerResponse.includes('sport') || lowerResponse.includes('music') || lowerResponse.includes('art')) {
+          encouragement = "That's awesome! Having creative/athletic outlets is so important. ";
+        } else {
+          encouragement = "I love that! ";
+        }
+        
+        return encouragement + "Alright, here's a big one - what are you looking for in your college experience? Like, what would make you think 'yeah, this was totally worth it'? Also, real talk - anything that worries you about this whole process?";
       },
-      dataKey: 'academics'
+      dataKey: 'freeTime'
     },
     {
       trigger: (response: string) => response.length > 10,
       getResponse: (response: string) => {
-        return "I love hearing about your aspirations! Now, thinking about college life itself - what kind of environment helps you thrive? Do you prefer intimate discussions or large lectures? Urban energy or peaceful campuses? Are you someone who loves school spirit and traditions, or do you prefer a more low-key academic atmosphere?";
+        let validation = "";
+        const lowerResponse = response.toLowerCase();
+        
+        if (lowerResponse.includes('worried') || lowerResponse.includes('scared') || lowerResponse.includes('anxious')) {
+          validation = "Thanks for being real with me about your worries - that takes guts, and honestly, everyone feels that way even if they don't admit it. ";
+        } else if (lowerResponse.includes('friend') || lowerResponse.includes('social')) {
+          validation = "Social connections are huge! College is definitely about the people you meet. ";
+        } else if (lowerResponse.includes('academic') || lowerResponse.includes('learn')) {
+          validation = "I love that you're thinking about the actual learning part - that's what it's all about! ";
+        } else {
+          validation = "That's a great way to think about it! ";
+        }
+        
+        return validation + "Okay, last question and then we can start finding your perfect matches - if you have a resume or a list of extracurriculars, feel free to paste or enter them here. Don't stress if it's not super polished - I just want to see what you're involved in!";
       },
-      dataKey: 'goals'
+      dataKey: 'collegeExperience'
     },
     {
-      trigger: (response: string) => response.length > 10,
+      trigger: (response: string) => response.length > 3,
       getResponse: (response: string) => {
-        return "Perfect! That helps me understand what kind of college community would feel like home to you. One last thing - tell me about what you do outside of class. This could be jobs, volunteering, hobbies, family responsibilities, creative projects - anything that's important to your life right now.";
+        return "Perfect! And real quick - what's your GPA and any test scores you want to share? This helps me find schools where you'll be competitive. Don't worry if they're not perfect - there are amazing schools for every student! 📊";
       },
-      dataKey: 'preferences'
+      dataKey: 'extracurriculars'
     },
     {
-      trigger: (response: string) => response.length > 5,
+      trigger: (response: string) => response.length > 1,
       getResponse: (response: string, state: OnboardingState) => {
-        return `Thank you for sharing so much about yourself, ${state.data.name}! I now have a wonderful picture of who you are:
+        return `Awesome, ${state.data.name}! 🎊 You've given me such a great picture of who you are. Here's what I've learned about you:
 
-🎯 Your passions: ${state.data.interests}
-📚 Academic interests: ${state.data.academics}  
-🚀 Career goals: ${state.data.goals}
-🏫 Campus preferences: ${state.data.preferences}
-🌟 Activities: ${response}
+💭 Career thoughts: ${state.data.career}
+🎯 Dream schools: ${state.data.dreamSchools}
+🎮 Outside interests: ${state.data.freeTime}
+🏫 College goals: ${state.data.collegeExperience}
+⭐ Activities: ${state.data.extracurriculars}
+📈 Academic stats: ${response}
 
-I'm going to create your personalized college profile now, and then we can start exploring colleges that would be amazing fits for you. Ready to see what we discover?`;
+I'm going to create your personalized profile now and then we can start exploring colleges that would be absolutely perfect for you. Ready to find your future home? 🏠✨`;
       },
-      dataKey: 'extracurriculars',
+      dataKey: 'academics',
       isComplete: true
     }
   ];
@@ -161,9 +210,9 @@ I'm going to create your personalized college profile now, and then we can start
     mutationFn: (data: OnboardingState['data']) => 
       api.createProfile({
         userId: 1,
-        academicInterests: data.academics ? [data.academics] : [],
-        careerGoals: data.goals ? [data.goals] : [],
-        values: data.preferences ? [data.preferences] : [],
+        academicInterests: data.career ? [data.career] : [],
+        careerGoals: data.career ? [data.career] : [],
+        values: data.collegeExperience ? [data.collegeExperience] : [],
         extracurriculars: data.extracurriculars ? [data.extracurriculars] : [],
         profileCompletion: 100,
       }),
