@@ -87,9 +87,26 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Welcome back, {user.fullName.split(' ')[0]}!
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 mb-4">
             Find colleges that match your interests and goals.
           </p>
+          
+          {/* Profile Completion Nudge */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium text-blue-900 mb-1">Complete your profile for better matches</h3>
+                <p className="text-sm text-blue-700">The more we learn about you, the more helpful our recommendations become.</p>
+              </div>
+              <Button 
+                onClick={() => window.location.href = '/profile'}
+                size="sm"
+                className="bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Build Profile
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Core Feature 1: Search */}
@@ -170,6 +187,12 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         <div className="mt-8 flex gap-4 justify-center">
+          <Button 
+            onClick={() => window.location.href = '/profile'}
+            className="bg-blue-600 text-white"
+          >
+            Build Your Profile
+          </Button>
           <Button 
             variant="outline"
             onClick={() => window.location.href = '/chat'}
