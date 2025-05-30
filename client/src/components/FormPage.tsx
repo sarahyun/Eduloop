@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useMutation } from '@tanstack/react-query';
+import { useAuth } from '@/context/AuthContext';
 
 function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
@@ -31,7 +32,9 @@ interface FormPageProps {
   userId?: number;
 }
 
-export function FormPage({ formData, formTitle, formId, userId = 1 }: FormPageProps) {
+export function FormPage({ formData, formTitle, formId, userId: propUserId }: FormPageProps) {
+  const { user } = useAuth();
+  const userId = propUserId || user?.id;
   const [formResponses, setFormResponses] = useState<{ [key: string]: string }>({});
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);

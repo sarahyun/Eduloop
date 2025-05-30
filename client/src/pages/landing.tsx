@@ -10,6 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
+import { useLocation } from "wouter";
 
 const signUpSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -31,7 +33,15 @@ type SignInData = z.infer<typeof signInSchema>;
 
 export default function LandingPage() {
   const { toast } = useToast();
+  const { login, signup, user } = useAuth();
+  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("");
+
+  // Redirect if already authenticated
+  if (user) {
+    setLocation("/dashboard");
+    return null;
+  }
 
   const signUpForm = useForm<SignUpData>({
     resolver: zodResolver(signUpSchema),
@@ -53,27 +63,14 @@ export default function LandingPage() {
 
   const signUpMutation = useMutation({
     mutationFn: async (data: SignUpData) => {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          fullName: data.fullName
-        })
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to sign up');
-      }
-      return response.json();
+      await signup(data.email, data.password, data.fullName);
     },
     onSuccess: () => {
       toast({
         title: "Account created successfully!",
         description: "Welcome to your college discovery journey.",
       });
-      window.location.href = "/onboarding";
+      setLocation("/onboarding");
     },
     onError: (error: Error) => {
       toast({
