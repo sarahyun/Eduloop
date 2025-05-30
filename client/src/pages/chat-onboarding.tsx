@@ -2,9 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Bot, User, Sparkles } from "lucide-react";
+import { Send, Bot, User, Sparkles, GraduationCap } from "lucide-react";
 import { TypingIndicator } from "@/components/SmartLoadingStates";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -25,6 +26,10 @@ interface OnboardingState {
     freeTime?: string;
     collegeExperience?: string;
     extracurriculars?: string;
+    academicInfo?: string;
+    gpa?: number;
+    satScore?: number;
+    actScore?: number;
   };
 }
 
@@ -44,6 +49,12 @@ export default function ChatOnboarding() {
     data: {}
   });
   const [isComplete, setIsComplete] = useState(false);
+  const [showAcademicForm, setShowAcademicForm] = useState(false);
+  const [academicData, setAcademicData] = useState({
+    gpa: '',
+    satScore: '',
+    actScore: ''
+  });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -196,6 +207,10 @@ I'm going to create your personalized profile now and then we can start explorin
       setMessages(prev => [...prev, assistantMessage]);
       setOnboardingState(data.newState);
       
+      if (data.showAcademicForm) {
+        setShowAcademicForm(true);
+      }
+      
       if (data.isComplete) {
         setIsComplete(true);
         // Here we could save the profile data
@@ -306,10 +321,104 @@ I'm going to create your personalized profile now and then we can start explorin
             </div>
           </ScrollArea>
 
+          {/* Academic Form */}
+          {showAcademicForm && (
+            <div className="px-6 py-6 border-t border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-blue-50/50 to-indigo-50/30 dark:from-gray-800/50 dark:to-gray-700/30">
+              <div className="max-w-2xl mx-auto">
+                <div className="bg-white dark:bg-gray-700 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-600">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
+                      <GraduationCap className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Academic Information</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Help us find the right academic fit</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="gpa" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        GPA (on 4.0 scale)
+                      </Label>
+                      <Input
+                        id="gpa"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="4.0"
+                        value={academicData.gpa}
+                        onChange={(e) => setAcademicData(prev => ({ ...prev, gpa: e.target.value }))}
+                        placeholder="e.g., 3.75"
+                        className="mt-1"
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="sat" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          SAT Score (optional)
+                        </Label>
+                        <Input
+                          id="sat"
+                          type="number"
+                          min="400"
+                          max="1600"
+                          value={academicData.satScore}
+                          onChange={(e) => setAcademicData(prev => ({ ...prev, satScore: e.target.value }))}
+                          placeholder="e.g., 1350"
+                          className="mt-1"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="act" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          ACT Score (optional)
+                        </Label>
+                        <Input
+                          id="act"
+                          type="number"
+                          min="1"
+                          max="36"
+                          value={academicData.actScore}
+                          onChange={(e) => setAcademicData(prev => ({ ...prev, actScore: e.target.value }))}
+                          placeholder="e.g., 30"
+                          className="mt-1"
+                        />
+                      </div>
+                    </div>
+                    
+                    <Button
+                      onClick={() => {
+                        const academicInfo = `GPA: ${academicData.gpa || 'Not provided'}, SAT: ${academicData.satScore || 'Not provided'}, ACT: ${academicData.actScore || 'Not provided'}`;
+                        setOnboardingState(prev => ({
+                          ...prev,
+                          data: {
+                            ...prev.data,
+                            academicInfo,
+                            gpa: academicData.gpa ? parseFloat(academicData.gpa) : undefined,
+                            satScore: academicData.satScore ? parseInt(academicData.satScore) : undefined,
+                            actScore: academicData.actScore ? parseInt(academicData.actScore) : undefined
+                          }
+                        }));
+                        setShowAcademicForm(false);
+                        generateResponseMutation.mutate(academicInfo);
+                      }}
+                      disabled={!academicData.gpa}
+                      className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium py-3 rounded-xl transition-all duration-300"
+                    >
+                      Continue
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Input Area */}
           <div className="px-6 py-6 border-t border-gray-200/50 dark:border-gray-700/50 rounded-b-3xl bg-gradient-to-r from-gray-50/50 to-blue-50/30 dark:from-gray-800/50 dark:to-gray-700/30">
             <div className="max-w-3xl mx-auto">
-              {!isComplete ? (
+              {!isComplete && !showAcademicForm ? (
                 <div className="flex items-end space-x-4">
                   <div className="flex-1 relative">
                     <Input
@@ -331,7 +440,7 @@ I'm going to create your personalized profile now and then we can start explorin
                     </Button>
                   </div>
                 </div>
-              ) : (
+              ) : isComplete ? (
                 <div className="text-center py-8 animate-in fade-in duration-1000">
                   <div className="relative">
                     <div className="inline-flex items-center space-x-3 text-green-600 dark:text-green-400 mb-4">
@@ -348,7 +457,7 @@ I'm going to create your personalized profile now and then we can start explorin
                     </div>
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
