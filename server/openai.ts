@@ -340,6 +340,40 @@ ${conversationHistory ? conversationHistory.slice(-4).map(msg => `${msg.role}: $
       };
     }
   }
+
+  async generateFollowUpQuestions(stepId: string, response: string, previousResponses: any): Promise<string[]> {
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: `Generate 1-2 thoughtful follow-up questions based on the user's response to help them reflect deeper on their interests and goals. Return as JSON array of strings.
+
+User's response to ${stepId}: "${response}"
+Previous responses: ${JSON.stringify(previousResponses)}
+
+Generate questions that:
+- Help them explore their interests more deeply
+- Are conversational and encouraging
+- Avoid repetition of what they already shared
+- Are specific to their response
+
+Return format: {"questions": ["question1", "question2"]}`
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+        max_tokens: 300
+      });
+
+      const result = JSON.parse(completion.choices[0].message.content || '{"questions": []}');
+      return result.questions || [];
+    } catch (error) {
+      console.error('Error generating follow-up questions:', error);
+      return [];
+    }
+  }
 }
 
 export interface CollegeRecommendation {
