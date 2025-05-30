@@ -112,6 +112,7 @@ export class MemStorage implements IStorage {
       id: 1,
       userId: "user-1",
       email: "student1@example.com",
+      password: "password123",
       name: "Alex Johnson",
       createdAt: new Date(),
       lastLogin: null,
