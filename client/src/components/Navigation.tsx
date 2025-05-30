@@ -6,7 +6,7 @@ import { Bell, Compass, Menu, X } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 interface NavigationProps {
-  user?: { fullName: string; email: string };
+  user?: { name: string; email: string };
 }
 
 export function Navigation({ user }: NavigationProps) {
