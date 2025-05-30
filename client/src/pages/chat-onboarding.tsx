@@ -309,7 +309,7 @@ export default function ChatOnboarding() {
         </div>
 
         {/* Chat Interface */}
-        <Card className="h-[600px] flex flex-col">
+        <Card className="h-[700px] flex flex-col">
           <CardContent className="flex-1 flex flex-col p-6">
             {/* Messages */}
             <ScrollArea ref={scrollAreaRef} className="flex-1 pr-4">
@@ -320,7 +320,7 @@ export default function ChatOnboarding() {
                     className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[80%] p-4 rounded-lg relative ${
+                      className={`max-w-[80%] p-6 rounded-lg relative min-h-[60px] ${
                         message.role === 'user'
                           ? 'bg-blue-500 text-white'
                           : 'chat-assistant-message border border-gray-200 shadow-sm'
