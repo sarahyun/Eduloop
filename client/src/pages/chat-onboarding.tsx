@@ -254,81 +254,83 @@ I'm going to create your personalized profile now and then we can start explorin
   }, []);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto h-screen flex flex-col">
-        {/* Header */}
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-          <div className="flex items-center justify-center">
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">College Discovery</h1>
+    <div className="min-h-screen bg-white dark:bg-gray-900 p-6">
+      <div className="max-w-4xl mx-auto h-[calc(100vh-3rem)]">
+        <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl h-full flex flex-col shadow-lg">
+          {/* Header */}
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 rounded-t-2xl">
+            <div className="flex items-center justify-center">
+              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">College Discovery</h1>
+            </div>
           </div>
-        </div>
 
-        {/* Messages */}
-        <ScrollArea className="flex-1 px-4 py-6 bg-white dark:bg-gray-900" ref={scrollAreaRef}>
-          <div className="space-y-4 max-w-3xl mx-auto">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
+          {/* Messages */}
+          <ScrollArea className="flex-1 px-6 py-6" ref={scrollAreaRef}>
+            <div className="space-y-4 max-w-3xl mx-auto">
+              {messages.map((message) => (
                 <div
-                  className={`max-w-[75%] px-4 py-3 rounded-2xl text-base leading-relaxed ${
-                    message.role === 'user'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700'
-                  }`}
+                  key={message.id}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <p className="whitespace-pre-wrap">{message.content}</p>
-                </div>
-              </div>
-            ))}
-            
-            {generateResponseMutation.isPending && (
-              <div className="flex justify-start">
-                <div className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-3 rounded-2xl">
-                  <TypingIndicator isVisible={true} />
-                </div>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-
-        {/* Input Area */}
-        <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-4">
-          <div className="max-w-3xl mx-auto">
-            {!isComplete ? (
-              <div className="flex items-end space-x-3">
-                <div className="flex-1 relative">
-                  <Input
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Type a message..."
-                    disabled={generateResponseMutation.isPending}
-                    className="w-full px-4 py-3 pr-12 rounded-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-base"
-                  />
-                  <Button
-                    onClick={handleSend}
-                    disabled={!input.trim() || generateResponseMutation.isPending}
-                    size="icon"
-                    className="absolute right-1 top-1 h-8 w-8 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-gray-600"
+                  <div
+                    className={`max-w-[75%] px-4 py-3 rounded-2xl text-base leading-relaxed ${
+                      message.role === 'user'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                    }`}
                   >
-                    <Send className="w-4 h-4" />
-                  </Button>
+                    <p className="whitespace-pre-wrap">{message.content}</p>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="text-center py-6">
-                <div className="inline-flex items-center space-x-2 text-green-600 dark:text-green-400 mb-2">
-                  <Sparkles className="w-6 h-6" />
-                  <span className="text-lg font-medium">Profile Complete!</span>
+              ))}
+              
+              {generateResponseMutation.isPending && (
+                <div className="flex justify-start">
+                  <div className="bg-white dark:bg-gray-700 px-4 py-3 rounded-2xl shadow-sm">
+                    <TypingIndicator isVisible={true} />
+                  </div>
                 </div>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Ready to explore your personalized college recommendations
-                </p>
-              </div>
-            )}
+              )}
+            </div>
+          </ScrollArea>
+
+          {/* Input Area */}
+          <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 rounded-b-2xl">
+            <div className="max-w-3xl mx-auto">
+              {!isComplete ? (
+                <div className="flex items-end space-x-3">
+                  <div className="flex-1 relative">
+                    <Input
+                      ref={inputRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Type a message..."
+                      disabled={generateResponseMutation.isPending}
+                      className="w-full px-4 py-3 pr-12 rounded-full border-0 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 text-base shadow-sm"
+                    />
+                    <Button
+                      onClick={handleSend}
+                      disabled={!input.trim() || generateResponseMutation.isPending}
+                      size="icon"
+                      className="absolute right-1 top-1 h-8 w-8 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-gray-600"
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <div className="inline-flex items-center space-x-2 text-green-600 dark:text-green-400 mb-2">
+                    <Sparkles className="w-6 h-6" />
+                    <span className="text-lg font-medium">Profile Complete!</span>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Ready to explore your personalized college recommendations
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
