@@ -162,6 +162,67 @@ Return your response in this exact JSON format:
     }
   }
 
+  async reRankRecommendations(
+    studentProfile: any, 
+    conversationHistory: Array<{ role: string; content: string }>,
+    userFeedback: Array<{ collegeId: number; action: 'saved' | 'dismissed' | 'clicked'; timestamp: Date }>,
+    currentRecommendations: any[]
+  ): Promise<CollegeRecommendation[]> {
+    try {
+      const systemPrompt = `You are an expert college recommendation engine that learns from student feedback and conversations. 
+      
+      Your task is to re-rank and refine college recommendations based on:
+      1. Student's evolving profile and interests revealed through conversations
+      2. User feedback patterns (saves, dismissals, clicks)
+      3. Conversation context and newly discovered preferences
+      4. Implicit signals about what matters most to the student
+
+      Student Profile: ${JSON.stringify(studentProfile)}
+      
+      Recent Conversation Context: ${conversationHistory.slice(-10).map(msg => `${msg.role}: ${msg.content}`).join('\n')}
+      
+      User Feedback Patterns: ${JSON.stringify(userFeedback)}
+      
+      Current Recommendations: ${JSON.stringify(currentRecommendations)}
+      
+      Instructions:
+      - Analyze conversation for emerging interests, values, and priorities
+      - Learn from feedback patterns (what they save vs dismiss)
+      - Adjust match scores based on new insights
+      - Provide updated reasoning that reflects learning
+      - Include confidence scores and learning factors
+      - Respond with JSON array of recommendations
+      
+      Response format:
+      {
+        "recommendations": [
+          {
+            "name": "College Name",
+            "matchScore": 85,
+            "reasoning": "Updated reasoning based on conversation insights",
+            "category": "match",
+            "highlights": ["Key selling points"],
+            "confidenceScore": 0.92,
+            "learningFactors": ["What we learned that improved this match"]
+          }
+        ]
+      }`;
+
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [{ role: "user", content: systemPrompt }],
+        response_format: { type: "json_object" },
+        max_tokens: 2000,
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{"recommendations": []}');
+      return result.recommendations || [];
+    } catch (error) {
+      console.error('Error re-ranking recommendations:', error);
+      throw new Error("Failed to re-rank recommendations");
+    }
+  }
+
   async generateCollegeRecommendations(studentProfile: any): Promise<CollegeRecommendation[]> {
     try {
       const systemPrompt = `You are an expert college counselor providing personalized college recommendations. Based on the student's profile, suggest colleges that would be excellent fits across reach, match, and safety categories.
@@ -258,6 +319,8 @@ export interface CollegeRecommendation {
   reasoning: string;
   category: 'reach' | 'match' | 'safety';
   highlights: string[];
+  confidenceScore: number;
+  learningFactors: string[];
 }
 
 export const aiService = new AIService();

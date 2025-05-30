@@ -65,6 +65,14 @@ export interface IStorage {
   // Search queries
   createSearchQuery(searchQuery: InsertSearchQuery): Promise<SearchQuery>;
   getUserSearchHistory(userId: number): Promise<SearchQuery[]>;
+
+  // User feedback tracking
+  createUserFeedback(feedback: InsertUserFeedback): Promise<UserFeedback>;
+  getUserFeedback(userId: number): Promise<UserFeedback[]>;
+
+  // Recommendation sessions
+  createRecommendationSession(session: InsertRecommendationSession): Promise<RecommendationSession>;
+  getUserRecommendationSessions(userId: number): Promise<RecommendationSession[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -76,6 +84,8 @@ export class MemStorage implements IStorage {
   private collegeRecommendations: Map<number, CollegeRecommendation>;
   private savedColleges: Map<number, SavedCollege>;
   private searchQueries: Map<number, SearchQuery>;
+  private userFeedback: Map<number, UserFeedback>;
+  private recommendationSessions: Map<number, RecommendationSession>;
   private currentId: number;
 
   constructor() {
