@@ -40,9 +40,9 @@ export default function OnboardingPage() {
     collegeExperience: "",
     extracurriculars: "",
   });
-  const [followUpQuestions, setFollowUpQuestions] = useState<{[key: string]: string[]}>({});
+  const [dynamicSteps, setDynamicSteps] = useState<OnboardingStep[]>([]);
   const [followUpResponses, setFollowUpResponses] = useState<{[key: string]: string}>({});
-  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
+  const [isGeneratingNextStep, setIsGeneratingNextStep] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -84,11 +84,23 @@ export default function OnboardingPage() {
   ];
 
   const getProgressPercentage = () => {
-    return ((currentStep + 1) / steps.length) * 100;
+    const allSteps = [...baseSteps, ...dynamicSteps];
+    return ((currentStep + 1) / allSteps.length) * 100;
   };
 
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
+  const handleNext = async () => {
+    const allSteps = [...baseSteps, ...dynamicSteps];
+    const currentStepData = allSteps[currentStep];
+    
+    // Check if we should generate a follow-up for this step
+    if (currentStepData && !currentStepData.id.includes('followup') && !currentStepData.id.includes('welcome') && !currentStepData.id.includes('academics')) {
+      const response = responses[currentStepData.id as keyof typeof responses];
+      if (response && response.length > 20) {
+        await generateFollowUpStep(currentStepData.id, response);
+      }
+    }
+    
+    if (currentStep < allSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -99,10 +111,10 @@ export default function OnboardingPage() {
     }
   };
 
-  const generateFollowUpQuestions = async (stepId: string, response: string) => {
+  const generateFollowUpStep = async (stepId: string, response: string) => {
     if (!response.trim() || response.length < 20) return;
     
-    setIsGeneratingQuestions(true);
+    setIsGeneratingNextStep(true);
     try {
       const result = await fetch('/api/generate-followup-questions', {
         method: 'POST',
@@ -116,15 +128,44 @@ export default function OnboardingPage() {
       
       if (result.ok) {
         const { questions } = await result.json();
-        setFollowUpQuestions(prev => ({
-          ...prev,
-          [stepId]: questions.slice(0, 2) // Limit to 2 questions
-        }));
+        if (questions && questions.length > 0) {
+          // Create a new step with the first follow-up question
+          const followUpStep: OnboardingStep = {
+            id: `${stepId}_followup`,
+            title: questions[0],
+            subtitle: "This helps us understand you better for personalized recommendations",
+            icon: <MessageCircle className="w-8 h-8 text-primary" />,
+            component: (
+              <div className="space-y-6">
+                <div className="text-center mb-6">
+                  <p className="text-gray-600">
+                    Based on what you shared, we'd love to learn more about this aspect of your interests.
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <Textarea
+                    placeholder="Share your thoughts..."
+                    value={followUpResponses[`${stepId}_followup`] || ''}
+                    onChange={(e) => setFollowUpResponses(prev => ({ ...prev, [`${stepId}_followup`]: e.target.value }))}
+                    className="min-h-32 text-base"
+                  />
+                </div>
+              </div>
+            )
+          };
+          
+          // Insert the follow-up step after the current step
+          setDynamicSteps(prev => {
+            const newSteps = [...prev];
+            newSteps.splice(currentStep + 1, 0, followUpStep);
+            return newSteps;
+          });
+        }
       }
     } catch (error) {
-      console.log('Could not generate follow-up questions');
+      console.log('Could not generate follow-up question');
     } finally {
-      setIsGeneratingQuestions(false);
+      setIsGeneratingNextStep(false);
     }
   };
 
@@ -162,18 +203,13 @@ export default function OnboardingPage() {
 
   const updateResponse = (key: string, value: string) => {
     setResponses(prev => ({ ...prev, [key]: value }));
-    
-    // Generate follow-up questions when user pauses typing (debounced)
-    setTimeout(() => {
-      generateFollowUpQuestions(key, value);
-    }, 2000);
   };
 
   const updateFollowUpResponse = (key: string, value: string) => {
     setFollowUpResponses(prev => ({ ...prev, [key]: value }));
   };
 
-  const steps: OnboardingStep[] = [
+  const baseSteps: OnboardingStep[] = [
     {
       id: "welcome",
       title: "Welcome to Your College Journey!",
@@ -526,7 +562,8 @@ Started a coding club at school..."
     }
   ];
 
-  const currentStepData = steps[currentStep];
+  const allSteps = [...baseSteps, ...dynamicSteps];
+  const currentStepData = allSteps[currentStep];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8">
@@ -535,7 +572,7 @@ Started a coding club at school..."
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <span className="text-sm font-medium text-gray-600">
-              Step {currentStep + 1} of {steps.length}
+              Step {currentStep + 1} of {allSteps.length}
             </span>
             <span className="text-sm text-gray-500">
               {Math.round(getProgressPercentage())}% complete
@@ -574,7 +611,7 @@ Started a coding club at school..."
               <span>Previous</span>
             </Button>
 
-            {currentStep === steps.length - 1 ? (
+            {currentStep === allSteps.length - 1 ? (
               <Button 
                 onClick={handleSubmit}
                 disabled={createProfileMutation.isPending}
@@ -592,10 +629,20 @@ Started a coding club at school..."
             ) : (
               <Button 
                 onClick={handleNext}
+                disabled={isGeneratingNextStep}
                 className="flex items-center space-x-2"
               >
-                <span>Continue</span>
-                <ArrowRight className="w-4 h-4" />
+                {isGeneratingNextStep ? (
+                  <>
+                    <span>Preparing next question...</span>
+                    <MessageCircle className="w-4 h-4 animate-pulse" />
+                  </>
+                ) : (
+                  <>
+                    <span>Continue</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </Button>
             )}
           </div>
