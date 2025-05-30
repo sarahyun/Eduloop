@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -47,6 +47,38 @@ export default function OnboardingPage() {
   const [isGeneratingNextStep, setIsGeneratingNextStep] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Load existing profile data to pre-populate form
+  const { data: existingProfile } = useQuery({
+    queryKey: ['/api/profile', 1],
+    queryFn: async () => {
+      const response = await fetch('/api/profile/1');
+      if (!response.ok) return null;
+      return response.json();
+    }
+  });
+
+  // Update responses when profile data loads
+  useEffect(() => {
+    if (existingProfile) {
+      setResponses({
+        careerMajor: existingProfile.careerMajor || "",
+        dreamSchools: existingProfile.dreamSchools || "",
+        freeTime: existingProfile.freeTimeActivities || "",
+        collegeExperience: existingProfile.collegeExperience || "",
+        extracurriculars: existingProfile.extracurricularsAdditionalInfo || "",
+      });
+      
+      // Update form values too
+      form.reset({
+        userId: 1,
+        learningStyle: existingProfile.learningStyle,
+        gpa: existingProfile.gpa || undefined,
+        satScore: existingProfile.satScore || undefined,
+        actScore: existingProfile.actScore || undefined,
+      });
+    }
+  }, [existingProfile, form]);
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
