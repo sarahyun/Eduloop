@@ -12,8 +12,20 @@ export default function Dashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Temporarily use hardcoded user ID to resolve AuthContext issue
-  const user = { id: 1, name: "Student User" };
+  // Use authenticated user from session
+  const { data: user, isLoading: userLoading } = useQuery({
+    queryKey: ['/api/auth/me'],
+    retry: false,
+  });
+
+  if (userLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+
+  if (!user) {
+    window.location.href = '/';
+    return null;
+  }
 
   // Fetch core data
   const { data: profile } = useQuery({

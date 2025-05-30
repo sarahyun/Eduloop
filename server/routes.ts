@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { aiService } from "./openai";
+import bcrypt from "bcryptjs";
 import { 
   insertUserSchema,
   insertStudentProfileSchema,
@@ -33,16 +34,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       
-      // For demo purposes, accept the test credentials directly
-      if (email === "student1@example.com" && password === "password123") {
-        const user = { id: 1, email: "student1@example.com", name: "Alex Johnson" };
-        (req.session as any).userId = user.id;
-        return res.json({ user });
-      }
-      
       const user = await storage.getUserByEmail(email);
       
-      if (!user || user.password !== password) {
+      if (!user) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Verify password using bcrypt
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      
+      if (!isPasswordValid) {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
@@ -63,13 +64,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Account with this email already exists" });
       }
 
-      // Create username from email
-      const username = email.split('@')[0];
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
       
       const user = await storage.createUser({
         userId: `user-${Date.now()}`,
         email,
-        password,
+        password: hashedPassword,
         name: fullName,
         role: "student"
       });
@@ -77,7 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       (req.session as any).userId = user.id;
       res.json({ user: { id: user.id, email: user.email, name: user.name } });
     } catch (error) {
-      res.status(500).json({ message: "Failed to create account", error: error.message });
+      res.status(500).json({ message: "Failed to create account", error: (error as Error).message });
     }
   });
 
