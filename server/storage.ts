@@ -120,6 +120,11 @@ export class MemStorage implements IStorage {
     const profile1: StudentProfile = {
       id: 1,
       userId: 1,
+      // Introduction section
+      name: "Sarah Johnson",
+      grade: "12th",
+      school: "Lincoln High School",
+      basicInfo: "I'm a senior who loves learning and helping others. I'm interested in technology and healthcare.",
       academicInterests: ["Computer Science", "Medicine"],
       careerGoals: ["Software Engineer", "Doctor"],
       values: ["Innovation", "Helping Others"],
