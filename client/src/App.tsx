@@ -21,6 +21,7 @@ function Router() {
       <Route path="/explore" component={ExplorePage} />
       <Route path="/onboarding" component={OnboardingPage} />
       <Route path="/chat-onboarding" component={ChatOnboarding} />
+      <Route path="/profile" component={ProfileBuilder} />
       <Route path="/profile-builder" component={ProfileBuilder} />
       <Route path="/section-form" component={SectionForm} />
       <Route component={NotFound} />
