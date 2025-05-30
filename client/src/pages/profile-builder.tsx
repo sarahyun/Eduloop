@@ -12,13 +12,58 @@ export default function ProfileBuilder() {
   const [user] = useState<User>({ id: 1, username: "sarah", email: "sarah@example.com", fullName: "Sarah Johnson" });
   const [selectedMethod, setSelectedMethod] = useState<'chat' | 'form' | null>(null);
   
-  // Dynamic sections with completion tracking - all offer both methods
+  // Load profile data to determine completion status
+  const { data: profile } = useQuery({
+    queryKey: ['/api/profile', user.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/profile/${user.id}`);
+      if (!response.ok) throw new Error('Failed to fetch profile');
+      return response.json();
+    }
+  });
+  
+  // Dynamic sections with completion tracking based on actual profile data
   const sections = [
-    { id: 'Introduction', title: 'Introduction', completed: false, method: 'both', description: 'Name, grade, school, and basic information about yourself', lastUpdated: 'Not started' },
-    { id: 'Academic Information', title: 'Academic Information', completed: false, method: 'both', description: 'Favorite classes, subjects, academic interests', lastUpdated: '2 days ago' },
-    { id: 'Extracurriculars and Interests', title: 'Extracurriculars and Interests', completed: false, method: 'both', description: 'What you\'re proud of, fields to explore, free time activities', lastUpdated: 'Not started' },
-    { id: 'Personal Reflections', title: 'Personal Reflections', completed: false, method: 'both', description: 'What makes you happy, challenges overcome, values', lastUpdated: 'Not started' },
-    { id: 'College Preferences', title: 'College Preferences', completed: false, method: 'both', description: 'College experience, school size, location preferences', lastUpdated: 'Not started' },
+    { 
+      id: 'Introduction', 
+      title: 'Introduction', 
+      completed: !!(profile && (profile.careerMajor || profile.dreamSchools || profile.freeTimeActivities)), 
+      method: 'both', 
+      description: 'Name, grade, school, and basic information about yourself', 
+      lastUpdated: profile?.careerMajor ? 'Recently completed' : 'Not started' 
+    },
+    { 
+      id: 'Academic Information', 
+      title: 'Academic Information', 
+      completed: !!(profile && (profile.gpa || profile.satScore || profile.actScore)), 
+      method: 'both', 
+      description: 'Favorite classes, subjects, academic interests', 
+      lastUpdated: profile?.gpa ? 'Recently completed' : 'Not started' 
+    },
+    { 
+      id: 'Extracurriculars and Interests', 
+      title: 'Extracurriculars and Interests', 
+      completed: !!(profile && profile.extracurricularsAdditionalInfo), 
+      method: 'both', 
+      description: 'What you\'re proud of, fields to explore, free time activities', 
+      lastUpdated: profile?.extracurricularsAdditionalInfo ? 'Recently completed' : 'Not started' 
+    },
+    { 
+      id: 'Personal Reflections', 
+      title: 'Personal Reflections', 
+      completed: !!(profile && (profile.whatMakesHappy || profile.challengeOvercome)), 
+      method: 'both', 
+      description: 'What makes you happy, challenges overcome, values', 
+      lastUpdated: profile?.whatMakesHappy ? 'Recently completed' : 'Not started' 
+    },
+    { 
+      id: 'College Preferences', 
+      title: 'College Preferences', 
+      completed: !!(profile && (profile.collegeExperience || profile.schoolSize)), 
+      method: 'both', 
+      description: 'College experience, school size, location preferences', 
+      lastUpdated: profile?.collegeExperience ? 'Recently completed' : 'Not started' 
+    },
   ];
 
   // Find first incomplete section
