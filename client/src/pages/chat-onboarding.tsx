@@ -78,7 +78,7 @@ export default function ChatOnboarding() {
     }
   }
   
-  const [showExpandButton, setShowExpandButton] = useState(true);
+  const [showExpandButton, setShowExpandButton] = useState(false);
   
   const [input, setInput] = useState("");
   const [onboardingState, setOnboardingState] = useState<OnboardingState>({
@@ -125,10 +125,7 @@ export default function ChatOnboarding() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const conversationFlow = [
-    {
-      trigger: (response: string) => true,
-      getResponse: (response: string, state: OnboardingState) => {
+
         if (state.step === 0) {
           // Initial response - check if user wants to update anything
           const lowerResponse = response.toLowerCase();
