@@ -26,6 +26,7 @@ function Router() {
       <Route path="/profile" component={ProfileBuilder} />
       <Route path="/profile-builder" component={ProfileBuilder} />
       <Route path="/section-form" component={SectionForm} />
+      <Route path="/sample-form" component={SampleFormPage} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -54,6 +54,7 @@ export default function OnboardingPage() {
   const [dynamicSteps, setDynamicSteps] = useState<OnboardingStep[]>([]);
   const [followUpResponses, setFollowUpResponses] = useState<{[key: string]: string}>({});
   const [isGeneratingNextStep, setIsGeneratingNextStep] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -259,6 +260,10 @@ export default function OnboardingPage() {
     };
     console.log('Onboarding submitting data:', { responses, formValues, formData });
     createProfileMutation.mutate(formData);
+  };
+
+  const handleFinalSubmit = () => {
+    setIsSubmitted(true);
   };
 
   // Question definitions for onboarding
@@ -659,19 +664,29 @@ Started a coding club at school..."
             </Button>
 
             {currentStep === allSteps.length - 1 ? (
-              <div className="text-center space-y-4">
-                <div className="flex items-center justify-center space-x-2 text-green-600">
-                  <CheckCircle className="w-6 h-6" />
-                  <span className="text-lg font-medium">Profile Complete!</span>
-                </div>
-                <p className="text-gray-600">Your responses have been automatically saved. You can now explore your dashboard.</p>
+              !isSubmitted ? (
                 <Button 
-                  onClick={() => window.location.href = '/dashboard'}
-                  className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary-dark hover:to-purple-600"
+                  onClick={handleFinalSubmit}
+                  className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary-dark hover:to-purple-600 flex items-center space-x-2"
                 >
-                  Go to Dashboard
+                  <span>Complete Profile</span>
+                  <CheckCircle className="w-4 h-4" />
                 </Button>
-              </div>
+              ) : (
+                <div className="text-center space-y-4">
+                  <div className="flex items-center justify-center space-x-2 text-green-600">
+                    <CheckCircle className="w-6 h-6" />
+                    <span className="text-lg font-medium">Welcome to Your Journey!</span>
+                  </div>
+                  <p className="text-gray-600">Your profile has been saved. You're now ready to explore personalized college recommendations and get guidance from our AI mentor.</p>
+                  <Button 
+                    onClick={() => window.location.href = '/dashboard'}
+                    className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary-dark hover:to-purple-600"
+                  >
+                    Get Started
+                  </Button>
+                </div>
+              )
             ) : (
               <Button 
                 onClick={handleNext}
