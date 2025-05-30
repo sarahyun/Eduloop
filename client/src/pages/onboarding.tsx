@@ -98,8 +98,18 @@ export default function OnboardingPage() {
     
     // Check if we should generate a follow-up for this step
     if (currentStepData && !currentStepData.id.includes('followup') && !currentStepData.id.includes('welcome') && !currentStepData.id.includes('academics')) {
-      const response = responses[currentStepData.id as keyof typeof responses];
-      console.log('Checking response for', currentStepData.id, ':', response);
+      // Map step IDs to response keys
+      const keyMapping: { [key: string]: keyof typeof responses } = {
+        'career': 'careerMajor',
+        'dreamSchools': 'dreamSchools',
+        'freeTime': 'freeTime',
+        'collegeExperience': 'collegeExperience',
+        'extracurriculars': 'extracurriculars'
+      };
+      
+      const responseKey = keyMapping[currentStepData.id];
+      const response = responseKey ? responses[responseKey] : null;
+      console.log('Checking response for', currentStepData.id, 'using key', responseKey, ':', response);
       if (response && response.length > 20) {
         console.log('Generating follow-up for:', currentStepData.id);
         await generateFollowUpStep(currentStepData.id, response);
