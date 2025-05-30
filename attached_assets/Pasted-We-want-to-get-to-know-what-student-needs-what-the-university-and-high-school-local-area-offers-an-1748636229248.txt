@@ -1,0 +1,24 @@
+We want to get to know what student needs, what the university and high school/local area offers, and help connect the dots. 
+0-3 Months - Build the smartest, most personalized college matching/discovery platform
+LLM-powered student profile builder: Uncover interests, values, goals beyond test scores
+Match students to schools based on “unique-fit” and recommendations adapt from student feedback
+Dynamic student profiles that evolve - students can add reflections + new updates/interests
+School RAG system - crawl high school site + take provided information on graduation reqs, courses, clubs, resources. Students can be suggested/ask about opportunities and information on their school.
+Conversational AI mentor
+Smart School Search Engine: Natural language queries → ranked school suggestions  eg. “small liberal arts school with great poetry faculty and strong alumni network” “social impact + neuroscience + small classes” -> auto-ranked school results
+Multilingual Support
+3-6 months - Connecting students to local opportunities, tracking growth over time by collecting data, strengthening AI companion for students
+Career path explorer - suggest major/careers based on evolving student profile and ways at local high school/city to explore it
+Counselor dashboard - see student progress, insight into profiles, sentiment analysis, school wide trends/reports, flag at risk students
+Student reflections, coursework/grades, writing samples, teacher/counselor/parent inputs, clubs/activities are tracked/updated over time. Log and graph student interest and growth over time.
+Strengthen the AI companion in pocket to grow alongside students from as early at 8th grade
+6 months +
+Parent dashboard
+Multi-year planning: support students from middle school to graduation
+self- onboarding for high schools 
+Universities can volunteer more comprehensive information on the school and their offerings
+District wide dashboards/analytics - equity gaps, counselor loads, student outcomes, trends, etc
+Full essay ecosystem - brainstorm, track drafts/revisions, AI feedback, counselor comments
+Mentorship networks - get connected to alumni from HS or mentors of similar background/identity
+
+

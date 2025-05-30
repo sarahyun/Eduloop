@@ -131,35 +131,35 @@ export default function LandingPage() {
             <div className="space-y-4">
               <div className="flex items-center space-x-2 text-blue-600">
                 <GraduationCap className="w-8 h-8" />
-                <span className="font-semibold text-lg">CollegeMatch AI</span>
+                <span className="font-semibold text-lg">Your College Journey Companion</span>
               </div>
               <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Find Your Perfect
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> College Match</span>
+                Grow Into Your
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Future Self</span>
               </h1>
               <p className="text-xl text-gray-600 leading-relaxed">
-                Discover colleges that truly fit your personality, goals, and aspirations with our AI-powered matching system.
+                Your AI mentor who grows with you from 8th grade through college. We help you ask better questions, discover who you're becoming, and find schools where you'll truly thrive.
               </p>
             </div>
 
-            {/* Features Grid */}
-            <div className="grid grid-cols-2 gap-6">
+            {/* Core Values Grid */}
+            <div className="grid grid-cols-1 gap-6">
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Target className="w-5 h-5 text-blue-600" />
+                  <Users className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Personalized Matching</h3>
-                  <p className="text-sm text-gray-600">AI analyzes your unique profile for perfect fits</p>
+                  <h3 className="font-semibold text-gray-900">Beyond Test Scores</h3>
+                  <p className="text-sm text-gray-600">Your whole story matters - interests, values, dreams, and experiences shape who you're becoming</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-5 h-5 text-purple-600" />
+                  <Target className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Expert Guidance</h3>
-                  <p className="text-sm text-gray-600">24/7 AI counselor for college planning</p>
+                  <h3 className="font-semibold text-gray-900">Fit Over Prestige</h3>
+                  <p className="text-sm text-gray-600">Find schools where you'll thrive, grow, and belong - not just the highest ranked ones</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
@@ -167,8 +167,8 @@ export default function LandingPage() {
                   <BookOpen className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Smart Search</h3>
-                  <p className="text-sm text-gray-600">Natural language college discovery</p>
+                  <h3 className="font-semibold text-gray-900">Questions, Not Answers</h3>
+                  <p className="text-sm text-gray-600">We help you reflect and discover: Who are you becoming? What matters to you? What are you proud of?</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
@@ -176,24 +176,28 @@ export default function LandingPage() {
                   <CheckCircle className="w-5 h-5 text-orange-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Application Tracker</h3>
-                  <p className="text-sm text-gray-600">Stay organized throughout your journey</p>
+                  <h3 className="font-semibold text-gray-900">Grows With You</h3>
+                  <p className="text-sm text-gray-600">From 8th grade to graduation - your companion learns and evolves alongside your journey</p>
                 </div>
               </div>
             </div>
 
-            {/* Social Proof */}
-            <div className="flex items-center space-x-6 pt-6 border-t border-gray-200">
-              <div>
-                <div className="flex items-center space-x-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
+            {/* Mission Statement */}
+            <div className="pt-6 border-t border-gray-200">
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">★</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 mb-1">
+                      "Access is power. Every student deserves guidance."
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      Supporting students in multiple languages, regardless of zip code or family background
+                    </p>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-600 mt-1">Trusted by 10,000+ students</p>
-              </div>
-              <div className="text-sm text-gray-600">
-                <span className="font-semibold text-gray-900">95%</span> find their dream school
               </div>
             </div>
           </div>
@@ -202,9 +206,9 @@ export default function LandingPage() {
           <div className="flex justify-center">
             <Card className="w-full max-w-md shadow-xl border-0">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Get Started Today</CardTitle>
+                <CardTitle className="text-2xl">Begin Your Journey</CardTitle>
                 <CardDescription>
-                  Join thousands of students finding their perfect college match
+                  Start growing with your AI companion who learns about you and evolves alongside your story
                 </CardDescription>
               </CardHeader>
               <CardContent>
