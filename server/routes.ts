@@ -503,6 +503,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get question responses for a user and form
+  app.get("/api/question-responses/:userId/:formId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const formId = req.params.formId;
+      const responses = await storage.getUserQuestionResponses(userId, formId);
+      res.json(responses);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch question responses" });
+    }
+  });
+
   // Question responses - handle form submission format
   app.post("/api/question-responses", async (req, res) => {
     try {

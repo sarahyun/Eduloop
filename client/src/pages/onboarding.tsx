@@ -270,9 +270,14 @@ export default function OnboardingPage() {
     extracurriculars: "Tell us about your extracurricular activities and involvement."
   };
 
+  // Autosave state
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
   // Autosave mutation using question response model
   const autosaveMutation = useMutation({
     mutationFn: async (allResponses: { [key: string]: string }) => {
+      setIsSaving(true);
       const responsePayload = {
         response_id: `1-onboarding`,
         user_id: 1,
@@ -295,6 +300,13 @@ export default function OnboardingPage() {
       if (!response.ok) throw new Error('Failed to autosave responses');
       return response.json();
     },
+    onSuccess: () => {
+      setIsSaving(false);
+      setLastSaved(new Date());
+    },
+    onError: () => {
+      setIsSaving(false);
+    }
   });
 
   // Debounced autosave to prevent too many API calls
