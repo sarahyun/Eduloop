@@ -12,14 +12,14 @@ export default function ProfileBuilder() {
   const [user] = useState<User>({ id: 1, username: "sarah", email: "sarah@example.com", fullName: "Sarah Johnson" });
   const [selectedMethod, setSelectedMethod] = useState<'chat' | 'form' | null>(null);
   
-  // Dynamic sections with completion tracking
+  // Dynamic sections with completion tracking - all offer both methods
   const sections = [
-    { id: 'basic', title: 'Basic Info', completed: true, method: 'form', lastUpdated: '2 days ago' },
-    { id: 'academic', title: 'Academic Background', completed: true, method: 'form', lastUpdated: '1 week ago' },
+    { id: 'basic', title: 'Basic Info', completed: true, method: 'both', lastUpdated: '2 days ago' },
+    { id: 'academic', title: 'Academic Background', completed: true, method: 'both', lastUpdated: '1 week ago' },
     { id: 'interests', title: 'Interests & Passions', completed: false, method: 'both' },
-    { id: 'goals', title: 'Career Goals', completed: false, method: 'chat' },
+    { id: 'goals', title: 'Career Goals', completed: false, method: 'both' },
     { id: 'preferences', title: 'College Preferences', completed: false, method: 'both' },
-    { id: 'values', title: 'Personal Values', completed: false, method: 'chat' },
+    { id: 'values', title: 'Personal Values', completed: false, method: 'both' },
   ];
 
   // Calculate completion percentage based on actual completed sections
@@ -170,30 +170,14 @@ export default function ProfileBuilder() {
                         {section.title}
                       </h3>
                       <div className="flex items-center mt-1">
-                        {section.method === 'both' && (
-                          <>
-                            <Badge variant="outline" className="mr-2 text-xs">
-                              <MessageCircle className="w-3 h-3 mr-1" />
-                              Chat
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              <FileText className="w-3 h-3 mr-1" />
-                              Form
-                            </Badge>
-                          </>
-                        )}
-                        {section.method === 'chat' && (
-                          <Badge variant="outline" className="text-xs">
-                            <MessageCircle className="w-3 h-3 mr-1" />
-                            Chat
-                          </Badge>
-                        )}
-                        {section.method === 'form' && (
-                          <Badge variant="outline" className="text-xs">
-                            <FileText className="w-3 h-3 mr-1" />
-                            Form
-                          </Badge>
-                        )}
+                        <Badge variant="outline" className="mr-2 text-xs">
+                          <MessageCircle className="w-3 h-3 mr-1" />
+                          Chat
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          <FileText className="w-3 h-3 mr-1" />
+                          Form
+                        </Badge>
                       </div>
                     </div>
                   </div>
@@ -202,30 +186,14 @@ export default function ProfileBuilder() {
                     {/* Actions for incomplete sections */}
                     {!section.completed && (
                       <>
-                        {section.method === 'both' && (
-                          <>
-                            <Button size="sm" variant="outline">
-                              <MessageCircle className="w-4 h-4 mr-1" />
-                              Chat
-                            </Button>
-                            <Button size="sm" variant="outline">
-                              <FileText className="w-4 h-4 mr-1" />
-                              Form
-                            </Button>
-                          </>
-                        )}
-                        {section.method === 'chat' && (
-                          <Button size="sm">
-                            <MessageCircle className="w-4 h-4 mr-1" />
-                            Start Chat
-                          </Button>
-                        )}
-                        {section.method === 'form' && (
-                          <Button size="sm">
-                            <FileText className="w-4 h-4 mr-1" />
-                            Fill Form
-                          </Button>
-                        )}
+                        <Button size="sm" variant="outline">
+                          <MessageCircle className="w-4 h-4 mr-1" />
+                          Chat
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <FileText className="w-4 h-4 mr-1" />
+                          Form
+                        </Button>
                       </>
                     )}
                     
