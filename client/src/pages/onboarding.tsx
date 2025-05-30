@@ -2,24 +2,24 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { ArrowRight, ArrowLeft, CheckCircle, Sparkles, BookOpen, Target, Heart, Zap, Plus, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { BookOpen, Target, Heart, Zap, GraduationCap, ArrowLeft, ArrowRight, CheckCircle } from "lucide-react";
+import { insertStudentProfileSchema } from "../../../shared/schema";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { insertStudentProfileSchema } from "../../../shared/schema";
-import { z } from "zod";
+import * as z from "zod";
 
 const profileSchema = insertStudentProfileSchema.extend({
-  academicInterests: z.array(z.string()).optional(),
-  careerGoals: z.array(z.string()).optional(),
-  values: z.array(z.string()).optional(),
-  extracurriculars: z.array(z.string()).optional(),
+  learningStyle: z.string().optional(),
+  gpa: z.number().optional(),
+  satScore: z.number().optional(),
+  actScore: z.number().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -47,12 +47,8 @@ export default function OnboardingPage() {
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      userId: 1, // This would come from auth context
-      academicInterests: [],
-      careerGoals: [],
-      values: [],
-      extracurriculars: [],
-      learningStyle: "",
+      userId: 1,
+      learningStyle: undefined,
       gpa: undefined,
       satScore: undefined,
       actScore: undefined,
@@ -62,52 +58,20 @@ export default function OnboardingPage() {
   const createProfileMutation = useMutation({
     mutationFn: (data: ProfileFormData) => api.createProfile(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
-      toast({ title: "Profile created successfully!" });
-      // Redirect to dashboard or next step
+      toast({
+        title: "Profile created successfully!",
+        description: "Welcome to your personalized college journey.",
+      });
+      window.location.href = "/dashboard";
+    },
+    onError: (error) => {
+      toast({
+        title: "Error creating profile",
+        description: "Please try again.",
+        variant: "destructive",
+      });
     },
   });
-
-  const academicInterests = [
-    "Computer Science", "Engineering", "Business", "Medicine", "Law", "Psychology",
-    "Biology", "Chemistry", "Physics", "Mathematics", "History", "English Literature",
-    "Art", "Music", "Theater", "Environmental Science", "Economics", "Political Science",
-    "Philosophy", "Sociology", "Anthropology", "International Relations"
-  ];
-
-  const careerGoals = [
-    "Software Engineer", "Doctor", "Lawyer", "Teacher", "Entrepreneur", "Research Scientist",
-    "Engineer", "Artist", "Writer", "Psychologist", "Business Executive", "Consultant",
-    "Non-profit Leader", "Government Official", "Journalist", "Designer", "Architect",
-    "Data Scientist", "Marketing Professional", "Finance Professional"
-  ];
-
-  const addCustomGoal = () => {
-    if (customGoalInput.trim() && !customGoals.includes(customGoalInput.trim()) && customGoals.length + selectedGoals.length < 3) {
-      setCustomGoals([...customGoals, customGoalInput.trim()]);
-      setCustomGoalInput("");
-    }
-  };
-
-  const removeCustomGoal = (goal: string) => {
-    setCustomGoals(customGoals.filter(g => g !== goal));
-  };
-
-  const getAllSelectedGoals = () => [...selectedGoals, ...customGoals];
-
-  const personalValues = [
-    "Innovation", "Collaboration", "Leadership", "Social Impact", "Financial Success",
-    "Work-Life Balance", "Creativity", "Intellectual Growth", "Community Service",
-    "Diversity & Inclusion", "Sustainability", "Global Perspective", "Academic Excellence",
-    "Personal Development", "Making a Difference", "Problem Solving"
-  ];
-
-  const extracurriculars = [
-    "Student Government", "Debate Team", "Drama Club", "Music Band/Orchestra", "Sports Teams",
-    "Volunteer Work", "Research Projects", "Internships", "Part-time Job", "Art Club",
-    "Science Olympiad", "Model UN", "Robotics Club", "Environmental Club", "Writing/Journalism",
-    "Gaming/Esports", "Photography", "Dance", "Martial Arts", "Coding Club"
-  ];
 
   const learningStyles = [
     { value: "visual", label: "Visual - I learn best with charts, diagrams, and visual aids" },
@@ -116,14 +80,6 @@ export default function OnboardingPage() {
     { value: "reading", label: "Reading/Writing - I learn best through reading and writing" },
     { value: "mixed", label: "Mixed - I use different approaches depending on the subject" }
   ];
-
-  const toggleSelection = (item: string, list: string[], setList: (items: string[]) => void, max?: number) => {
-    if (list.includes(item)) {
-      setList(list.filter(i => i !== item));
-    } else if (!max || (list === selectedGoals ? getAllSelectedGoals().length < max : list.length < max)) {
-      setList([...list, item]);
-    }
-  };
 
   const getProgressPercentage = () => {
     return ((currentStep + 1) / steps.length) * 100;
@@ -164,28 +120,33 @@ export default function OnboardingPage() {
   const steps: OnboardingStep[] = [
     {
       id: "welcome",
-      title: "Welcome to CollegeNavigate AI!",
-      subtitle: "Let's create your personalized college discovery journey",
-      icon: <Sparkles className="w-8 h-8 text-primary" />,
+      title: "Welcome to Your College Journey!",
+      subtitle: "Let's get to know you better through a friendly conversation",
+      icon: <GraduationCap className="w-8 h-8 text-primary" />,
       component: (
-        <div className="space-y-6 text-center">
-          <div className="w-20 h-20 bg-gradient-to-r from-primary to-purple-500 rounded-full flex items-center justify-center mx-auto">
-            <Sparkles className="w-10 h-10 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">
-              Ready to find your perfect college match?
-            </h2>
-            <p className="text-gray-600 text-lg leading-relaxed">
-              We'll ask you a few friendly questions to understand who you are, what you love, 
-              and what you're looking for in your college experience. This should take about 5 minutes.
+        <div className="text-center space-y-6">
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-xl">
+            <p className="text-lg text-gray-700 leading-relaxed">
+              We're here to help you discover colleges that truly fit who you are and what you want to achieve. 
+              This isn't about having the "right" answers - it's about getting to know the real you.
             </p>
           </div>
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>What makes us different:</strong> We look beyond just test scores to understand 
-              your complete story, interests, and aspirations.
-            </p>
+          <div className="grid md:grid-cols-3 gap-4 text-sm">
+            <div className="bg-white p-4 rounded-lg border">
+              <Heart className="w-6 h-6 text-red-500 mx-auto mb-2" />
+              <div className="font-medium">Honest & Open</div>
+              <div className="text-gray-600">Share what genuinely interests you</div>
+            </div>
+            <div className="bg-white p-4 rounded-lg border">
+              <Target className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+              <div className="font-medium">No Pressure</div>
+              <div className="text-gray-600">It's okay not to have everything figured out</div>
+            </div>
+            <div className="bg-white p-4 rounded-lg border">
+              <Zap className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
+              <div className="font-medium">Your Voice</div>
+              <div className="text-gray-600">Tell us in your own words</div>
+            </div>
           </div>
         </div>
       )
@@ -351,120 +312,124 @@ Started a coding club at school..."
       subtitle: "Understanding your learning style helps us recommend the right college environments",
       icon: <BookOpen className="w-8 h-8 text-primary" />,
       component: (
-        <div className="space-y-4">
-          {learningStyles.map((style) => (
-            <div
-              key={style.value}
-              className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
-                form.watch("learningStyle") === style.value
-                  ? "border-primary bg-primary/5"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-              onClick={() => form.setValue("learningStyle", style.value)}
-            >
-              <div className="flex items-center space-x-3">
-                <div className={`w-4 h-4 rounded-full border-2 ${
-                  form.watch("learningStyle") === style.value
-                    ? "border-primary bg-primary"
-                    : "border-gray-300"
-                }`} />
-                <span className="font-medium text-gray-900">{style.label}</span>
-              </div>
+        <Form {...form}>
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <p className="text-gray-600">
+                Different colleges have different teaching styles. Help us understand how you learn best.
+              </p>
             </div>
-          ))}
-        </div>
+            <FormField
+              control={form.control}
+              name="learningStyle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base font-medium text-gray-900">
+                    Which learning style describes you best?
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="h-12">
+                        <SelectValue placeholder="Select your learning preference" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {learningStyles.map((style) => (
+                        <SelectItem key={style.value} value={style.value}>
+                          {style.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </Form>
       )
     },
     {
-      id: "academics-scores",
-      title: "Academic Information (Optional)",
-      subtitle: "Help us provide better recommendations - you can always update this later",
-      icon: <BookOpen className="w-8 h-8 text-primary" />,
+      id: "academics",
+      title: "Academic Background",
+      subtitle: "Help us understand your academic performance (all optional)",
+      icon: <GraduationCap className="w-8 h-8 text-primary" />,
       component: (
-        <div className="space-y-6">
-          <div className="text-center mb-6">
-            <p className="text-gray-600">
-              While test scores don't define you, they help us suggest realistic options. 
-              Feel free to skip any you haven't taken yet.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div>
-              <Label htmlFor="gpa" className="text-sm font-medium text-gray-700">
-                Current GPA (optional)
-              </Label>
-              <Input
-                id="gpa"
-                type="number"
-                step="0.01"
-                min="0"
-                max="4.0"
-                placeholder="3.8"
-                className="mt-1"
-                {...form.register("gpa", { valueAsNumber: true })}
-              />
-              <p className="text-xs text-gray-500 mt-1">On a 4.0 scale</p>
+        <Form {...form}>
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <p className="text-gray-600">
+                These details help us suggest colleges that match your academic level. All fields are optional.
+              </p>
             </div>
-            <div>
-              <Label htmlFor="satScore" className="text-sm font-medium text-gray-700">
-                SAT Score (optional)
-              </Label>
-              <Input
-                id="satScore"
-                type="number"
-                min="400"
-                max="1600"
-                placeholder="1450"
-                className="mt-1"
-                {...form.register("satScore", { valueAsNumber: true })}
+            <div className="grid md:grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="gpa"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>GPA (if known)</FormLabel>
+                    <FormControl>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="4"
+                        placeholder="3.5"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <p className="text-xs text-gray-500 mt-1">Out of 1600</p>
-            </div>
-            <div>
-              <Label htmlFor="actScore" className="text-sm font-medium text-gray-700">
-                ACT Score (optional)
-              </Label>
-              <Input
-                id="actScore"
-                type="number"
-                min="1"
-                max="36"
-                placeholder="32"
-                className="mt-1"
-                {...form.register("actScore", { valueAsNumber: true })}
+              <FormField
+                control={form.control}
+                name="satScore"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>SAT Score (if taken)</FormLabel>
+                    <FormControl>
+                      <input
+                        type="number"
+                        min="400"
+                        max="1600"
+                        placeholder="1350"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <p className="text-xs text-gray-500 mt-1">Out of 36</p>
+              <FormField
+                control={form.control}
+                name="actScore"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ACT Score (if taken)</FormLabel>
+                    <FormControl>
+                      <input
+                        type="number"
+                        min="1"
+                        max="36"
+                        placeholder="28"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
           </div>
-        </div>
-      )
-    },
-    {
-      id: "complete",
-      title: "You're all set!",
-      subtitle: "Let's start discovering your perfect college matches",
-      icon: <CheckCircle className="w-8 h-8 text-green-500" />,
-      component: (
-        <div className="space-y-6 text-center">
-          <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto">
-            <CheckCircle className="w-10 h-10 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">
-              Your profile is ready!
-            </h2>
-            <p className="text-gray-600 text-lg leading-relaxed">
-              Based on your responses, we'll provide personalized college recommendations, 
-              connect you with your AI mentor, and help you explore schools that align with your goals.
-            </p>
-          </div>
-          <div className="bg-green-50 p-4 rounded-lg">
-            <p className="text-sm text-green-800">
-              <strong>What's next:</strong> Explore your dashboard to see recommendations, 
-              chat with your AI mentor, and start building your college list!
-            </p>
-          </div>
-        </div>
+        </Form>
       )
     }
   ];
@@ -472,11 +437,11 @@ Started a coding club at school..."
   const currentStepData = steps[currentStep];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Progress Bar */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        {/* Progress Header */}
         <div className="mb-8">
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex justify-between items-center mb-4">
             <span className="text-sm font-medium text-gray-600">
               Step {currentStep + 1} of {steps.length}
             </span>
