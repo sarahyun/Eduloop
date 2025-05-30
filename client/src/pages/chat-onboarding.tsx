@@ -331,12 +331,22 @@ export default function ChatOnboarding() {
                           className="max-w-[80%] p-4 rounded-lg mr-auto"
                           style={{ 
                             backgroundColor: '#ffffff',
-                            color: '#1f2937',
                             border: '1px solid #e5e7eb',
-                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+                            minHeight: 'fit-content',
+                            width: 'fit-content',
+                            display: 'block'
                           }}
                         >
-                          <div className="whitespace-pre-wrap" style={{ backgroundColor: '#ffffff', color: '#1f2937' }}>
+                          <div 
+                            className="whitespace-pre-wrap" 
+                            style={{ 
+                              backgroundColor: '#ffffff', 
+                              color: '#6b7280',
+                              lineHeight: '1.5',
+                              wordWrap: 'break-word'
+                            }}
+                          >
                             {message.content}
                           </div>
                         </div>
