@@ -292,24 +292,39 @@ ${questions && Array.isArray(questions) ? questions.map(q => `- ${q.question}`).
 
       // Analyze conversation to determine which questions have been addressed
       const questionsAsked = new Set();
-      const conversationText = conversationHistory ? conversationHistory.map(msg => msg.content.toLowerCase()).join(' ') : '';
       
-      questions.forEach(q => {
-        const questionKeywords = q.question.toLowerCase();
-        if (questionKeywords.includes('career') || questionKeywords.includes('major')) {
-          if (conversationText.includes('biology') || conversationText.includes('cs') || conversationText.includes('computer science') || conversationText.includes('major')) {
-            questionsAsked.add(q.id);
+      // Check if AI has already asked each question by looking at assistant messages
+      if (conversationHistory) {
+        conversationHistory.forEach(msg => {
+          if (msg.role === 'assistant') {
+            const content = msg.content.toLowerCase();
+            
+            // Check which question this AI message corresponds to
+            questions.forEach(q => {
+              const questionText = q.question.toLowerCase();
+              
+              // Match based on key phrases from each question
+              if (q.id === 'careerMajor' && (content.includes('career') || content.includes('major'))) {
+                questionsAsked.add(q.id);
+              } else if (q.id === 'dreamSchools' && (content.includes('dream school') || content.includes('schools in mind'))) {
+                questionsAsked.add(q.id);
+              } else if (q.id === 'introFreeTimeActivities' && content.includes('outside of school')) {
+                questionsAsked.add(q.id);
+              } else if (q.id === 'introCollegeExperience' && content.includes('college experience')) {
+                questionsAsked.add(q.id);
+              } else if (q.id === 'extracurriculars' && content.includes('extracurricular')) {
+                questionsAsked.add(q.id);
+              } else if (q.id === 'gpa' && content.includes('what is your gpa')) {
+                questionsAsked.add(q.id);
+              } else if (q.id === 'satScore' && content.includes('what is your sat')) {
+                questionsAsked.add(q.id);
+              } else if (q.id === 'actScore' && content.includes('what is your act')) {
+                questionsAsked.add(q.id);
+              }
+            });
           }
-        } else if (questionKeywords.includes('dream school')) {
-          if (conversationText.includes('harvard') || conversationText.includes('caltech') || conversationText.includes('school')) {
-            questionsAsked.add(q.id);
-          }
-        } else if (questionKeywords.includes('free time') || questionKeywords.includes('outside of school')) {
-          if (conversationText.includes('idk') || conversationText.includes('sure') || conversationText.includes('relax') || conversationText.includes('movies')) {
-            questionsAsked.add(q.id);
-          }
-        }
-      });
+        });
+      }
 
       // Find next unanswered question
       const nextQuestion = questions.find(q => !questionsAsked.has(q.id));
