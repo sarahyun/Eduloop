@@ -34,12 +34,13 @@ interface OnboardingStep {
 
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-  const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
-  const [customGoals, setCustomGoals] = useState<string[]>([]);
-  const [customGoalInput, setCustomGoalInput] = useState("");
-  const [selectedValues, setSelectedValues] = useState<string[]>([]);
-  const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
+  const [responses, setResponses] = useState({
+    careerMajor: "",
+    dreamSchools: "",
+    freeTime: "",
+    collegeExperience: "",
+    extracurriculars: "",
+  });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -144,16 +145,20 @@ export default function OnboardingPage() {
     const formValues = form.getValues();
     const formData = {
       userId: 1,
-      academicInterests: selectedInterests,
-      careerGoals: getAllSelectedGoals(),
-      values: selectedValues,
-      extracurriculars: selectedActivities,
-      learningStyle: formValues.learningStyle || null,
-      gpa: formValues.gpa || null,
-      satScore: formValues.satScore || null,
-      actScore: formValues.actScore || null,
+      academicInterests: responses.careerMajor ? [responses.careerMajor] : undefined,
+      careerGoals: responses.careerMajor ? [responses.careerMajor] : undefined,
+      values: responses.collegeExperience ? [responses.collegeExperience] : undefined,
+      extracurriculars: responses.extracurriculars ? [responses.extracurriculars] : undefined,
+      learningStyle: formValues.learningStyle || undefined,
+      gpa: formValues.gpa || undefined,
+      satScore: formValues.satScore || undefined,
+      actScore: formValues.actScore || undefined,
     };
     createProfileMutation.mutate(formData);
+  };
+
+  const updateResponse = (key: string, value: string) => {
+    setResponses(prev => ({ ...prev, [key]: value }));
   };
 
   const steps: OnboardingStep[] = [
@@ -186,193 +191,156 @@ export default function OnboardingPage() {
       )
     },
     {
-      id: "academics",
-      title: "What subjects spark your curiosity?",
-      subtitle: "Select up to 5 academic areas that genuinely interest you",
-      icon: <BookOpen className="w-8 h-8 text-primary" />,
-      component: (
-        <div className="space-y-6">
-          <div className="text-center mb-6">
-            <p className="text-gray-600">
-              Don't worry about being "practical" - choose what actually excites you to learn about!
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              Selected: {selectedInterests.length}/5
-            </p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {academicInterests.map((interest) => (
-              <Badge
-                key={interest}
-                variant={selectedInterests.includes(interest) ? "default" : "secondary"}
-                className={`cursor-pointer p-3 text-center transition-all hover:scale-105 ${
-                  selectedInterests.includes(interest) 
-                    ? "bg-primary text-white" 
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                } ${selectedInterests.length >= 5 && !selectedInterests.includes(interest) ? "opacity-50" : ""}`}
-                onClick={() => toggleSelection(interest, selectedInterests, setSelectedInterests, 5)}
-              >
-                {interest}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )
-    },
-    {
       id: "career",
-      title: "What's your dream career direction?",
-      subtitle: "Choose from common paths or add your own unique aspirations",
+      title: "Do you have a career or major in mind?",
+      subtitle: "No worries if not - this helps us understand your direction",
       icon: <Target className="w-8 h-8 text-primary" />,
       component: (
         <div className="space-y-6">
           <div className="text-center mb-6">
             <p className="text-gray-600">
-              Think about what kind of work would make you excited to get up in the morning.
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              Selected: {getAllSelectedGoals().length}/3
+              Think about what kind of work interests you, or what you might want to study. It's totally fine if you're unsure!
             </p>
           </div>
-
-          {/* Custom Goal Input */}
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <Label htmlFor="customGoal" className="text-sm font-medium text-gray-700 mb-2 block">
-              Add your own career goal:
+          <div className="space-y-4">
+            <Label htmlFor="careerMajor" className="text-base font-medium text-gray-900">
+              Tell us about any career ideas or majors you're considering:
             </Label>
-            <div className="flex space-x-2">
-              <Input
-                id="customGoal"
-                placeholder="e.g., Marine Biologist, Film Director, Social Worker..."
-                value={customGoalInput}
-                onChange={(e) => setCustomGoalInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && addCustomGoal()}
-                className="flex-1"
-                disabled={getAllSelectedGoals().length >= 3}
-              />
-              <Button 
-                type="button"
-                size="sm"
-                onClick={addCustomGoal}
-                disabled={!customGoalInput.trim() || getAllSelectedGoals().length >= 3}
-                className="px-3"
-              >
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Custom Goals Display */}
-          {customGoals.length > 0 && (
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Your custom career goals:</Label>
-              <div className="flex flex-wrap gap-2">
-                {customGoals.map((goal) => (
-                  <Badge
-                    key={goal}
-                    variant="default"
-                    className="bg-green-100 text-green-800 hover:bg-green-200 px-3 py-1 text-sm flex items-center space-x-1"
-                  >
-                    <span>{goal}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-auto p-0 hover:bg-transparent"
-                      onClick={() => removeCustomGoal(goal)}
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Predefined Career Options */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium text-gray-700">Or choose from common career paths:</Label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {careerGoals.map((goal) => (
-                <Badge
-                  key={goal}
-                  variant={selectedGoals.includes(goal) ? "default" : "secondary"}
-                  className={`cursor-pointer p-3 text-center transition-all hover:scale-105 ${
-                    selectedGoals.includes(goal) 
-                      ? "bg-primary text-white" 
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  } ${getAllSelectedGoals().length >= 3 && !selectedGoals.includes(goal) ? "opacity-50" : ""}`}
-                  onClick={() => toggleSelection(goal, selectedGoals, setSelectedGoals, 3)}
-                >
-                  {goal}
-                </Badge>
-              ))}
-            </div>
+            <Textarea
+              id="careerMajor"
+              placeholder="I'm thinking about medicine because I love helping people, or maybe computer science since I enjoy coding... or honestly, I have no idea yet and that's okay!"
+              value={responses.careerMajor}
+              onChange={(e) => updateResponse('careerMajor', e.target.value)}
+              className="min-h-32 text-base"
+            />
+            <p className="text-sm text-gray-500">
+              Feel free to mention multiple interests, uncertainty, or anything that comes to mind.
+            </p>
           </div>
         </div>
       )
     },
     {
-      id: "values",
-      title: "What matters most to you?",
-      subtitle: "Choose up to 4 values that guide your decisions",
-      icon: <Heart className="w-8 h-8 text-primary" />,
+      id: "dreamSchools",
+      title: "Got any dream schools in mind?",
+      subtitle: "If so, what draws you to these schools?",
+      icon: <BookOpen className="w-8 h-8 text-primary" />,
       component: (
         <div className="space-y-6">
           <div className="text-center mb-6">
             <p className="text-gray-600">
-              These values will help us find colleges with cultures and communities that align with who you are.
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              Selected: {selectedValues.length}/4
+              Maybe you've heard about certain colleges or visited some campuses. What appeals to you about them?
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {personalValues.map((value) => (
-              <Badge
-                key={value}
-                variant={selectedValues.includes(value) ? "default" : "secondary"}
-                className={`cursor-pointer p-3 text-center transition-all hover:scale-105 ${
-                  selectedValues.includes(value) 
-                    ? "bg-primary text-white" 
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                } ${selectedValues.length >= 4 && !selectedValues.includes(value) ? "opacity-50" : ""}`}
-                onClick={() => toggleSelection(value, selectedValues, setSelectedValues, 4)}
-              >
-                {value}
-              </Badge>
-            ))}
+          <div className="space-y-4">
+            <Label htmlFor="dreamSchools" className="text-base font-medium text-gray-900">
+              Tell us about any schools that interest you and why:
+            </Label>
+            <Textarea
+              id="dreamSchools"
+              placeholder="I love Stanford because of their innovation culture and Silicon Valley connections. NYU appeals to me for the city experience and their strong business program. Or maybe I haven't really thought about specific schools yet..."
+              value={responses.dreamSchools}
+              onChange={(e) => updateResponse('dreamSchools', e.target.value)}
+              className="min-h-32 text-base"
+            />
+            <p className="text-sm text-gray-500">
+              Share what you know or admit if you're still exploring - both are perfectly fine!
+            </p>
           </div>
         </div>
       )
     },
     {
-      id: "activities",
-      title: "How do you spend your time outside class?",
-      subtitle: "Select your current or interested extracurricular activities",
+      id: "freeTime",
+      title: "How do you spend your free time?",
+      subtitle: "Aside from hanging out with friends, what do you enjoy doing?",
       icon: <Zap className="w-8 h-8 text-primary" />,
       component: (
         <div className="space-y-6">
           <div className="text-center mb-6">
             <p className="text-gray-600">
-              Include activities you're passionate about - they show who you are beyond academics.
+              Tell us about your hobbies, interests, or activities that you genuinely enjoy outside of school.
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {extracurriculars.map((activity) => (
-              <Badge
-                key={activity}
-                variant={selectedActivities.includes(activity) ? "default" : "secondary"}
-                className={`cursor-pointer p-3 text-center transition-all hover:scale-105 ${
-                  selectedActivities.includes(activity) 
-                    ? "bg-primary text-white" 
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-                onClick={() => toggleSelection(activity, selectedActivities, setSelectedActivities)}
-              >
-                {activity}
-              </Badge>
-            ))}
+          <div className="space-y-4">
+            <Label htmlFor="freeTime" className="text-base font-medium text-gray-900">
+              What do you like to do outside of school?
+            </Label>
+            <Textarea
+              id="freeTime"
+              placeholder="I love playing guitar and writing music. I'm really into photography and often go on nature walks to take pictures. I volunteer at the animal shelter on weekends. I spend way too much time playing video games but I love the strategy aspect..."
+              value={responses.freeTime}
+              onChange={(e) => updateResponse('freeTime', e.target.value)}
+              className="min-h-32 text-base"
+            />
+            <p className="text-sm text-gray-500">
+              Include anything from hobbies to volunteer work to things you do just for fun.
+            </p>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: "collegeExperience",
+      title: "What are you looking for in college?",
+      subtitle: "What excites you? What worries you about this process?",
+      icon: <Heart className="w-8 h-8 text-primary" />,
+      component: (
+        <div className="space-y-6">
+          <div className="text-center mb-6">
+            <p className="text-gray-600">
+              Help us understand what kind of college experience you're hoping for and any concerns you might have.
+            </p>
+          </div>
+          <div className="space-y-4">
+            <Label htmlFor="collegeExperience" className="text-base font-medium text-gray-900">
+              What are you looking for in your college experience? Any worries about the process?
+            </Label>
+            <Textarea
+              id="collegeExperience"
+              placeholder="I want a place where I can explore different subjects before declaring a major. I'm excited about meeting people from diverse backgrounds. I'm worried about the cost and whether I'll get into a good school. I want strong research opportunities but also a fun social scene..."
+              value={responses.collegeExperience}
+              onChange={(e) => updateResponse('collegeExperience', e.target.value)}
+              className="min-h-32 text-base"
+            />
+            <p className="text-sm text-gray-500">
+              Be honest about both your hopes and concerns - this helps us provide better guidance.
+            </p>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: "extracurriculars",
+      title: "Tell us about your activities",
+      subtitle: "Share your extracurriculars, achievements, or experiences",
+      icon: <Zap className="w-8 h-8 text-primary" />,
+      component: (
+        <div className="space-y-6">
+          <div className="text-center mb-6">
+            <p className="text-gray-600">
+              If you have a resume or list of activities, feel free to paste it here. Or just tell us about what you've been involved in.
+            </p>
+          </div>
+          <div className="space-y-4">
+            <Label htmlFor="extracurriculars" className="text-base font-medium text-gray-900">
+              List your extracurriculars, achievements, work experience, or other activities:
+            </Label>
+            <Textarea
+              id="extracurriculars"
+              placeholder="Student Council - President (Junior & Senior year)
+Varsity Soccer - Captain, led team to regional championships
+Part-time job at local bookstore (15 hrs/week)
+Volunteer tutor for elementary students (2 years)
+National Honor Society member
+Started a coding club at school..."
+              value={responses.extracurriculars}
+              onChange={(e) => updateResponse('extracurriculars', e.target.value)}
+              className="min-h-40 text-base font-mono"
+            />
+            <p className="text-sm text-gray-500">
+              Include leadership roles, awards, jobs, volunteer work, or anything meaningful to you.
+            </p>
           </div>
         </div>
       )
