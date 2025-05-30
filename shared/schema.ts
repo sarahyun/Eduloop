@@ -4,12 +4,16 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  email: text("email").notNull().unique(),
-  fullName: text("full_name").notNull(),
-  grade: text("grade"),
-  createdAt: timestamp("created_at").defaultNow(),
+  userId: text("user_id").notNull().unique(), // Unique identifier for the user
+  email: text("email").notNull().unique(), // User's email address
+  name: text("name"), // Optional full name of the user
+  createdAt: timestamp("created_at").defaultNow(), // Account creation timestamp
+  lastLogin: timestamp("last_login"), // Optional timestamp for the last login
+  role: text("role").notNull(), // Role (student/counselor/parent)
+  students: text("students").array().default([]), // List of student IDs for counselors/parents
+  grade: text("grade"), // Optional field for student grade
+  counselorId: text("counselor_id"), // Optional counselor ID for students
+  parentId: text("parent_id"), // Optional parent ID for students
 });
 
 export const studentProfiles = pgTable("student_profiles", {
@@ -127,12 +131,10 @@ export const questionResponses = pgTable("question_responses", {
 });
 
 // Insert schemas
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-  email: true,
-  fullName: true,
-  grade: true,
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  lastLogin: true,
 });
 
 export const insertStudentProfileSchema = createInsertSchema(studentProfiles).omit({
