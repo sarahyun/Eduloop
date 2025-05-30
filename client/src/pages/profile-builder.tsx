@@ -14,10 +14,10 @@ export default function ProfileBuilder() {
   
   // Dynamic sections with completion tracking - all offer both methods
   const sections = [
-    { id: 'Academic Information', title: 'Academic Information', completed: false, method: 'both', description: 'Favorite classes, subjects, academic interests' },
-    { id: 'Personal Interests', title: 'Personal Interests', completed: false, method: 'both', description: 'Hobbies, passion projects, personal values' },
-    { id: 'Background & Goals', title: 'Background & Goals', completed: false, method: 'both', description: 'Career aspirations, life goals, personal challenges' },
-    { id: 'College Preferences', title: 'College Preferences', completed: false, method: 'both', description: 'Ideal environment, important factors, location preferences' },
+    { id: 'Academic Information', title: 'Academic Information', completed: false, method: 'both', description: 'Favorite classes, subjects, academic interests', lastUpdated: '2 days ago' },
+    { id: 'Extracurriculars and Interests', title: 'Extracurriculars and Interests', completed: false, method: 'both', description: 'What you\'re proud of, fields to explore, free time activities', lastUpdated: 'Not started' },
+    { id: 'Personal Reflections', title: 'Personal Reflections', completed: false, method: 'both', description: 'What makes you happy, challenges overcome, values', lastUpdated: 'Not started' },
+    { id: 'College Preferences', title: 'College Preferences', completed: false, method: 'both', description: 'College experience, school size, location preferences', lastUpdated: 'Not started' },
   ];
 
   // Find first incomplete section
