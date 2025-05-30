@@ -284,7 +284,7 @@ Recommend a diverse mix of colleges with specific reasoning for each. Return you
       const sectionContext = section ? `
 Current section: ${section}
 Questions for this section:
-${questions.map(q => `- ${q.question}`).join('\n')}
+${questions ? questions.map(q => `- ${q.question}`).join('\n') : 'No questions defined'}
 ` : '';
 
       const completion = await this.openai.chat.completions.create({
@@ -307,22 +307,21 @@ Guidelines:
 - Return response in JSON format: {"response": "your response", "isComplete": boolean, "profileUpdates": {questionId: "extracted answer"}}
 
 Conversation history:
-${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}`
+${conversationHistory ? conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n') : 'No previous conversation'}`
           },
           {
             role: "user",
             content: userMessage
           }
         ],
-        response_format: { type: "json_object" },
       });
 
-      const result = JSON.parse(completion.choices[0].message.content || '{}');
+      const response = completion.choices[0].message.content || "I'd love to learn more about you. Could you tell me a bit more?";
       
       return {
-        response: result.response || "I'd love to learn more about you. Could you tell me a bit more?",
-        isComplete: result.isComplete || false,
-        profileUpdates: result.profileUpdates || {}
+        response: response,
+        isComplete: false,
+        profileUpdates: {}
       };
     } catch (error) {
       console.error('Error generating onboarding response:', error);
