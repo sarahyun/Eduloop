@@ -34,11 +34,23 @@ interface OnboardingState {
 }
 
 export default function ChatOnboarding() {
+  // Sample previous answers - in real app this would come from user's profile
+  const previousAnswers = {
+    name: "Sarah",
+    career: "Maybe something in engineering or computer science",
+    dreamSchools: "Stanford because of their tech programs, MIT for engineering",
+    freeTime: "I love coding side projects and playing guitar",
+    collegeExperience: "Want a collaborative environment with good research opportunities",
+    extracurriculars: "Robotics club president, guitar lessons, volunteer coding tutor",
+    gpa: 3.8,
+    satScore: 1450
+  };
+
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
       role: 'assistant',
-      content: "Hi! I'm here to help you discover colleges that would be a great fit for you. I'll ask you some questions to get to know you better.\n\nWhat should I call you?",
+      content: `Hi Sarah! I have your previous answers from our introduction. Let me recap what I know about you:\n\n🎯 **Career interests**: ${previousAnswers.career}\n🏫 **Dream schools**: ${previousAnswers.dreamSchools}\n⏰ **Free time**: ${previousAnswers.freeTime}\n🎓 **College experience**: ${previousAnswers.collegeExperience}\n📋 **Activities**: ${previousAnswers.extracurriculars}\n📊 **Academics**: GPA ${previousAnswers.gpa}, SAT ${previousAnswers.satScore}\n\nHas anything changed since we last talked? Would you like to update or expand on any of these answers?`,
       timestamp: new Date()
     }
   ]);
@@ -46,7 +58,7 @@ export default function ChatOnboarding() {
   const [input, setInput] = useState("");
   const [onboardingState, setOnboardingState] = useState<OnboardingState>({
     step: 0,
-    data: {}
+    data: previousAnswers
   });
   const [isComplete, setIsComplete] = useState(false);
   const [showAcademicForm, setShowAcademicForm] = useState(false);
@@ -65,52 +77,67 @@ export default function ChatOnboarding() {
       trigger: (response: string) => true,
       getResponse: (response: string, state: OnboardingState) => {
         if (state.step === 0) {
-          const newState = { ...state, step: 1, data: { ...state.data, name: response } };
-          return {
-            response: `Nice to meet you, ${response}! I'm here to help you find colleges that match your interests and goals.\n\nWhat career path are you most excited about exploring?`,
-            newState,
-            isComplete: false
-          };
+          // Initial response - check if user wants to update anything
+          const lowerResponse = response.toLowerCase();
+          
+          if (lowerResponse.includes('update') || lowerResponse.includes('change') || lowerResponse.includes('career') || lowerResponse.includes('school') || lowerResponse.includes('activity') || lowerResponse.includes('gpa') || lowerResponse.includes('test')) {
+            const newState = { ...state, step: 1 };
+            return {
+              response: `Great! What would you like to update or tell me more about? You can mention:\n\n• Your career interests\n• Dream schools and why they appeal to you\n• How you spend your free time\n• What you want in your college experience\n• Your extracurriculars and activities\n• Your academic information (GPA, test scores)\n\nJust let me know what you'd like to focus on!`,
+              newState,
+              isComplete: false
+            };
+          } else if (lowerResponse.includes('no') || lowerResponse.includes('same') || lowerResponse.includes('good') || lowerResponse.includes('continue')) {
+            const newState = { ...state, step: 10 };
+            return {
+              response: `Perfect! Since your information looks good, let's move on to some deeper questions to help me understand you even better.\n\nWhat are your 3 favorite classes you've taken so far, and what makes them special to you?`,
+              newState,
+              isComplete: false
+            };
+          } else {
+            // User gave a general response, ask for clarification
+            const newState = { ...state, step: 1 };
+            return {
+              response: `Thanks for that! To make sure I give you the best recommendations, would you like to update any of your previous answers, or should we move on to some new questions to learn more about you?`,
+              newState,
+              isComplete: false
+            };
+          }
         } else if (state.step === 1) {
-          const newState = { ...state, step: 2, data: { ...state.data, career: response } };
+          // User wants to update something - parse their response
+          const newState = { ...state, step: 2 };
           return {
-            response: `${response} sounds fascinating! There are so many great colleges with strong programs in that field.\n\nAre there any specific colleges or universities you've been dreaming about? What draws you to them?`,
+            response: `Got it! I've noted your updates. Is there anything else you'd like to change or expand on from your introduction, or are you ready to dive into some new questions?`,
             newState,
             isComplete: false
           };
         } else if (state.step === 2) {
-          const newState = { ...state, step: 3, data: { ...state.data, dreamSchools: response } };
+          // Move to academics section
+          const newState = { ...state, step: 10 };
           return {
-            response: `Those are excellent choices! It's great that you're thinking about what excites you about different schools.\n\nWhen you're not studying, what do you love to do? I'm curious about your hobbies and interests outside of academics.`,
+            response: `Excellent! Now let's explore your academic interests more deeply.\n\nWhat are your 3 favorite classes you've taken so far, and what makes them special to you?`,
             newState,
             isComplete: false
           };
-        } else if (state.step === 3) {
-          const newState = { ...state, step: 4, data: { ...state.data, freeTime: response } };
+        } else if (state.step === 10) {
+          // Start academics questions
+          const newState = { ...state, step: 11, data: { ...state.data, favoriteClasses: response } };
           return {
-            response: `That's really cool! Those interests could connect to some amazing opportunities in college.\n\nWhat kind of college experience are you hoping for? Think about things like campus size, location, campus culture, or any specific programs that matter to you.`,
+            response: `Those sound like fascinating classes! It's great to see what sparks your curiosity.\n\nAre there any subjects you find particularly challenging or struggle with? It's totally normal - we all have different strengths!`,
             newState,
             isComplete: false
           };
-        } else if (state.step === 4) {
-          const newState = { ...state, step: 5, data: { ...state.data, collegeExperience: response } };
+        } else if (state.step === 11) {
+          const newState = { ...state, step: 12, data: { ...state.data, strugglingSubjects: response } };
           return {
-            response: `I can already see some great college matches forming! One more question to help me understand you better.\n\nWhat activities, clubs, or leadership roles have been meaningful to you? This could be anything from sports to volunteering to creative projects.`,
+            response: `Thanks for being honest about that. Understanding your challenges helps me find colleges with the right support systems.\n\nWhat academic topics, problems in the world, or questions fascinate you most? What keeps you thinking even after class ends?`,
             newState,
             isComplete: false
           };
-        } else if (state.step === 5) {
-          const newState = { ...state, step: 6, data: { ...state.data, extracurriculars: response } };
+        } else if (state.step === 12) {
+          const newState = { ...state, step: 13, data: { ...state.data, academicFascinations: response } };
           return {
-            response: `That's wonderful! Now I'd like to get a sense of your academic profile to help match you with the right colleges.\n\nPlease fill out your academic information below:`,
-            newState,
-            isComplete: false,
-            showAcademicForm: true
-          };
-        } else if (state.step === 6) {
-          const newState = { ...state, step: 7, data: { ...state.data, academicInfo: response } };
-          return {
-            response: `Perfect! I now have everything I need to find great college matches for you.\n\nLet's see what colleges would be a good fit based on your interests, goals, and academic profile.`,
+            response: `I love hearing about what genuinely excites you intellectually! This gives me great insight into programs and research opportunities you might thrive in.\n\nI have everything I need to start finding some amazing college matches for you. Ready to see what I've found?`,
             newState,
             isComplete: true,
             showContinueButton: true
