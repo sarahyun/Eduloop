@@ -55,6 +55,8 @@ export default function ChatOnboarding() {
     }
   ]);
   
+  const [showExpandButton, setShowExpandButton] = useState(true);
+  
   const [input, setInput] = useState("");
   const [onboardingState, setOnboardingState] = useState<OnboardingState>({
     step: 0,
@@ -80,7 +82,14 @@ export default function ChatOnboarding() {
           // Initial response - check if user wants to update anything
           const lowerResponse = response.toLowerCase();
           
-          if (lowerResponse.includes('update') || lowerResponse.includes('change') || lowerResponse.includes('career') || lowerResponse.includes('school') || lowerResponse.includes('activity') || lowerResponse.includes('gpa') || lowerResponse.includes('test')) {
+          if (lowerResponse.includes('expand') || lowerResponse.includes('more detail') || lowerResponse.includes('tell me more')) {
+            const newState = { ...state, step: 20 };
+            return {
+              response: `Great! I'd love to learn more about you. Let me ask some follow-up questions about your interests.\n\nYou mentioned you're interested in ${state.data.career}. What specifically draws you to this field? Is there a particular problem you'd love to help solve or a project that excites you?`,
+              newState,
+              isComplete: false
+            };
+          } else if (lowerResponse.includes('update') || lowerResponse.includes('change') || lowerResponse.includes('career') || lowerResponse.includes('school') || lowerResponse.includes('activity') || lowerResponse.includes('gpa') || lowerResponse.includes('test')) {
             const newState = { ...state, step: 1 };
             return {
               response: `Great! What would you like to update or tell me more about? You can mention:\n\n• Your career interests\n• Dream schools and why they appeal to you\n• How you spend your free time\n• What you want in your college experience\n• Your extracurriculars and activities\n• Your academic information (GPA, test scores)\n\nJust let me know what you'd like to focus on!`,
@@ -141,6 +150,30 @@ export default function ChatOnboarding() {
             newState,
             isComplete: true,
             showContinueButton: true
+          };
+        } else if (state.step === 20) {
+          // Expand on career interests
+          const newState = { ...state, step: 21, data: { ...state.data, careerDetails: response } };
+          return {
+            response: `That's really insightful! It's clear you've thought deeply about your future.\n\nYou mentioned ${state.data.dreamSchools} as schools you're interested in. Beyond the programs, what kind of campus culture or environment do you think would help you thrive? What matters most to you in a college community?`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 21) {
+          // Expand on college environment
+          const newState = { ...state, step: 22, data: { ...state.data, environmentDetails: response } };
+          return {
+            response: `I can see you really know what you're looking for in a college experience. That's so valuable!\n\nWhen you mentioned ${state.data.freeTime}, it caught my attention. How do you see yourself continuing or expanding these interests in college? Are there specific opportunities or communities you'd want to be part of?`,
+            newState,
+            isComplete: false
+          };
+        } else if (state.step === 22) {
+          // Expand on interests and transition to academics
+          const newState = { ...state, step: 10, data: { ...state.data, interestExpansion: response } };
+          return {
+            response: `This gives me such a rich picture of who you are and what drives you. I can already see some amazing possibilities for college matches!\n\nNow let's dive into your academic interests. What are your 3 favorite classes you've taken so far, and what makes them special to you?`,
+            newState,
+            isComplete: false
           };
         }
         
@@ -275,8 +308,23 @@ export default function ChatOnboarding() {
                   >
                     <p className="whitespace-pre-wrap">{message.content}</p>
                     
+                    {/* Show expand button for first message */}
+                    {message.role === 'assistant' && index === 0 && showExpandButton && (
+                      <div className="mt-4 space-y-2">
+                        <Button 
+                          onClick={() => {
+                            const expandMessage = "I'd like to expand on my answers";
+                            generateResponseMutation.mutate(expandMessage);
+                            setShowExpandButton(false);
+                          }}
+                          className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white"
+                        >
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Expand on my answers
+                        </Button>
+                      </div>
+                    )}
 
-                    
                     {/* Show academic form in the chat bubble if this is the academic step */}
                     {message.role === 'assistant' && showAcademicForm && index === messages.length - 1 && (
                       <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600">
