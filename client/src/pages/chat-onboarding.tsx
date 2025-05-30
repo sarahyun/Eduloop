@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -31,40 +31,140 @@ export default function ChatOnboarding() {
   const [input, setInput] = useState("");
   const [isComplete, setIsComplete] = useState(false);
   const [showContinueButton, setShowContinueButton] = useState(false);
+  const [showExpandButton, setShowExpandButton] = useState(false);
+  const [existingData, setExistingData] = useState<any>(null);
   
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Load existing profile data
+  const { data: profile } = useQuery({
+    queryKey: ['/api/profile', user.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/profile/${user.id}`);
+      if (!response.ok) throw new Error('Failed to fetch profile');
+      return response.json();
+    }
+  });
+
   function getInitialMessage() {
-    switch (targetSection) {
-      case 'Introduction':
-        return `Hi! I'm excited to get to know you better. Let's start with some basic information.\n\nWhat's your name?`;
-      
-      case 'Academic Information':
-        return `Hi Sarah! Let's dive into your academic experience to help me understand what drives your intellectual curiosity.\n\nWhat are your 3 favorite classes you've taken so far? Tell me what makes them special to you.`;
-      
-      case 'Extracurriculars and Interests':
-        return `Hi Sarah! Now I'd love to learn about what you're passionate about outside the classroom.\n\nWhat are you most proud of outside of academics? This could be an accomplishment, project, or something you've worked hard on.`;
-      
-      case 'Personal Reflections':
-        return `Hi Sarah! Let's explore what makes you uniquely you and what drives you.\n\nWhat makes you happy? I'd love to understand what brings you joy and fulfillment.`;
-      
-      case 'College Preferences':
-        return `Hi Sarah! Let's talk about what you're looking for in your college experience.\n\nWhat do you want in your college experience? Think about the environment, opportunities, and community you're hoping to find.`;
-      
-      default:
-        return `Hi Sarah! I'm here to help you build your profile. Let's start with some questions to understand you better.`;
+    if (!profile) return "Loading your profile...";
+    
+    // Check if this section has existing data
+    const hasExistingData = getSectionData(targetSection, profile);
+    
+    if (hasExistingData && Object.values(hasExistingData).some(value => value)) {
+      // Section is completed - show recap
+      setShowExpandButton(true);
+      return getSectionRecap(targetSection, hasExistingData);
+    } else {
+      // Section is new - start fresh conversation
+      switch (targetSection) {
+        case 'Introduction':
+          return `Hi! I'm excited to get to know you better. Let's start with some basic information.\n\nWhat's your name?`;
+        
+        case 'Academic Information':
+          return `Hi Sarah! Let's dive into your academic experience to help me understand what drives your intellectual curiosity.\n\nWhat are your 3 favorite classes you've taken so far? Tell me what makes them special to you.`;
+        
+        case 'Extracurriculars and Interests':
+          return `Hi Sarah! Now I'd love to learn about what you're passionate about outside the classroom.\n\nWhat are you most proud of outside of academics? This could be an accomplishment, project, or something you've worked hard on.`;
+        
+        case 'Personal Reflections':
+          return `Hi Sarah! Let's explore what makes you uniquely you and what drives you.\n\nWhat makes you happy? I'd love to understand what brings you joy and fulfillment.`;
+        
+        case 'College Preferences':
+          return `Hi Sarah! Let's talk about what you're looking for in your college experience.\n\nWhat do you want in your college experience? Think about the environment, opportunities, and community you're hoping to find.`;
+        
+        default:
+          return `Hi Sarah! I'm here to help you build your profile. Let's start with some questions to understand you better.`;
+      }
     }
   }
 
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: getInitialMessage(),
-      timestamp: new Date()
+  function getSectionData(section: string | null, profileData: any) {
+    if (!section || !profileData) return null;
+    
+    switch (section) {
+      case 'Introduction':
+        return {
+          name: profileData.name,
+          grade: profileData.grade,
+          school: profileData.school,
+          basicInfo: profileData.basicInfo
+        };
+      case 'Academic Information':
+        return {
+          favoriteClasses: profileData.favoriteClasses,
+          strugglingSubjects: profileData.strugglingSubjects,
+          academicFascinations: profileData.academicFascinations
+        };
+      case 'Extracurriculars and Interests':
+        return {
+          proudOfOutsideAcademics: profileData.proudOfOutsideAcademics,
+          fieldsToExplore: profileData.fieldsToExplore,
+          freeTimeActivities: profileData.freeTimeActivities
+        };
+      case 'Personal Reflections':
+        return {
+          whatMakesHappy: profileData.whatMakesHappy,
+          challengeOvercome: profileData.challengeOvercome,
+          rememberedFor: profileData.rememberedFor,
+          importantLesson: profileData.importantLesson
+        };
+      case 'College Preferences':
+        return {
+          collegeExperience: profileData.collegeExperience,
+          schoolSize: profileData.schoolSize,
+          locationExperiences: profileData.locationExperiences,
+          parentsExpectations: profileData.parentsExpectations,
+          communityEnvironment: profileData.communityEnvironment
+        };
+      default:
+        return null;
     }
-  ]);
+  }
+
+  function getSectionRecap(section: string | null, data: any) {
+    if (!section || !data) return "";
+    
+    const responses = Object.entries(data).filter(([_, value]) => value);
+    if (responses.length === 0) return "";
+    
+    let recap = `Hi Sarah! I can see you've already shared some great information about your ${section.toLowerCase()}. Here's what you told me:\n\n`;
+    
+    responses.forEach(([key, value]) => {
+      const question = getQuestionForKey(section, key);
+      if (question && value) {
+        recap += `**${question}**\n${value}\n\n`;
+      }
+    });
+    
+    recap += `Would you like to expand on any of these answers or add more details?`;
+    return recap;
+  }
+
+  function getQuestionForKey(section: string, key: string) {
+    const sectionQuestions = PROFILE_SECTIONS[section as keyof typeof PROFILE_SECTIONS];
+    if (!sectionQuestions) return null;
+    
+    const question = sectionQuestions.find(q => q.id === key);
+    return question?.question || null;
+  }
+
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  // Initialize messages when profile loads
+  useEffect(() => {
+    if (profile && messages.length === 0) {
+      const initialMessage = getInitialMessage();
+      setMessages([{
+        id: '1',
+        role: 'assistant',
+        content: initialMessage,
+        timestamp: new Date()
+      }]);
+    }
+  }, [profile]);
 
   // Generate AI response
   const generateResponseMutation = useMutation({
@@ -213,6 +313,28 @@ export default function ChatOnboarding() {
                     >
                       <div className="whitespace-pre-wrap">{message.content}</div>
                       
+                      {/* Show expand button for completed sections */}
+                      {message.role === 'assistant' && showExpandButton && index === messages.length - 1 && (
+                        <div className="mt-4 text-center">
+                          <Button
+                            onClick={() => {
+                              setShowExpandButton(false);
+                              const expandMessage: ChatMessage = {
+                                id: Date.now().toString(),
+                                role: 'user',
+                                content: "I'd like to expand on my answers and add more details.",
+                                timestamp: new Date()
+                              };
+                              setMessages(prev => [...prev, expandMessage]);
+                              generateResponseMutation.mutate("I'd like to expand on my answers and add more details.");
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg"
+                          >
+                            Expand on my answers
+                          </Button>
+                        </div>
+                      )}
+
                       {/* Show continue button at the end */}
                       {message.role === 'assistant' && showContinueButton && index === messages.length - 1 && (
                         <div className="mt-4 text-center">
