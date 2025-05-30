@@ -34,7 +34,14 @@ export default function SectionForm() {
       const profileData = profile as any;
       
       // Map profile fields to question IDs for each section
-      if (currentSection === 'Academic Information') {
+      if (currentSection === 'Introduction') {
+        initialAnswers['1'] = profileData.careerMajor || '';
+        initialAnswers['2'] = profileData.dreamSchools || '';
+        initialAnswers['3'] = profileData.freeTimeActivities || '';
+        initialAnswers['4'] = profileData.collegeExperience || '';
+        initialAnswers['5'] = profileData.extracurricularsAdditionalInfo || '';
+        initialAnswers['6'] = profileData.gpaTestScores || '';
+      } else if (currentSection === 'Academic Information') {
         initialAnswers['1'] = profileData.favoriteClasses || '';
         initialAnswers['2'] = profileData.strugglingSubjects || '';
         initialAnswers['3'] = profileData.academicFascinations || '';
@@ -65,7 +72,14 @@ export default function SectionForm() {
       // Map question IDs back to profile field names
       const profileUpdates: Record<string, string> = {};
       
-      if (currentSection === 'Academic Information') {
+      if (currentSection === 'Introduction') {
+        if (sectionAnswers['1']) profileUpdates.careerMajor = sectionAnswers['1'];
+        if (sectionAnswers['2']) profileUpdates.dreamSchools = sectionAnswers['2'];
+        if (sectionAnswers['3']) profileUpdates.freeTimeActivities = sectionAnswers['3'];
+        if (sectionAnswers['4']) profileUpdates.collegeExperience = sectionAnswers['4'];
+        if (sectionAnswers['5']) profileUpdates.extracurricularsAdditionalInfo = sectionAnswers['5'];
+        if (sectionAnswers['6']) profileUpdates.gpaTestScores = sectionAnswers['6'];
+      } else if (currentSection === 'Academic Information') {
         if (sectionAnswers['1']) profileUpdates.favoriteClasses = sectionAnswers['1'];
         if (sectionAnswers['2']) profileUpdates.strugglingSubjects = sectionAnswers['2'];
         if (sectionAnswers['3']) profileUpdates.academicFascinations = sectionAnswers['3'];
