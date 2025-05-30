@@ -159,7 +159,7 @@ export default function ChatOnboarding() {
         } else if (state.step === 12) {
           const newState = { ...state, step: 13, data: { ...state.data, academicFascinations: response } };
           return {
-            response: `I love hearing about what genuinely excites you intellectually! This gives me great insight into programs and research opportunities you might thrive in.\n\nI have everything I need to start finding some amazing college matches for you. Ready to see what I've found?`,
+            response: `I love hearing about what genuinely excites you intellectually! This gives me great insight into programs and research opportunities you might thrive in.\n\nThis is a great start to building your profile. To give you the best college recommendations, I'll need to learn more about your personal interests, values, and preferences. You can continue building your profile through additional conversations or by filling out the detailed forms on your dashboard.`,
             newState,
             isComplete: true,
             showContinueButton: true
@@ -464,7 +464,7 @@ export default function ChatOnboarding() {
                           }}
                           className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
                         >
-                          Ready for recommendations
+                          Continue building profile
                         </Button>
                       </div>
                     )}
