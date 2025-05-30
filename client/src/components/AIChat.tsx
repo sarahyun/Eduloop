@@ -49,7 +49,15 @@ export function AIChat({
     "Compare schools",
     "Application tips", 
     "Career guidance",
-    "Essay help"
+    "Essay help",
+    "Financial aid advice",
+    "Interview preparation",
+    "Major exploration",
+    "Scholarship opportunities",
+    "Study abroad programs",
+    "Extracurricular planning",
+    "Time management",
+    "Academic planning"
   ];
 
   const formatTime = (dateString: string) => {
