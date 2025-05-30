@@ -303,7 +303,11 @@ Instructions:
 - The user just answered the current question: "${currentQuestion?.question || 'previous question'}"
 - Acknowledge their response briefly and positively
 - If there's a next question, ask it directly
-- If this was the last question, indicate the section is complete
+- If this was the last question, provide a thoughtful summary of what you learned about them:
+  * Highlight their interests, goals, and personality
+  * Show you understand their unique profile
+  * Make connections between their answers
+  * End with encouragement about continuing their profile
 - Only ask 1 brief follow-up if the answer is extremely vague (like "idk" or "nothing")
 - Be conversational but move efficiently through questions
 - Return JSON: {"response": "your response", "isComplete": ${isLastQuestion}, "profileUpdates": {"field": "value"}}

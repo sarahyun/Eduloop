@@ -498,6 +498,18 @@ export default function ChatOnboarding() {
               </div>
             </ScrollArea>
 
+            {/* Completion Section */}
+            {isComplete && (
+              <div className="flex justify-center p-4 border-t bg-gray-50">
+                <Button 
+                  onClick={() => window.location.href = '/profile-builder'}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full"
+                >
+                  Continue Building Profile
+                </Button>
+              </div>
+            )}
+
             {/* Input Area */}
             <div className="flex items-center space-x-2 p-4 border-t bg-white">
               <Input
