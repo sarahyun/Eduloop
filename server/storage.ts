@@ -460,30 +460,59 @@ export class MemStorage implements IStorage {
 }
 
 // Database storage implementation
-import { db } from "./db";
+import { db, pool } from "./db";
 import { eq } from "drizzle-orm";
 
 export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
+    try {
+      const result = await pool.query(`
+        SELECT id, username, email, full_name as name, password 
+        FROM users WHERE id = $1
+      `, [id]);
+      
+      return result.rows[0] as User || undefined;
+    } catch (error) {
+      console.error('Database getUser error:', error);
+      return undefined;
+    }
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user || undefined;
+    try {
+      const result = await pool.query(`
+        SELECT id, username, email, full_name as name, password 
+        FROM users WHERE email = $1
+      `, [email]);
+      
+      return result.rows[0] as User || undefined;
+    } catch (error) {
+      console.error('Database getUserByEmail error:', error);
+      return undefined;
+    }
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values({
-        ...insertUser,
-        userId: `user_${Date.now()}`, // Generate unique userId
-        createdAt: new Date(),
-      })
-      .returning();
-    return user;
+  async createUser(insertUser: any): Promise<User> {
+    try {
+      // Use raw SQL to insert into the existing table structure
+      const result = await pool.query(`
+        INSERT INTO users (username, password, email, full_name, grade, created_at) 
+        VALUES ($1, $2, $3, $4, $5, $6) 
+        RETURNING id, email, full_name as name
+      `, [
+        insertUser.username, 
+        insertUser.password, 
+        insertUser.email, 
+        insertUser.fullName, 
+        '12th',
+        new Date()
+      ]);
+      
+      return result.rows[0] as User;
+    } catch (error) {
+      console.error('Database user creation error:', error);
+      throw error;
+    }
   }
 
   // Implement other methods with database operations
