@@ -15,6 +15,11 @@ export const users = pgTable("users", {
 export const studentProfiles = pgTable("student_profiles", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
+  // Introduction section
+  name: text("name"),
+  grade: text("grade"),
+  school: text("school"),
+  basicInfo: text("basic_info"),
   // Academic Information section
   favoriteClasses: text("favorite_classes"),
   strugglingSubjects: text("struggling_subjects"), 

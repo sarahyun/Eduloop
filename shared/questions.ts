@@ -1,4 +1,10 @@
 export const PROFILE_SECTIONS = {
+  "Introduction": [
+    { id: "name", question: "What's your name?" },
+    { id: "grade", question: "What grade are you in?" },
+    { id: "school", question: "What school do you attend?" },
+    { id: "basicInfo", question: "Tell us a bit about yourself" }
+  ],
   "Academic Information": [
     { id: "favoriteClasses", question: "What are your 3 favorite classes?" },
     { id: "strugglingSubjects", question: "What subjects do you struggle with?" },
