@@ -7,6 +7,7 @@ import {
   collegeRecommendations,
   savedColleges,
   searchQueries,
+  questionResponses,
   type User, 
   type InsertUser,
   type StudentProfile,
@@ -22,7 +23,9 @@ import {
   type SavedCollege,
   type InsertSavedCollege,
   type SearchQuery,
-  type InsertSearchQuery
+  type InsertSearchQuery,
+  type QuestionResponse,
+  type InsertQuestionResponse
 } from "@shared/schema";
 
 export interface IStorage {
@@ -65,6 +68,12 @@ export interface IStorage {
   // Search queries
   createSearchQuery(searchQuery: InsertSearchQuery): Promise<SearchQuery>;
   getUserSearchHistory(userId: number): Promise<SearchQuery[]>;
+
+  // Question responses
+  createQuestionResponse(response: InsertQuestionResponse): Promise<QuestionResponse>;
+  updateQuestionResponse(userId: number, questionId: string, response: Partial<QuestionResponse>): Promise<QuestionResponse>;
+  getUserQuestionResponses(userId: number, section?: string): Promise<QuestionResponse[]>;
+  getQuestionResponse(userId: number, questionId: string): Promise<QuestionResponse | undefined>;
 
   // User feedback tracking
   createUserFeedback(feedback: InsertUserFeedback): Promise<UserFeedback>;
