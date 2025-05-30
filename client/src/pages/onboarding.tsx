@@ -175,14 +175,17 @@ export default function OnboardingPage() {
           // Insert the follow-up step after the current step
           setDynamicSteps(prev => {
             const newSteps = [...prev];
-            // Insert at the correct position relative to base steps
-            const insertPosition = currentStep - baseSteps.length + 1;
-            newSteps.splice(Math.max(0, insertPosition), 0, followUpStep);
+            newSteps.push(followUpStep); // Add to end of dynamic steps
+            console.log('Added follow-up step:', followUpStep.title);
+            console.log('Dynamic steps now:', newSteps.length);
             return newSteps;
           });
           
           // Advance to the follow-up step
-          setCurrentStep(currentStep + 1);
+          setTimeout(() => {
+            console.log('Advancing to next step, current:', currentStep);
+            setCurrentStep(currentStep + 1);
+          }, 100);
         }
       }
     } catch (error) {
