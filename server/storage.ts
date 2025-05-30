@@ -104,6 +104,35 @@ export class MemStorage implements IStorage {
   }
 
   private initializeSampleData() {
+    // Create sample users
+    const user1: User = {
+      id: 1,
+      username: "student1",
+      password: "password123",
+      email: "student1@example.com",
+      fullName: "Alex Johnson",
+      grade: "12th",
+      createdAt: new Date()
+    };
+    this.users.set(1, user1);
+
+    // Create sample student profile
+    const profile1: StudentProfile = {
+      id: 1,
+      userId: 1,
+      academicInterests: ["Computer Science", "Medicine"],
+      careerGoals: ["Software Engineer", "Doctor"],
+      values: ["Innovation", "Helping Others"],
+      learningStyle: "Visual",
+      extracurriculars: ["Coding Club", "Volunteer Work"],
+      gpa: 3.8,
+      satScore: 1450,
+      actScore: 32,
+      profileCompletion: 85,
+      updatedAt: new Date()
+    };
+    this.studentProfiles.set(1, profile1);
+
     const sampleColleges: InsertCollege[] = [
       {
         name: "Stanford University",
