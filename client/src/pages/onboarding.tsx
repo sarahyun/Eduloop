@@ -110,8 +110,8 @@ export default function OnboardingPage() {
       const response = responseKey ? responses[responseKey] : null;
 
       if (response && response.length > 20) {
-
         await generateFollowUpStep(currentStepData.id, response);
+        return; // Don't advance step yet, wait for follow-up to be generated
       }
     }
     
@@ -180,6 +180,9 @@ export default function OnboardingPage() {
             newSteps.splice(Math.max(0, insertPosition), 0, followUpStep);
             return newSteps;
           });
+          
+          // Advance to the follow-up step
+          setCurrentStep(currentStep + 1);
         }
       }
     } catch (error) {
