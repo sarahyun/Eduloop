@@ -72,6 +72,7 @@ export default function OnboardingPage() {
   // Update responses when profile data loads
   useEffect(() => {
     if (existingProfile) {
+      console.log('Loading existing profile:', existingProfile);
       setResponses({
         careerMajor: existingProfile.careerMajor || "",
         dreamSchools: existingProfile.dreamSchools || "",
