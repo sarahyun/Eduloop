@@ -175,15 +175,9 @@ export default function OnboardingPage() {
     // Combine main responses with follow-up responses
     const allResponses = Object.keys(responses).map(key => {
       let mainResponse = responses[key as keyof typeof responses];
-      const followUps = followUpQuestions[key];
-      if (followUps && followUps.length > 0) {
-        const followUpAnswers = followUps.map((q, index) => 
-          followUpResponses[`${key}_followup_${index}`]
-        ).filter(Boolean);
-        
-        if (followUpAnswers.length > 0) {
-          mainResponse += '\n\nAdditional details:\n' + followUpAnswers.join('\n');
-        }
+      const followUpAnswer = followUpResponses[`${key}_followup`];
+      if (followUpAnswer) {
+        mainResponse += '\n\nAdditional details:\n' + followUpAnswer;
       }
       return mainResponse;
     }).filter(Boolean);
@@ -269,28 +263,6 @@ export default function OnboardingPage() {
             <p className="text-sm text-gray-500">
               Feel free to mention multiple interests, uncertainty, or anything that comes to mind.
             </p>
-            
-            {/* Follow-up Questions */}
-            {isGeneratingQuestions && (
-              <div className="flex items-center space-x-2 text-sm text-gray-500">
-                <MessageCircle className="w-4 h-4 animate-pulse" />
-                <span>Thinking of follow-up questions...</span>
-              </div>
-            )}
-            
-            {followUpQuestions.careerMajor && followUpQuestions.careerMajor.map((question, index) => (
-              <div key={index} className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
-                <Label className="text-sm font-medium text-gray-800 mb-2 block">
-                  Follow-up: {question}
-                </Label>
-                <Textarea
-                  placeholder="Your thoughts..."
-                  value={followUpResponses[`careerMajor_followup_${index}`] || ''}
-                  onChange={(e) => updateFollowUpResponse(`careerMajor_followup_${index}`, e.target.value)}
-                  className="min-h-20 text-sm"
-                />
-              </div>
-            ))}
           </div>
         </div>
       )
@@ -321,20 +293,6 @@ export default function OnboardingPage() {
             <p className="text-sm text-gray-500">
               Share what you know or admit if you're still exploring - both are perfectly fine!
             </p>
-            
-            {followUpQuestions.dreamSchools && followUpQuestions.dreamSchools.map((question, index) => (
-              <div key={index} className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
-                <Label className="text-sm font-medium text-gray-800 mb-2 block">
-                  Follow-up: {question}
-                </Label>
-                <Textarea
-                  placeholder="Your thoughts..."
-                  value={followUpResponses[`dreamSchools_followup_${index}`] || ''}
-                  onChange={(e) => updateFollowUpResponse(`dreamSchools_followup_${index}`, e.target.value)}
-                  className="min-h-20 text-sm"
-                />
-              </div>
-            ))}
           </div>
         </div>
       )
@@ -365,20 +323,6 @@ export default function OnboardingPage() {
             <p className="text-sm text-gray-500">
               Include anything from hobbies to volunteer work to things you do just for fun.
             </p>
-            
-            {followUpQuestions.freeTime && followUpQuestions.freeTime.map((question, index) => (
-              <div key={index} className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
-                <Label className="text-sm font-medium text-gray-800 mb-2 block">
-                  Follow-up: {question}
-                </Label>
-                <Textarea
-                  placeholder="Your thoughts..."
-                  value={followUpResponses[`freeTime_followup_${index}`] || ''}
-                  onChange={(e) => updateFollowUpResponse(`freeTime_followup_${index}`, e.target.value)}
-                  className="min-h-20 text-sm"
-                />
-              </div>
-            ))}
           </div>
         </div>
       )
@@ -409,20 +353,6 @@ export default function OnboardingPage() {
             <p className="text-sm text-gray-500">
               Be honest about both your hopes and concerns - this helps us provide better guidance.
             </p>
-            
-            {followUpQuestions.collegeExperience && followUpQuestions.collegeExperience.map((question, index) => (
-              <div key={index} className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
-                <Label className="text-sm font-medium text-gray-800 mb-2 block">
-                  Follow-up: {question}
-                </Label>
-                <Textarea
-                  placeholder="Your thoughts..."
-                  value={followUpResponses[`collegeExperience_followup_${index}`] || ''}
-                  onChange={(e) => updateFollowUpResponse(`collegeExperience_followup_${index}`, e.target.value)}
-                  className="min-h-20 text-sm"
-                />
-              </div>
-            ))}
           </div>
         </div>
       )
@@ -458,20 +388,6 @@ Started a coding club at school..."
             <p className="text-sm text-gray-500">
               Include leadership roles, awards, jobs, volunteer work, or anything meaningful to you.
             </p>
-            
-            {followUpQuestions.extracurriculars && followUpQuestions.extracurriculars.map((question, index) => (
-              <div key={index} className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
-                <Label className="text-sm font-medium text-gray-800 mb-2 block">
-                  Follow-up: {question}
-                </Label>
-                <Textarea
-                  placeholder="Your thoughts..."
-                  value={followUpResponses[`extracurriculars_followup_${index}`] || ''}
-                  onChange={(e) => updateFollowUpResponse(`extracurriculars_followup_${index}`, e.target.value)}
-                  className="min-h-20 text-sm"
-                />
-              </div>
-            ))}
           </div>
         </div>
       )
