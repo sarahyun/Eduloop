@@ -254,17 +254,17 @@ I'm going to create your personalized profile now and then we can start explorin
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
       <div className="max-w-4xl mx-auto h-screen flex flex-col">
         {/* Header */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
           <div className="flex items-center justify-center">
             <h1 className="text-lg font-semibold text-gray-900 dark:text-white">College Discovery</h1>
           </div>
         </div>
 
         {/* Messages */}
-        <ScrollArea className="flex-1 px-4 py-6" ref={scrollAreaRef}>
+        <ScrollArea className="flex-1 px-4 py-6 bg-white dark:bg-gray-900" ref={scrollAreaRef}>
           <div className="space-y-4 max-w-3xl mx-auto">
             {messages.map((message) => (
               <div
@@ -272,10 +272,10 @@ I'm going to create your personalized profile now and then we can start explorin
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[75%] px-4 py-3 rounded-3xl text-base leading-relaxed ${
+                  className={`max-w-[75%] px-4 py-3 rounded-2xl text-base leading-relaxed ${
                     message.role === 'user'
-                      ? 'bg-blue-500 text-white rounded-br-lg'
-                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-bl-lg'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700'
                   }`}
                 >
                   <p className="whitespace-pre-wrap">{message.content}</p>
@@ -285,7 +285,7 @@ I'm going to create your personalized profile now and then we can start explorin
             
             {generateResponseMutation.isPending && (
               <div className="flex justify-start">
-                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-3 rounded-3xl rounded-bl-lg">
+                <div className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-3 rounded-2xl">
                   <TypingIndicator isVisible={true} />
                 </div>
               </div>
@@ -294,7 +294,7 @@ I'm going to create your personalized profile now and then we can start explorin
         </ScrollArea>
 
         {/* Input Area */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700 px-4 py-4">
+        <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-4">
           <div className="max-w-3xl mx-auto">
             {!isComplete ? (
               <div className="flex items-end space-x-3">
@@ -306,7 +306,7 @@ I'm going to create your personalized profile now and then we can start explorin
                     onKeyPress={handleKeyPress}
                     placeholder="Type a message..."
                     disabled={generateResponseMutation.isPending}
-                    className="w-full px-4 py-3 pr-12 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-base resize-none"
+                    className="w-full px-4 py-3 pr-12 rounded-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-base"
                   />
                   <Button
                     onClick={handleSend}
