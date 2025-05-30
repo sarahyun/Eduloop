@@ -280,11 +280,14 @@ Recommend a diverse mix of colleges with specific reasoning for each. Return you
     try {
       const { userMessage, section, conversationHistory, questions } = context;
       
+      // Debug logging
+      console.log('OpenAI context:', { userMessage, section, questions: questions || 'undefined', conversationHistory: conversationHistory || 'undefined' });
+      
       // Build context about the current section and questions
       const sectionContext = section ? `
 Current section: ${section}
 Questions for this section:
-${questions ? questions.map(q => `- ${q.question}`).join('\n') : 'No questions defined'}
+${questions && Array.isArray(questions) ? questions.map(q => `- ${q.question}`).join('\n') : 'No questions defined'}
 ` : '';
 
       const completion = await this.openai.chat.completions.create({
