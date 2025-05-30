@@ -9,6 +9,7 @@ import ExplorePage from "@/pages/explore";
 import OnboardingPage from "@/pages/onboarding";
 import ChatOnboarding from "@/pages/chat-onboarding";
 import ProfileBuilder from "@/pages/profile-builder";
+import SectionForm from "@/pages/section-form";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -20,7 +21,8 @@ function Router() {
       <Route path="/explore" component={ExplorePage} />
       <Route path="/onboarding" component={OnboardingPage} />
       <Route path="/chat-onboarding" component={ChatOnboarding} />
-      <Route path="/profile" component={ProfileBuilder} />
+      <Route path="/profile-builder" component={ProfileBuilder} />
+      <Route path="/section-form" component={SectionForm} />
       <Route component={NotFound} />
     </Switch>
   );
