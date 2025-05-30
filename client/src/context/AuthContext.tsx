@@ -64,9 +64,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     try {
       // Create the user profile in backend
-      await apiRequest('/api/users/', {
+      await fetch('/api/users/', {
         method: 'POST',
-        body: {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           userId: userCredential.user.uid,
           name,
           email,
@@ -74,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           grade,
           createdAt: new Date().toISOString(),
           lastLogin: new Date().toISOString()
-        }
+        })
       });
 
       // Set the user state with the role immediately
