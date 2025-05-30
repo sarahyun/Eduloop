@@ -133,7 +133,7 @@ export default function OnboardingPage() {
     
     // Combine main responses with follow-up responses
     const allResponses = Object.keys(responses).map(key => {
-      let mainResponse = responses[key];
+      let mainResponse = responses[key as keyof typeof responses];
       const followUps = followUpQuestions[key];
       if (followUps && followUps.length > 0) {
         const followUpAnswers = followUps.map((q, index) => 
@@ -163,12 +163,10 @@ export default function OnboardingPage() {
   const updateResponse = (key: string, value: string) => {
     setResponses(prev => ({ ...prev, [key]: value }));
     
-    // Generate follow-up questions when user pauses typing
-    const timeoutId = setTimeout(() => {
+    // Generate follow-up questions when user pauses typing (debounced)
+    setTimeout(() => {
       generateFollowUpQuestions(key, value);
     }, 2000);
-    
-    return () => clearTimeout(timeoutId);
   };
 
   const updateFollowUpResponse = (key: string, value: string) => {

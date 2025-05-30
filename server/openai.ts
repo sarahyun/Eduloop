@@ -197,6 +197,48 @@ Recommend a diverse mix of colleges with specific reasoning for each. Return you
       throw new Error("Unable to generate recommendations at this time.");
     }
   }
+
+  async generateFollowUpQuestions(stepId: string, response: string, previousResponses: any): Promise<string[]> {
+    const contextMap: { [key: string]: string } = {
+      careerMajor: "the student's career and major interests",
+      dreamSchools: "the student's thoughts on specific colleges",
+      freeTime: "how the student spends their free time and hobbies",
+      collegeExperience: "what the student wants from college and their concerns",
+      extracurriculars: "the student's activities and achievements"
+    };
+
+    const context = contextMap[stepId] || "the student's response";
+    
+    const prompt = `Based on ${context}, generate 1-2 thoughtful follow-up questions that would help understand the student better for college recommendations. 
+
+Student's response: "${response}"
+
+Previous responses context: ${JSON.stringify(previousResponses)}
+
+Generate questions that:
+- Are specific and personal
+- Help reveal deeper motivations or interests
+- Are conversational and supportive
+- Avoid being repetitive of what they already shared
+- Would be useful for college matching
+
+Respond with a JSON array of questions (maximum 2).`;
+
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+        max_tokens: 300,
+      });
+
+      const result = JSON.parse(completion.choices[0].message.content || "{}");
+      return result.questions || [];
+    } catch (error) {
+      console.error("Error generating follow-up questions:", error);
+      return [];
+    }
+  }
 }
 
 export interface CollegeRecommendation {
