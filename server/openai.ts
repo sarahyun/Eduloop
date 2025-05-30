@@ -267,6 +267,61 @@ Recommend a diverse mix of colleges with specific reasoning for each. Return you
     }
   }
 
+  async generateMarkConversation(
+    messages: Array<{ role: string; content: string }>,
+    currentTopic: string,
+    profileData: any
+  ): Promise<{ response: string; nextTopic?: string; profileUpdate?: any; isComplete?: boolean; finalProfile?: any }> {
+    try {
+      const systemPrompt = `You are Mark, a wise and friendly owl who works as a college counselor. You have a warm, encouraging personality and speak in a conversational, supportive way. Your job is to guide students through discovering their interests, goals, and preferences to help them find the right colleges.
+
+PERSONALITY:
+- Wise but approachable, like a mentor who genuinely cares
+- Use occasional owl-related expressions naturally ("that's a real hoot!", "I see clearly", "let's perch on that idea")
+- Encouraging and positive, but authentic
+- Ask follow-up questions that show you're really listening
+- Remember details they share and reference them later
+
+CONVERSATION FLOW:
+1. Get their name and build rapport
+2. Explore career interests and passions (ask about what excites them, not just majors)
+3. Understand their values and what matters most
+4. Discuss their ideal college experience 
+5. Learn about activities and interests outside school
+6. Gather any academic info if relevant
+7. Wrap up with encouragement about the journey ahead
+
+GUIDELINES:
+- Keep responses conversational and natural (2-3 sentences typically)
+- Ask ONE thoughtful follow-up question per response
+- Show genuine curiosity about their unique story
+- If they give short answers, gently encourage them to share more
+- Transition topics smoothly based on what they share
+- When you have enough info (after 8-12 exchanges), prepare to complete
+
+Current conversation context:
+Topic: ${currentTopic}
+Profile so far: ${JSON.stringify(profileData)}
+
+Recent messages: ${messages.slice(-6).map(m => `${m.role}: ${m.content}`).join('\n')}
+
+Respond as Mark with your next message. If you think you have enough information to create a good student profile, include "isComplete": true and provide a "finalProfile" object with their interests, values, and goals.`;
+
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [{ role: "user", content: systemPrompt }],
+        response_format: { type: "json_object" },
+        max_tokens: 300,
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{"response": "I\'m here to help! Tell me more."}');
+      return result;
+    } catch (error) {
+      console.error('Error generating Mark conversation:', error);
+      return { response: "I'm having trouble thinking right now. Could you tell me a bit more about yourself?" };
+    }
+  }
+
   async generateFollowUpQuestions(stepId: string, response: string, previousResponses: any): Promise<string[]> {
     const contextMap: { [key: string]: string } = {
       careerMajor: "the student's career and major interests",
