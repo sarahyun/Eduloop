@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -15,6 +15,15 @@ import { insertStudentProfileSchema } from "../../../shared/schema";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import * as z from "zod";
+
+// Simple debounce utility function
+function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
 
 const profileSchema = insertStudentProfileSchema.extend({
   learningStyle: z.string().optional(),
@@ -252,30 +261,49 @@ export default function OnboardingPage() {
     createProfileMutation.mutate(formData);
   };
 
-  // Autosave mutation
-  const autosaveMutation = useMutation({
-    mutationFn: async (data: { [key: string]: string }) => {
-      const profileUpdates: Record<string, string> = {};
-      
-      // Map response keys to profile field names
-      if (data.careerMajor !== undefined) profileUpdates.careerMajor = data.careerMajor;
-      if (data.dreamSchools !== undefined) profileUpdates.dreamSchools = data.dreamSchools;
-      if (data.freeTime !== undefined) profileUpdates.freeTimeActivities = data.freeTime;
-      if (data.collegeExperience !== undefined) profileUpdates.collegeExperience = data.collegeExperience;
-      if (data.extracurriculars !== undefined) profileUpdates.extracurricularsAdditionalInfo = data.extracurriculars;
+  // Question definitions for onboarding
+  const onboardingQuestions = {
+    careerMajor: "What do you want to study or what career interests you?",
+    dreamSchools: "What are some schools you're excited about?", 
+    freeTime: "What do you like to do outside of school?",
+    collegeExperience: "What are you looking for in your college experience? Any worries about the process?",
+    extracurriculars: "Tell us about your extracurricular activities and involvement."
+  };
 
-      const response = await fetch('/api/profile/1', {
-        method: 'PUT',
+  // Autosave mutation using question response model
+  const autosaveMutation = useMutation({
+    mutationFn: async (allResponses: { [key: string]: string }) => {
+      const responsePayload = {
+        response_id: `1-onboarding`,
+        user_id: 1,
+        form_id: "onboarding",
+        submitted_at: new Date().toISOString(),
+        responses: Object.entries(allResponses)
+          .filter(([key, value]) => value && value.trim() !== '')
+          .map(([questionId, answer]) => ({
+            question_id: questionId,
+            question_text: onboardingQuestions[questionId as keyof typeof onboardingQuestions] || '',
+            answer: answer
+          }))
+      };
+
+      const response = await fetch('/api/question-responses', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: 1,
-          ...profileUpdates
-        })
+        body: JSON.stringify(responsePayload)
       });
-      if (!response.ok) throw new Error('Failed to autosave');
+      if (!response.ok) throw new Error('Failed to autosave responses');
       return response.json();
     },
   });
+
+  // Debounced autosave to prevent too many API calls
+  const debouncedAutosave = useCallback(
+    debounce((allResponses: { [key: string]: string }) => {
+      autosaveMutation.mutate(allResponses);
+    }, 1000),
+    []
+  );
 
   const updateResponse = (key: string, value: string) => {
     console.log('Updating response:', key, '=', value);
@@ -283,8 +311,8 @@ export default function OnboardingPage() {
       const updated = { ...prev, [key]: value };
       console.log('Updated responses state:', updated);
       
-      // Autosave the single field that changed
-      autosaveMutation.mutate({ [key]: value });
+      // Pass all responses to autosave, not just the changed field
+      debouncedAutosave(updated);
       
       return updated;
     });
