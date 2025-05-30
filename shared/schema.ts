@@ -16,10 +16,12 @@ export const studentProfiles = pgTable("student_profiles", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
   // Introduction section
-  name: text("name"),
-  grade: text("grade"),
-  school: text("school"),
-  basicInfo: text("basic_info"),
+  careerMajor: text("career_major"),
+  dreamSchools: text("dream_schools"),
+  introFreeTimeActivities: text("intro_free_time_activities"),
+  introCollegeExperience: text("intro_college_experience"),
+  extracurriculars: text("extracurriculars"),
+  gpaTestScores: text("gpa_test_scores"),
   // Academic Information section
   favoriteClasses: text("favorite_classes"),
   strugglingSubjects: text("struggling_subjects"), 

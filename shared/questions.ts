@@ -1,9 +1,11 @@
 export const PROFILE_SECTIONS = {
   "Introduction": [
-    { id: "name", question: "What's your name?" },
-    { id: "grade", question: "What grade are you in?" },
-    { id: "school", question: "What school do you attend?" },
-    { id: "basicInfo", question: "Tell us a bit about yourself" }
+    { id: "careerMajor", question: "Do you have a career or major in mind? No worries if not." },
+    { id: "dreamSchools", question: "Got any dream schools in mind, if so why these schools?" },
+    { id: "introFreeTimeActivities", question: "Aside from hanging out with friends, how do you like to spend your time outside of school?" },
+    { id: "introCollegeExperience", question: "What are you looking for in your college experience? Also, anything that worries you about this process?" },
+    { id: "extracurriculars", question: "If you have a resume or a list of extracurriculars, feel free to paste or enter them here." },
+    { id: "gpaTestScores", question: "What is your GPA and test scores?" }
   ],
   "Academic Information": [
     { id: "favoriteClasses", question: "What are your 3 favorite classes?" },
