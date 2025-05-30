@@ -62,6 +62,19 @@ export default function ChatOnboarding() {
     step: 0,
     data: previousAnswers
   });
+
+  // Calculate progress for current section
+  const getSectionProgress = () => {
+    const step = onboardingState.step;
+    if (step === 0) return { section: "Introduction Review", progress: 0, total: 1 };
+    if (step >= 1 && step <= 2) return { section: "Updates & Clarifications", progress: step - 1, total: 2 };
+    if (step >= 10 && step <= 12) return { section: "Academic Interests", progress: step - 10, total: 3 };
+    if (step >= 20 && step <= 21) return { section: "Interest Expansion", progress: step - 20, total: 2 };
+    return { section: "Complete", progress: 1, total: 1 };
+  };
+
+  const { section, progress, total } = getSectionProgress();
+  const progressPercentage = total > 0 ? Math.round((progress / total) * 100) : 0;
   const [isComplete, setIsComplete] = useState(false);
   const [showAcademicForm, setShowAcademicForm] = useState(false);
   const [showProfileInsights, setShowProfileInsights] = useState(false);
@@ -282,7 +295,7 @@ export default function ChatOnboarding() {
         <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl h-full flex flex-col shadow-2xl border border-white/20 dark:border-gray-700/50">
           {/* Header */}
           <div className="px-6 py-6 border-b border-gray-200/50 dark:border-gray-700/50 rounded-t-3xl bg-gradient-to-r from-blue-500/10 to-indigo-500/10">
-            <div className="flex items-center justify-center space-x-3">
+            <div className="flex items-center justify-center space-x-3 mb-4">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
                 <Bot className="w-5 h-5 text-white" />
               </div>
@@ -292,6 +305,23 @@ export default function ChatOnboarding() {
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">AI-powered guidance</p>
               </div>
+            </div>
+            
+            {/* Progress Indicator */}
+            <div className="max-w-md mx-auto">
+              <div className="flex items-center justify-between text-sm mb-2">
+                <span className="text-gray-600 dark:text-gray-300 font-medium">{section}</span>
+                <span className="text-gray-500 dark:text-gray-400">{progressPercentage}% complete</span>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                <div 
+                  className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2.5 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${progressPercentage}%` }}
+                ></div>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
+                Building your profile to find the perfect college matches
+              </p>
             </div>
           </div>
 
