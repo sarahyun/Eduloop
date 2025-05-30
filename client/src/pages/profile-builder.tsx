@@ -14,7 +14,7 @@ export default function ProfileBuilder() {
   
   // Dynamic sections with completion tracking - all offer both methods
   const sections = [
-    { id: 'onboarding', title: 'Basic Info', completed: true, method: 'both', lastUpdated: '2 days ago', description: 'Name, school, basic background' },
+    { id: 'onboarding', title: 'Introductions', completed: true, method: 'both', lastUpdated: '2 days ago', description: 'Name, school, basic background' },
     { id: 'academics', title: 'Academics', completed: false, method: 'both', description: 'Favorite classes, subjects, academic interests' },
     { id: 'interests', title: 'Interests', completed: false, method: 'both', description: 'What you\'re proud of, fields to explore, free time' },
     { id: 'reflections', title: 'Personal Reflections', completed: false, method: 'both', description: 'What makes you happy, challenges overcome, values' },
@@ -223,7 +223,12 @@ export default function ProfileBuilder() {
                     {section.completed && (
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-500">Updated {section.lastUpdated}</span>
-                        <Button size="sm" variant="ghost" className="text-gray-600 hover:text-blue-600">
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="text-gray-600 hover:text-blue-600"
+                          onClick={() => handleMethodSelection('chat', section.id)}
+                        >
                           <Edit className="w-3 h-3 mr-1" />
                           Edit
                         </Button>
