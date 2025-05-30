@@ -368,6 +368,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate follow-up questions
+  app.post("/api/generate-followup-questions", async (req, res) => {
+    try {
+      const { stepId, response, previousResponses } = req.body;
+      
+      if (!response || response.length < 20) {
+        return res.json({ questions: [] });
+      }
+
+      const questions = await aiService.generateFollowUpQuestions(stepId, response, previousResponses);
+      res.json({ questions });
+    } catch (error) {
+      log(`Error generating follow-up questions: ${error}`);
+      res.status(500).json({ error: "Failed to generate follow-up questions" });
+    }
+  });
+
   // Search history
   app.get("/api/search-history/:userId", async (req, res) => {
     try {
