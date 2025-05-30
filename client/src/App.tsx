@@ -7,7 +7,7 @@ import Dashboard from "@/pages/dashboard";
 import ChatPage from "@/pages/chat";
 import ExplorePage from "@/pages/explore";
 import OnboardingPage from "@/pages/onboarding";
-import ChatOnboarding from "@/pages/chat-onboarding-new";
+import ChatOnboarding from "@/pages/chat-onboarding";
 import ProfileBuilder from "@/pages/profile-builder";
 import SectionForm from "@/pages/section-form";
 import NotFound from "@/pages/not-found";

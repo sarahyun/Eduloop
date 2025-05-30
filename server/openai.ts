@@ -267,6 +267,70 @@ Recommend a diverse mix of colleges with specific reasoning for each. Return you
     }
   }
 
+  async generateOnboardingResponse(context: {
+    userMessage: string;
+    section?: string;
+    conversationHistory: Array<{ role: string; content: string }>;
+    questions: Array<{ id: string; question: string }>;
+  }): Promise<{
+    response: string;
+    isComplete: boolean;
+    profileUpdates?: Record<string, string>;
+  }> {
+    try {
+      const { userMessage, section, conversationHistory, questions } = context;
+      
+      // Build context about the current section and questions
+      const sectionContext = section ? `
+Current section: ${section}
+Questions for this section:
+${questions.map(q => `- ${q.question}`).join('\n')}
+` : '';
+
+      const completion = await this.openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: `You are a friendly college counselor having a conversation with a student to build their profile. 
+
+${sectionContext}
+
+Guidelines:
+- Ask one question at a time, building naturally on their responses
+- Don't repeat questions that have already been covered in other sections
+- Keep responses conversational and encouraging
+- Extract key information from their answers
+- When you have enough information for the current section (usually after 3-4 meaningful exchanges), indicate completion
+- Return response in JSON format: {"response": "your response", "isComplete": boolean, "profileUpdates": {questionId: "extracted answer"}}
+
+Conversation history:
+${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}`
+          },
+          {
+            role: "user",
+            content: userMessage
+          }
+        ],
+        response_format: { type: "json_object" },
+      });
+
+      const result = JSON.parse(completion.choices[0].message.content || '{}');
+      
+      return {
+        response: result.response || "I'd love to learn more about you. Could you tell me a bit more?",
+        isComplete: result.isComplete || false,
+        profileUpdates: result.profileUpdates || {}
+      };
+    } catch (error) {
+      console.error('Error generating onboarding response:', error);
+      return {
+        response: "I'm having trouble processing that. Could you try rephrasing your response?",
+        isComplete: false
+      };
+    }
+  }
+
   async generateFollowUpQuestions(stepId: string, response: string, previousResponses: any): Promise<string[]> {
     const contextMap: { [key: string]: string } = {
       careerMajor: "the student's career and major interests",
