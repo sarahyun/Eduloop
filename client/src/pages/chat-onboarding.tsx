@@ -251,9 +251,7 @@ export default function ChatOnboarding() {
         profileCompletion: 100,
       }),
     onSuccess: () => {
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 2000);
+      // Profile saved successfully - user can navigate manually when ready
     }
   });
 
