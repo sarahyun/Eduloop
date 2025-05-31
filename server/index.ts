@@ -80,7 +80,7 @@ app.use((req, res, next) => {
     target: 'http://localhost:8000',
     changeOrigin: true,
     pathRewrite: {
-      '^/api': '/api',
+      '^/api': '',
     }
   }));
 
