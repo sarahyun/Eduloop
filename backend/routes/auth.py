@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from models import UserCreate, UserResponse, LoginRequest
 from database import db, serialize_doc
 
-router = APIRouter(prefix="/auth", tags=["authentication"])
+router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
 @router.post("/signup", response_model=UserResponse)
 async def signup(user: UserCreate):
