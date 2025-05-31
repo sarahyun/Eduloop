@@ -81,17 +81,10 @@ app.use((req, res, next) => {
     changeOrigin: true,
     pathRewrite: {
       '^/api': '/api',
-    },
-    onError: (err, req, res) => {
-      log(`Proxy error: ${err.message}`);
-      res.status(500).json({ message: 'Backend service unavailable' });
-    },
-    onProxyReq: (proxyReq, req) => {
-      log(`Proxying ${req.method} ${req.url} to FastAPI`);
     }
   }));
 
-  const server = require('http').createServer(app);
+  const server = createServer(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
