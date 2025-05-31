@@ -6,6 +6,7 @@ from typing import Optional, List
 from datetime import datetime
 from bson import ObjectId
 import os
+from ai_service import ai_service
 
 app = FastAPI(title="College Counseling API", version="1.0.0")
 
@@ -348,6 +349,84 @@ async def get_user_question_responses(user_id: str, section: Optional[str] = Non
         return responses
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get question responses: {str(e)}")
+
+# AI-powered routes
+class ChatRequest(BaseModel):
+    message: str
+    conversationId: str
+    userId: str
+
+@app.post("/api/chat")
+async def chat_with_mentor(request: ChatRequest):
+    try:
+        # Get conversation history
+        messages = []
+        async for msg in db.messages.find({"conversationId": request.conversationId}):
+            messages.append({"role": msg["role"], "content": msg["content"]})
+        
+        # Get student profile for context
+        student_profile = await db.studentProfiles.find_one({"userId": request.userId})
+        
+        # Generate AI response
+        ai_response = await ai_service.generate_mentor_response(
+            request.message, 
+            messages, 
+            student_profile
+        )
+        
+        # Save user message
+        await db.messages.insert_one({
+            "conversationId": request.conversationId,
+            "role": "user",
+            "content": request.message,
+            "createdAt": datetime.now()
+        })
+        
+        # Save AI response
+        await db.messages.insert_one({
+            "conversationId": request.conversationId,
+            "role": "assistant",
+            "content": ai_response,
+            "createdAt": datetime.now()
+        })
+        
+        return {"response": ai_response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Chat failed: {str(e)}")
+
+@app.get("/api/recommendations/{user_id}")
+async def get_college_recommendations(user_id: str):
+    try:
+        # Get student profile
+        student_profile = await db.studentProfiles.find_one({"userId": user_id})
+        if not student_profile:
+            raise HTTPException(status_code=404, detail="Student profile not found")
+        
+        # Generate recommendations using AI
+        recommendations = await ai_service.generate_college_recommendations(student_profile)
+        
+        return {"recommendations": [rec.dict() for rec in recommendations]}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate recommendations: {str(e)}")
+
+@app.get("/api/insights/{user_id}")
+async def get_profile_insights(user_id: str):
+    try:
+        # Get student profile
+        student_profile = await db.studentProfiles.find_one({"userId": user_id})
+        if not student_profile:
+            raise HTTPException(status_code=404, detail="Student profile not found")
+        
+        # Generate insights using AI
+        insights = await ai_service.generate_profile_insights(student_profile)
+        
+        return {"insights": [insight.dict() for insight in insights]}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate insights: {str(e)}")
 
 @app.get("/")
 async def root():

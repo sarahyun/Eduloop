@@ -50,7 +50,7 @@ class AIService:
             
             messages.append({"role": "user", "content": user_message})
 
-            response = await self.client.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model="gpt-4o",
                 messages=messages,
                 max_tokens=500,
@@ -82,7 +82,7 @@ class AIService:
             Respond with a JSON object containing an array of college recommendations.
             """
 
-            response = await self.client.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
                     {"role": "system", "content": "You are a college admissions expert. Provide realistic, helpful college recommendations in JSON format."},
@@ -134,7 +134,7 @@ class AIService:
             Provide insights in JSON format with type, title, description, and actionItems for each insight.
             """
 
-            response = await self.client.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
                     {"role": "system", "content": "You are a college admissions counselor providing strategic guidance. Respond in JSON format."},
@@ -176,7 +176,7 @@ class AIService:
             Provide a JSON response with colleges array and searchStrategy explanation.
             """
 
-            response = await self.client.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
                     {"role": "system", "content": "You are a college search expert. Help students find relevant colleges based on their queries."},
