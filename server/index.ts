@@ -75,12 +75,65 @@ app.use((req, res, next) => {
     log(`Failed to start FastAPI backend: ${error}`);
   }
 
-  // Proxy API requests to FastAPI backend
+  // Handle auth endpoints directly in Express
+  app.post('/api/auth/signup', async (req, res) => {
+    try {
+      const response = await fetch('http://localhost:8000/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(req.body)
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        return res.status(response.status).json(data);
+      }
+      
+      res.json(data);
+    } catch (error) {
+      console.error('Auth signup error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const response = await fetch('http://localhost:8000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(req.body)
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        return res.status(response.status).json(data);
+      }
+      
+      res.json(data);
+    } catch (error) {
+      console.error('Auth login error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Proxy other API requests to FastAPI backend
   app.use('/api', createProxyMiddleware({
     target: 'http://localhost:8000',
     changeOrigin: true,
     pathRewrite: {
       '^/api': '',
+    },
+    timeout: 10000,
+    proxyTimeout: 10000,
+    onError: (err, req, res) => {
+      console.error('Proxy error:', err);
+      res.status(500).json({ error: 'Proxy error' });
     }
   }));
 
