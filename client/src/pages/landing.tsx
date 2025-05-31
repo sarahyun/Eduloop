@@ -332,9 +332,9 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
-              <div className="text-3xl font-bold text-blue-600 mb-2">25+</div>
-              <div className="text-gray-700 font-semibold">Matching Factors</div>
-              <div className="text-sm text-gray-600 mt-2">Academic, social, and cultural fit analysis</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">Smart</div>
+              <div className="text-gray-700 font-semibold">Language Processing</div>
+              <div className="text-sm text-gray-600 mt-2">Understands natural conversation and context</div>
             </div>
             <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200">
               <div className="text-3xl font-bold text-indigo-600 mb-2">AI-Powered</div>
