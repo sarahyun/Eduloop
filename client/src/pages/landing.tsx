@@ -350,6 +350,138 @@ export default function LandingPage() {
         </div>
       </div>
 
+      {/* Deep Personalization Section */}
+      <div className="py-24 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+              Beyond Basic Matching:
+              <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Deep Profile Analysis
+              </span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Our AI doesn't just match on stats. We analyze your personality, interests, values, and goals 
+              to explain exactly why each college would be perfect for your unique journey.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            <div className="space-y-8">
+              <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+                <div className="flex items-start space-x-4 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Personalized Fit Analysis</h3>
+                    <p className="text-gray-600">Get detailed explanations of why each college matches your specific personality, academic interests, and life goals.</p>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
+                  <h4 className="font-semibold text-gray-900 mb-3">Example Analysis for Sarah:</h4>
+                  <div className="text-sm text-gray-700 leading-relaxed">
+                    "Carleton College would be perfect for your love of collaborative learning and environmental activism. 
+                    Their innovative Environmental Studies program aligns with your sustainability passion, while the 
+                    close-knit community matches your preference for meaningful relationships over large crowds. 
+                    The quirky, intellectual culture celebrates your creative thinking style."
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+                <div className="flex items-start space-x-4 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Unique Opportunities</h3>
+                    <p className="text-gray-600">Discover specific programs, clubs, and experiences at each college that align with your interests.</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <BookOpen className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-medium text-gray-900">Undergraduate Research Program</span>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <Users className="w-4 h-4 text-indigo-600" />
+                    <span className="text-sm font-medium text-gray-900">Environmental Action Coalition</span>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <Globe className="w-4 h-4 text-purple-600" />
+                    <span className="text-sm font-medium text-gray-900">Study Abroad in Costa Rica</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+                <div className="flex items-start space-x-4 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                    <TrendingUp className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Growth Opportunities</h3>
+                    <p className="text-gray-600">Understand how each college will help you grow in areas that matter to your future.</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="border-l-4 border-blue-500 pl-4">
+                    <div className="font-medium text-gray-900">Academic Growth</div>
+                    <div className="text-sm text-gray-600">Small seminar-style classes will develop your critical thinking and communication skills</div>
+                  </div>
+                  <div className="border-l-4 border-indigo-500 pl-4">
+                    <div className="font-medium text-gray-900">Leadership Development</div>
+                    <div className="text-sm text-gray-600">Student government and club leadership roles readily available</div>
+                  </div>
+                  <div className="border-l-4 border-purple-500 pl-4">
+                    <div className="font-medium text-gray-900">Network Building</div>
+                    <div className="text-sm text-gray-600">Strong alumni network in environmental policy and consulting</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+                <div className="flex items-start space-x-4 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
+                    <Shield className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Honest Assessment</h3>
+                    <p className="text-gray-600">We also share potential challenges so you make informed decisions.</p>
+                  </div>
+                </div>
+                
+                <div className="bg-orange-50 rounded-2xl p-4 border border-orange-200">
+                  <h4 className="font-medium text-orange-900 mb-2">Potential Considerations:</h4>
+                  <ul className="text-sm text-orange-800 space-y-1">
+                    <li>• Rural location may feel isolated from urban opportunities</li>
+                    <li>• Competitive academic environment requires strong time management</li>
+                    <li>• Limited dining options on weekends</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-16 text-center">
+            <Button 
+              size="lg"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-12 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 text-lg"
+              onClick={() => setActiveTab("signup")}
+            >
+              Get Your Detailed Analysis
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Auth Modal/Overlay */}
       {(activeTab === "signin" || activeTab === "signup") && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
