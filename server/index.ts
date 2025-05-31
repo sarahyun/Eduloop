@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
-import { registerRoutes } from "./routes";
+import { createProxyMiddleware } from 'http-proxy-middleware';
+import { spawn } from 'child_process';
+import { createServer } from 'http';
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
@@ -50,7 +52,46 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  // Start the FastAPI backend
+  let fastApiProcess: any;
+  try {
+    log("Starting FastAPI backend...");
+    fastApiProcess = spawn('python', ['main.py'], {
+      cwd: './backend',
+      stdio: 'pipe'
+    });
+    
+    fastApiProcess.stdout?.on('data', (data: any) => {
+      log(`[FastAPI] ${data.toString().trim()}`);
+    });
+    
+    fastApiProcess.stderr?.on('data', (data: any) => {
+      log(`[FastAPI Error] ${data.toString().trim()}`);
+    });
+
+    // Wait a moment for FastAPI to start
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  } catch (error) {
+    log(`Failed to start FastAPI backend: ${error}`);
+  }
+
+  // Proxy API requests to FastAPI backend
+  app.use('/api', createProxyMiddleware({
+    target: 'http://localhost:8000',
+    changeOrigin: true,
+    pathRewrite: {
+      '^/api': '/api',
+    },
+    onError: (err, req, res) => {
+      log(`Proxy error: ${err.message}`);
+      res.status(500).json({ message: 'Backend service unavailable' });
+    },
+    onProxyReq: (proxyReq, req) => {
+      log(`Proxying ${req.method} ${req.url} to FastAPI`);
+    }
+  }));
+
+  const server = require('http').createServer(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
