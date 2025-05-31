@@ -83,103 +83,199 @@ export interface ProfileInsight {
 export const api = {
   // Auth
   async register(userData: { username: string; password: string; email: string; fullName: string; grade?: string }) {
-    const response = await apiRequest('POST', '/api/auth/register', userData);
-    return response.json();
+    try {
+      const response = await apiRequest('POST', '/api/auth/register', userData);
+      return response.json();
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    }
   },
 
   async login(credentials: { username: string; password: string }) {
-    const response = await apiRequest('POST', '/api/auth/login', credentials);
-    return response.json();
+    try {
+      const response = await apiRequest('POST', '/api/auth/login', credentials);
+      return response.json();
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
   },
 
   // Profile
   async getProfile(userId: number): Promise<StudentProfile> {
-    const response = await apiRequest('GET', `/api/profile/${userId}`);
-    return response.json();
+    try {
+      const response = await apiRequest('GET', `/api/profiles/${userId}`);
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get profile:', error);
+      throw error;
+    }
   },
 
   async createProfile(profileData: Omit<StudentProfile, 'id'>): Promise<StudentProfile> {
-    const response = await apiRequest('POST', '/api/profile', profileData);
-    return response.json();
+    try {
+      const response = await apiRequest('POST', '/api/profiles', profileData);
+      return response.json();
+    } catch (error) {
+      console.error('Failed to create profile:', error);
+      throw error;
+    }
   },
 
   async updateProfile(userId: number, updates: Partial<StudentProfile>): Promise<StudentProfile> {
-    const response = await apiRequest('PUT', `/api/profile/${userId}`, updates);
-    return response.json();
+    try {
+      const response = await apiRequest('PUT', `/api/profiles/${userId}`, updates);
+      return response.json();
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      throw error;
+    }
   },
 
   // Colleges
   async getColleges(): Promise<College[]> {
-    const response = await apiRequest('GET', '/api/colleges');
-    return response.json();
+    try {
+      const response = await apiRequest('GET', '/api/colleges');
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get colleges:', error);
+      // Return empty array as fallback
+      return [];
+    }
   },
 
   async searchColleges(query: string): Promise<College[]> {
-    const response = await apiRequest('GET', `/api/colleges/search?q=${encodeURIComponent(query)}`);
-    return response.json();
+    try {
+      const response = await apiRequest('GET', `/api/colleges/search?q=${encodeURIComponent(query)}`);
+      return response.json();
+    } catch (error) {
+      console.error('Failed to search colleges:', error);
+      return [];
+    }
   },
 
   async aiSearchColleges(query: string, userId?: number): Promise<{ colleges: any[]; searchStrategy: string }> {
-    const response = await apiRequest('POST', '/api/colleges/ai-search', { query, userId });
-    return response.json();
+    try {
+      const response = await apiRequest('POST', '/api/colleges/ai-search', { query, userId });
+      return response.json();
+    } catch (error) {
+      console.error('Failed to perform AI search:', error);
+      return { colleges: [], searchStrategy: '' };
+    }
   },
 
   // Conversations
   async getConversations(userId: number): Promise<Conversation[]> {
-    const response = await apiRequest('GET', `/api/conversations/${userId}`);
-    return response.json();
+    try {
+      const response = await apiRequest('GET', `/api/conversations/${userId}`);
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get conversations:', error);
+      return [];
+    }
   },
 
   async createConversation(conversationData: { userId: number; title?: string }): Promise<Conversation> {
-    const response = await apiRequest('POST', '/api/conversations', conversationData);
-    return response.json();
+    try {
+      const response = await apiRequest('POST', '/api/conversations', conversationData);
+      return response.json();
+    } catch (error) {
+      console.error('Failed to create conversation:', error);
+      throw error;
+    }
   },
 
   async getMessages(conversationId: number): Promise<Message[]> {
-    const response = await apiRequest('GET', `/api/conversations/${conversationId}/messages`);
-    return response.json();
+    try {
+      const response = await apiRequest('GET', `/api/messages/${conversationId}`);
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get messages:', error);
+      return [];
+    }
   },
 
   async sendMessage(conversationId: number, messageData: { role: string; content: string }): Promise<{ userMessage: Message; aiMessage?: Message }> {
-    const response = await apiRequest('POST', `/api/conversations/${conversationId}/messages`, messageData);
-    return response.json();
+    try {
+      const response = await apiRequest('POST', '/api/messages', { ...messageData, conversationId });
+      return response.json();
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      throw error;
+    }
   },
 
   // Recommendations
   async getRecommendations(userId: number): Promise<CollegeRecommendation[]> {
-    const response = await apiRequest('GET', `/api/recommendations/${userId}`);
-    return response.json();
+    try {
+      const response = await apiRequest('GET', `/api/college-recommendations/${userId}`);
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get recommendations:', error);
+      return [];
+    }
   },
 
   async generateRecommendations(userId: number): Promise<CollegeRecommendation[]> {
-    const response = await apiRequest('POST', '/api/recommendations/generate', { userId });
-    return response.json();
+    try {
+      const response = await apiRequest('POST', '/api/college-recommendations/generate', { userId });
+      return response.json();
+    } catch (error) {
+      console.error('Failed to generate recommendations:', error);
+      throw error;
+    }
   },
 
   // Saved Colleges
   async getSavedColleges(userId: number): Promise<SavedCollege[]> {
-    const response = await apiRequest('GET', `/api/saved-colleges/${userId}`);
-    return response.json();
+    try {
+      const response = await apiRequest('GET', `/api/saved-colleges/${userId}`);
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get saved colleges:', error);
+      return [];
+    }
   },
 
   async saveCollege(data: { userId: number; collegeId: number; notes?: string }): Promise<SavedCollege> {
-    const response = await apiRequest('POST', '/api/saved-colleges', data);
-    return response.json();
+    try {
+      const response = await apiRequest('POST', '/api/saved-colleges', data);
+      return response.json();
+    } catch (error) {
+      console.error('Failed to save college:', error);
+      throw error;
+    }
   },
 
   async removeSavedCollege(userId: number, collegeId: number): Promise<void> {
-    await apiRequest('DELETE', `/api/saved-colleges/${userId}/${collegeId}`);
+    try {
+      await apiRequest('DELETE', `/api/saved-colleges/${userId}/${collegeId}`);
+    } catch (error) {
+      console.error('Failed to remove saved college:', error);
+      throw error;
+    }
   },
 
   // Insights
   async generateInsights(userId: number): Promise<ProfileInsight[]> {
-    const response = await apiRequest('POST', '/api/insights/generate', { userId });
-    return response.json();
+    try {
+      const response = await apiRequest('POST', `/api/profile-insights/${userId}`);
+      return response.json();
+    } catch (error) {
+      console.error('Failed to generate insights:', error);
+      return [];
+    }
   },
 
   // Search History
   async getSearchHistory(userId: number): Promise<any[]> {
-    const response = await apiRequest('GET', `/api/search-history/${userId}`);
-    return response.json();
+    try {
+      const response = await apiRequest('GET', `/api/search-history/${userId}`);
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get search history:', error);
+      return [];
+    }
   }
 };

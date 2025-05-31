@@ -8,7 +8,6 @@ import { GraduationCap, Users, BookOpen, Target, ArrowRight, Star, CheckCircle, 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "wouter";
@@ -35,6 +34,8 @@ export default function LandingPage() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { signup, login } = useAuth();
 
   const signUpForm = useForm<SignUpData>({
     resolver: zodResolver(signUpSchema),
@@ -54,74 +55,44 @@ export default function LandingPage() {
     }
   });
 
-  const signUpMutation = useMutation({
-    mutationFn: async (data: SignUpData) => {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          fullName: data.fullName
-        })
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to sign up');
-      }
-      return response.json();
-    },
-    onSuccess: () => {
+  const onSignUp = async (data: SignUpData) => {
+    setIsLoading(true);
+    try {
+      await signup(data.email, data.password, data.fullName);
       toast({
         title: "Account created successfully!",
         description: "Welcome to your college discovery journey.",
       });
       setLocation("/dashboard");
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Sign up failed",
-        description: error.message,
+        description: error.message || "Failed to create account",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
-  });
+  };
 
-  const signInMutation = useMutation({
-    mutationFn: async (data: SignInData) => {
-      const response = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to sign in');
-      }
-      return response.json();
-    },
-    onSuccess: () => {
+  const onSignIn = async (data: SignInData) => {
+    setIsLoading(true);
+    try {
+      await login(data.email, data.password);
       toast({
         title: "Welcome back!",
         description: "Redirecting to your dashboard...",
       });
       setLocation("/dashboard");
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Sign in failed",
-        description: error.message,
+        description: error.message || "Invalid email or password",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
-  });
-
-  const onSignUp = (data: SignUpData) => {
-    signUpMutation.mutate(data);
-  };
-
-  const onSignIn = (data: SignInData) => {
-    signInMutation.mutate(data);
   };
 
   return (
@@ -466,7 +437,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Auth Modal/Overlay */}
+      {/* Auth Modal */}
       {(activeTab === "signin" || activeTab === "signup") && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-md">
@@ -520,9 +491,9 @@ export default function LandingPage() {
                   <Button 
                     type="submit" 
                     className="w-full bg-blue-600 hover:bg-blue-700"
-                    disabled={signInMutation.isPending}
+                    disabled={isLoading}
                   >
-                    {signInMutation.isPending ? "Signing In..." : "Sign In"}
+                    {isLoading ? "Signing In..." : "Sign In"}
                   </Button>
                 </form>
               ) : (
@@ -578,9 +549,9 @@ export default function LandingPage() {
                   <Button 
                     type="submit" 
                     className="w-full bg-blue-600 hover:bg-blue-700"
-                    disabled={signUpMutation.isPending}
+                    disabled={isLoading}
                   >
-                    {signUpMutation.isPending ? "Creating Account..." : "Create Account"}
+                    {isLoading ? "Creating Account..." : "Create Account"}
                   </Button>
                 </form>
               )}

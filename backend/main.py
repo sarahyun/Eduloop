@@ -27,7 +27,7 @@ app.include_router(profiles_router)
 app.include_router(colleges_router)
 
 # Conversation routes
-@app.post("/api/conversations/")
+@app.post("/conversations/")
 async def create_conversation(conversation: ConversationCreate):
     try:
         conversation_data = {
@@ -44,7 +44,7 @@ async def create_conversation(conversation: ConversationCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create conversation: {str(e)}")
 
-@app.get("/api/conversations/{user_id}")
+@app.get("/conversations/{user_id}")
 async def get_user_conversations(user_id: str):
     try:
         conversations = []
@@ -54,7 +54,7 @@ async def get_user_conversations(user_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get conversations: {str(e)}")
 
-@app.post("/api/messages/")
+@app.post("/messages/")
 async def create_message(message: MessageCreate):
     try:
         message_data = {
@@ -72,7 +72,7 @@ async def create_message(message: MessageCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create message: {str(e)}")
 
-@app.get("/api/messages/{conversation_id}")
+@app.get("/messages/{conversation_id}")
 async def get_conversation_messages(conversation_id: str):
     try:
         messages = []
@@ -82,7 +82,7 @@ async def get_conversation_messages(conversation_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get messages: {str(e)}")
 
-@app.post("/api/question-responses/")
+@app.post("/question-responses/")
 async def create_question_response(response: QuestionResponseCreate):
     try:
         response_data = {
@@ -100,7 +100,7 @@ async def create_question_response(response: QuestionResponseCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create question response: {str(e)}")
 
-@app.get("/api/question-responses/{user_id}")
+@app.get("/question-responses/{user_id}")
 async def get_user_question_responses(user_id: str, section: str = None):
     try:
         query = {"userId": user_id}
@@ -115,7 +115,7 @@ async def get_user_question_responses(user_id: str, section: str = None):
         raise HTTPException(status_code=500, detail=f"Failed to get question responses: {str(e)}")
 
 # AI-powered routes
-@app.post("/api/chat")
+@app.post("/chat")
 async def chat_with_mentor(request: ChatRequest):
     try:
         # Get student profile and conversation history
@@ -155,7 +155,7 @@ async def chat_with_mentor(request: ChatRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to process chat: {str(e)}")
 
-@app.get("/api/college-recommendations/{user_id}")
+@app.get("/college-recommendations/{user_id}")
 async def get_college_recommendations(user_id: str):
     try:
         profile = await db.studentProfiles.find_one({"userId": user_id})
@@ -169,7 +169,7 @@ async def get_college_recommendations(user_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get recommendations: {str(e)}")
 
-@app.get("/api/profile-insights/{user_id}")
+@app.get("/profile-insights/{user_id}")
 async def get_profile_insights(user_id: str):
     try:
         profile = await db.studentProfiles.find_one({"userId": user_id})

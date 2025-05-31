@@ -12,9 +12,10 @@ import { Slider } from "@/components/ui/slider";
 import { Filter, Search, MapPin, Users, School, DollarSign } from "lucide-react";
 import { api, type User, type College } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ExplorePage() {
-  const [user] = useState<User>({ id: 1, username: "sarah", email: "sarah@example.com", fullName: "Sarah Johnson" });
+  const { user, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     type: "",
@@ -28,19 +29,43 @@ export default function ExplorePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Show loading state while auth is loading
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Please log in to continue</h2>
+          <Button onClick={() => window.location.href = '/'}>Go to Login</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Create a mock user ID for API calls (since backend expects number but Firebase uses string)
+  const mockUserId = 1; // This is a temporary solution until backend is updated to handle string UIDs
+
   // Fetch colleges
-  const { data: colleges = [] } = useQuery({
+  const { data: colleges = [] } = useQuery<College[]>({
     queryKey: ['/api/colleges'],
   });
 
-  const { data: savedColleges = [] } = useQuery({
-    queryKey: ['/api/saved-colleges', user.id],
-    enabled: !!user?.id,
+  const { data: savedColleges = [] } = useQuery<any[]>({
+    queryKey: ['/api/saved-colleges', mockUserId],
+    enabled: !!user,
   });
 
   // AI search mutation
   const aiSearchMutation = useMutation({
-    mutationFn: ({ query }: { query: string }) => api.aiSearchColleges(query, user.id),
+    mutationFn: ({ query }: { query: string }) => api.aiSearchColleges(query, mockUserId),
   });
 
   // Regular search mutation
@@ -55,6 +80,9 @@ export default function ExplorePage() {
       queryClient.invalidateQueries({ queryKey: ['/api/saved-colleges'] });
       toast({ title: "College saved successfully!" });
     },
+    onError: () => {
+      toast({ title: "Failed to save college", variant: "destructive" });
+    },
   });
 
   const removeSavedCollegeMutation = useMutation({
@@ -64,10 +92,13 @@ export default function ExplorePage() {
       queryClient.invalidateQueries({ queryKey: ['/api/saved-colleges'] });
       toast({ title: "College removed from saved list" });
     },
+    onError: () => {
+      toast({ title: "Failed to remove college", variant: "destructive" });
+    },
   });
 
   // Filter colleges based on current filters
-  const filteredColleges = colleges.filter(college => {
+  const filteredColleges = colleges.filter((college: College) => {
     if (filters.type && college.type !== filters.type) return false;
     if (filters.size && college.size !== filters.size) return false;
     if (filters.setting && college.setting !== filters.setting) return false;
@@ -100,16 +131,16 @@ export default function ExplorePage() {
 
   // Handle saving/removing colleges
   const handleSaveCollege = (collegeId: number) => {
-    saveCollegeMutation.mutate({ userId: user.id, collegeId });
+    saveCollegeMutation.mutate({ userId: mockUserId, collegeId });
   };
 
   const handleRemoveSavedCollege = (collegeId: number) => {
-    removeSavedCollegeMutation.mutate({ userId: user.id, collegeId });
+    removeSavedCollegeMutation.mutate({ userId: mockUserId, collegeId });
   };
 
   // Check if college is saved
   const isCollegeSaved = (collegeId: number) => {
-    return savedColleges.some(saved => saved.collegeId === collegeId);
+    return savedColleges.some((saved: any) => saved.collegeId === collegeId);
   };
 
   // Get colleges to display
@@ -117,7 +148,7 @@ export default function ExplorePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation user={user} />
+      <Navigation user={{ name: user.displayName || user.email || 'User', email: user.email || '' }} />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}

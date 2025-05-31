@@ -19,6 +19,7 @@
   /* Primary Blue */
   --primary: 207 100% 61%; /* #359EFF */
   --primary-foreground: 0 0% 100%; /* #FFFFFF */
+  --primary-dark: 207 100% 51%; /* #2B8AE6 - Darker shade of primary */
   
   /* Secondary */
   --secondary: 210 40% 96%; /* #F1F5F9 */
@@ -72,18 +73,23 @@
 }
 
 .dark {
-  --background: 222 84% 5%; /* #0F172A */
-  --foreground: 210 40% 98%; /* #F1F5F9 */
-  --muted: 217 33% 17%; /* #1E293B */
-  --muted-foreground: 215 20% 65%; /* #94A3B8 */
-  --popover: 222 84% 5%; /* #0F172A */
-  --popover-foreground: 210 40% 98%; /* #F1F5F9 */
-  --card: 222 84% 5%; /* #0F172A */
-  --card-foreground: 210 40% 98%; /* #F1F5F9 */
-  --border: 217 33% 17%; /* #1E293B */
-  --input: 217 33% 17%; /* #1E293B */
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+
   --primary: 207 100% 61%; /* #359EFF */
   --primary-foreground: 0 0% 100%; /* #FFFFFF */
+  --primary-dark: 207 100% 51%; /* #2B8AE6 - Darker shade of primary */
+
+  --muted: 217 33% 17%; /* #1E293B */
+  --muted-foreground: 215 20% 65%; /* #94A3B8 */
+  --border: 217 33% 17%; /* #1E293B */
+  --input: 217 33% 17%; /* #1E293B */
   --secondary: 217 33% 17%; /* #1E293B */
   --secondary-foreground: 210 40% 98%; /* #F1F5F9 */
   --accent: 217 33% 17%; /* #1E293B */
@@ -315,6 +321,26 @@
 .bg-primary-contrast {
   background-color: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
+}
+
+.text-primary-dark {
+  color: hsl(var(--primary-dark));
+}
+
+.bg-primary-dark {
+  background-color: hsl(var(--primary-dark));
+}
+
+.hover\:bg-primary-dark:hover {
+  background-color: hsl(var(--primary-dark));
+}
+
+.hover\:text-primary-dark:hover {
+  color: hsl(var(--primary-dark));
+}
+
+.hover\:from-primary-dark:hover {
+  --tw-gradient-from: hsl(var(--primary-dark));
 }
 
 /* Custom utility classes matching the design */

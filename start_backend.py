@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
 import os
+import subprocess
 import sys
-sys.path.append('backend')
 
 if __name__ == "__main__":
-    os.chdir('backend')
-    import uvicorn
-    from main import app
+    # Change to backend directory
+    backend_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'backend')
+    os.chdir(backend_path)
     
-    uvicorn.run(app, host="0.0.0.0", port=5000, reload=True)
+    print("Starting FastAPI backend on http://localhost:8000")
+    
+    # Run uvicorn directly with the import string format
+    subprocess.run([
+        sys.executable, "-m", "uvicorn", 
+        "main:app", 
+        "--host", "0.0.0.0", 
+        "--port", "8000", 
+        "--reload"
+    ])

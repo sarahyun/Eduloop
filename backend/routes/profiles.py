@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from models import StudentProfileCreate, StudentProfileUpdate
 from database import db, serialize_doc
 
-router = APIRouter(prefix="/api/profiles", tags=["profiles"])
+router = APIRouter(prefix="/profiles", tags=["profiles"])
 
 @router.post("")
 async def create_profile(profile: StudentProfileCreate):

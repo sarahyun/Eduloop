@@ -5,7 +5,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from database import db, serialize_doc
 
-router = APIRouter(prefix="/api/colleges", tags=["colleges"])
+router = APIRouter(prefix="/colleges", tags=["colleges"])
 
 @router.get("")
 async def get_colleges():
