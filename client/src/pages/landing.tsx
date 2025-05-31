@@ -462,13 +462,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 max-w-xl mx-auto">
-            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
-              <div className="text-3xl font-bold text-blue-600 mb-2">Smart</div>
-              <div className="text-gray-700 font-semibold">Language Processing</div>
-              <div className="text-sm text-gray-600 mt-2">Understands natural conversation and context</div>
-            </div>
-          </div>
+
         </div>
       </div>
 
