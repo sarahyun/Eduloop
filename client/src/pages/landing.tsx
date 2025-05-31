@@ -166,21 +166,21 @@ export default function LandingPage() {
           <div className="text-center">
             <div className="flex justify-center mb-8">
               <div className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 border border-blue-200">
-                <Globe className="w-5 h-5 text-blue-600 mr-2" />
-                <span className="text-blue-700 font-semibold">Smart College Search & Discovery Platform</span>
+                <Brain className="w-5 h-5 text-blue-600 mr-2" />
+                <span className="text-blue-700 font-semibold">AI-Powered College Matching Platform</span>
               </div>
             </div>
             
             <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight">
-              Find Your Perfect
+              Get Personalized
               <span className="block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                College Match
+                College Matches
               </span>
             </h1>
             
             <p className="text-xl lg:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
-              Search through thousands of colleges instantly. Our AI analyzes your profile to discover schools 
-              where you'll thrive, uncover hidden gems, and match you with colleges that fit your goals perfectly.
+              Simply describe what you're looking for in plain English. Our AI understands natural language 
+              to find colleges that match your unique needs and aspirations.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
@@ -189,7 +189,7 @@ export default function LandingPage() {
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-10 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 text-lg"
                 onClick={() => setActiveTab("signup")}
               >
-                Start College Search
+                Get My Matches
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
               <Button 
@@ -205,26 +205,26 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               <div className="text-center p-6 rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Globe className="w-8 h-8 text-white" />
+                  <MessageCircle className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Instant College Search</h3>
-                <p className="text-gray-600">Search thousands of colleges by major, location, size, or any criteria that matters to you</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Natural Language Search</h3>
+                <p className="text-gray-600">Ask in plain English: "I want a small liberal arts college with strong environmental science"</p>
               </div>
               
               <div className="text-center p-6 rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
                 <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Target className="w-8 h-8 text-white" />
+                  <Brain className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Perfect Matching</h3>
-                <p className="text-gray-600">AI analyzes your profile to match you with colleges where you'll succeed academically and socially</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">AI Understanding</h3>
+                <p className="text-gray-600">Our AI interprets your preferences and finds colleges that match your exact needs</p>
               </div>
               
               <div className="text-center p-6 rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
                 <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="w-8 h-8 text-white" />
+                  <Target className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Hidden Gems Discovery</h3>
-                <p className="text-gray-600">Uncover amazing colleges you never knew existed that perfectly match your unique interests</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Smart Recommendations</h3>
+                <p className="text-gray-600">Get personalized college matches that understand the nuance of what you're looking for</p>
               </div>
             </div>
           </div>
@@ -238,19 +238,19 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* College Search Features Section */}
+      {/* Personalized Matching Features Section */}
       <div className="bg-white/80 backdrop-blur-sm py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Powerful College
+              Natural Language
               <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Search & Discovery
+                College Discovery
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Stop feeling overwhelmed by endless college lists. Our intelligent search platform helps you 
-              discover and match with colleges that truly fit your unique profile and aspirations.
+              Forget complex filters and confusing search forms. Just tell us what you're looking for 
+              in plain English, and our AI will understand and find the perfect colleges for you.
             </p>
           </div>
 
@@ -258,21 +258,21 @@ export default function LandingPage() {
             <div className="space-y-8">
               {[
                 {
-                  icon: <Globe className="w-8 h-8" />,
-                  title: "Advanced College Search",
-                  description: "Search through our comprehensive database of colleges using any criteria - location, major, size, culture, cost, or selectivity. Find exactly what you're looking for instantly.",
+                  icon: <MessageCircle className="w-8 h-8" />,
+                  title: "Natural Language Search",
+                  description: "Simply describe what you want: 'I need a college with strong engineering, diverse student body, and warm weather.' Our AI understands conversational language.",
                   gradient: "from-blue-500 to-indigo-600"
                 },
                 {
-                  icon: <Target className="w-8 h-8" />,
-                  title: "AI-Powered Matching",
-                  description: "Our sophisticated algorithms analyze your academic profile, interests, and goals to identify colleges where you'll thrive both academically and personally.",
+                  icon: <Brain className="w-8 h-8" />,
+                  title: "Intelligent Interpretation",
+                  description: "Our AI understands context, nuance, and implied preferences in your search to find colleges that truly match your vision.",
                   gradient: "from-indigo-500 to-purple-600"
                 },
                 {
-                  icon: <Sparkles className="w-8 h-8" />,
-                  title: "Hidden Gem Discovery",
-                  description: "Uncover amazing colleges you never knew existed. Our platform reveals lesser-known schools that could be perfect fits for your unique interests and career goals.",
+                  icon: <Target className="w-8 h-8" />,
+                  title: "Contextual Recommendations",
+                  description: "Get results that go beyond keywords - our AI considers the deeper meaning behind what you're looking for in a college experience.",
                   gradient: "from-purple-500 to-pink-600"
                 }
               ].map((feature, index) => (
@@ -292,33 +292,37 @@ export default function LandingPage() {
               <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-3xl p-8 shadow-2xl">
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-gray-900 text-lg">College Search Results</h4>
-                    <div className="text-sm text-gray-600">2,847 matches found</div>
+                    <h4 className="font-bold text-gray-900 text-lg">Your College Matches</h4>
+                    <div className="text-sm text-gray-600">Based on your profile</div>
                   </div>
                   <div className="bg-white rounded-2xl p-6 shadow-lg">
                     <div className="space-y-4">
+                      <div className="p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                        <div className="text-sm text-blue-700 mb-2">Example Search:</div>
+                        <div className="font-medium text-blue-900">"I want a mid-size university with strong computer science, vibrant campus life, and good weather"</div>
+                      </div>
+                      <div className="text-sm text-gray-600 font-medium">AI-Generated Results:</div>
                       {[
-                        { name: "Stanford University", match: "95%", type: "Reach", location: "California" },
-                        { name: "Carleton College", match: "92%", type: "Match", location: "Minnesota" },
-                        { name: "Reed College", match: "89%", type: "Match", location: "Oregon" },
-                        { name: "Grinnell College", match: "87%", type: "Safety", location: "Iowa" }
+                        { name: "University of California, San Diego", reason: "Strong CS program, great weather" },
+                        { name: "University of Texas at Austin", reason: "Vibrant campus, excellent tech programs" },
+                        { name: "Georgia Institute of Technology", reason: "Top-tier CS, active student life" },
+                        { name: "University of Washington", reason: "Tech hub location, diverse community" }
                       ].map((college, i) => (
                         <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div>
                             <div className="font-semibold text-gray-900">{college.name}</div>
-                            <div className="text-sm text-gray-600">{college.location} • {college.type}</div>
+                            <div className="text-sm text-gray-600">{college.reason}</div>
                           </div>
                           <div className="text-right">
-                            <div className="text-lg font-bold text-blue-600">{college.match}</div>
-                            <div className="text-xs text-gray-500">match</div>
+                            <div className="text-sm text-blue-600">Perfect match</div>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
                   <div className="flex items-center justify-center">
-                    <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-                      View All Matches
+                    <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white" onClick={() => setActiveTab("signup")}>
+                      Get Your Matches
                     </Button>
                   </div>
                 </div>
@@ -328,19 +332,19 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
-              <div className="text-3xl font-bold text-blue-600 mb-2">4,000+</div>
-              <div className="text-gray-700 font-semibold">Colleges in Database</div>
-              <div className="text-sm text-gray-600 mt-2">Comprehensive coverage of US institutions</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">25+</div>
+              <div className="text-gray-700 font-semibold">Matching Factors</div>
+              <div className="text-sm text-gray-600 mt-2">Academic, social, and cultural fit analysis</div>
             </div>
             <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200">
-              <div className="text-3xl font-bold text-indigo-600 mb-2">50+</div>
-              <div className="text-gray-700 font-semibold">Search Filters</div>
-              <div className="text-sm text-gray-600 mt-2">Find colleges by any criteria that matters</div>
+              <div className="text-3xl font-bold text-indigo-600 mb-2">AI-Powered</div>
+              <div className="text-gray-700 font-semibold">Recommendations</div>
+              <div className="text-sm text-gray-600 mt-2">Personalized to your unique profile</div>
             </div>
             <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200">
-              <div className="text-3xl font-bold text-purple-600 mb-2">95%</div>
-              <div className="text-gray-700 font-semibold">Match Accuracy</div>
-              <div className="text-sm text-gray-600 mt-2">AI-powered precision matching</div>
+              <div className="text-3xl font-bold text-purple-600 mb-2">Real-time</div>
+              <div className="text-gray-700 font-semibold">Updates</div>
+              <div className="text-sm text-gray-600 mt-2">Matches improve as you grow</div>
             </div>
           </div>
         </div>
