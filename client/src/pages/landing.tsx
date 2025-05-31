@@ -462,21 +462,11 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8 max-w-xl mx-auto">
             <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
               <div className="text-3xl font-bold text-blue-600 mb-2">Smart</div>
               <div className="text-gray-700 font-semibold">Language Processing</div>
               <div className="text-sm text-gray-600 mt-2">Understands natural conversation and context</div>
-            </div>
-            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200">
-              <div className="text-3xl font-bold text-indigo-600 mb-2">AI-Powered</div>
-              <div className="text-gray-700 font-semibold">Discovery</div>
-              <div className="text-sm text-gray-600 mt-2">Finds colleges you never knew existed</div>
-            </div>
-            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200">
-              <div className="text-3xl font-bold text-purple-600 mb-2">Instant</div>
-              <div className="text-gray-700 font-semibold">Results</div>
-              <div className="text-sm text-gray-600 mt-2">Get answers in seconds, not hours</div>
             </div>
           </div>
         </div>
