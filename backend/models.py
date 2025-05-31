@@ -116,3 +116,8 @@ class ChatRequest(BaseModel):
     message: str
     conversationId: str
     userId: str
+
+# Auth models
+class LoginRequest(BaseModel):
+    email: str
+    password: Optional[str] = None

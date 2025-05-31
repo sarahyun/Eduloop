@@ -6,6 +6,7 @@ from ai_service import ai_service
 from routes.users import router as users_router
 from routes.profiles import router as profiles_router
 from routes.colleges import router as colleges_router
+from routes.auth import router as auth_router
 from datetime import datetime
 
 app = FastAPI(title="College Counseling API", version="1.0.0")
@@ -20,6 +21,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(profiles_router)
 app.include_router(colleges_router)
