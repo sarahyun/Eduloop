@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     try {
       // Create the user profile in backend
-      await fetch('/api/users/', {
+      await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,9 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name,
           email,
           role,
-          grade,
-          createdAt: new Date().toISOString(),
-          lastLogin: new Date().toISOString()
+          grade
         })
       });
 
