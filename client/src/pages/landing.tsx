@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { GraduationCap, Users, BookOpen, Target, ArrowRight, Star, CheckCircle } from "lucide-react";
+import { GraduationCap, Users, BookOpen, Target, ArrowRight, Star, CheckCircle, Brain, Sparkles, Globe, Shield, MessageCircle, TrendingUp } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -125,31 +125,35 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
+      <nav className="bg-white/95 backdrop-blur-lg shadow-lg border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Star className="w-5 h-5 text-white" />
+          <div className="flex justify-between items-center h-20">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <Brain className="w-7 h-7 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">CollegeNavigate</span>
+              <div>
+                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  CollegeNavigate
+                </span>
+                <div className="text-xs text-gray-500 font-medium">AI-Powered College Guidance</div>
+              </div>
             </div>
-            <div className="flex space-x-3">
+            <div className="flex space-x-4">
               <Button 
-                variant="default" 
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                variant="ghost" 
+                className="text-gray-700 hover:text-gray-900 font-semibold px-6"
                 onClick={() => setActiveTab("signin")}
               >
-                Log in
+                Sign In
               </Button>
               <Button 
-                variant="outline" 
-                className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
                 onClick={() => setActiveTab("signup")}
               >
-                Sign Up
+                Start Your Journey
               </Button>
             </div>
           </div>
@@ -157,36 +161,80 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <div className="relative">
-        <div 
-          className="bg-cover bg-center bg-gray-900 text-white min-h-[500px] flex items-end rounded-3xl mx-4 mt-8"
-          style={{
-            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`
-          }}
-        >
-          <div className="p-8 max-w-4xl">
-            <h1 className="text-4xl lg:text-5xl font-bold mb-4">
-              Get the college application insights you need.
+      <div className="relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24">
+          <div className="text-center">
+            <div className="flex justify-center mb-8">
+              <div className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 border border-blue-200">
+                <Sparkles className="w-5 h-5 text-blue-600 mr-2" />
+                <span className="text-blue-700 font-semibold">AI-Powered College Discovery</span>
+              </div>
+            </div>
+            
+            <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight">
+              Your College Journey
+              <span className="block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Reimagined
+              </span>
             </h1>
-            <p className="text-xl mb-6 text-gray-100">
-              Get started with our free college matching tool. We'll help you find best-fit schools, based on your unique profile. We'll give personalized insights to help you stand out.
+            
+            <p className="text-xl lg:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
+              Discover your perfect college match with AI-powered insights. Get personalized recommendations, 
+              expert guidance, and strategic support throughout your entire application journey.
             </p>
-            <div className="flex items-center bg-white rounded-lg p-2 max-w-md">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                className="border-0 flex-1"
-                value={signUpForm.watch("email")}
-                onChange={(e) => signUpForm.setValue("email", e.target.value)}
-              />
+            
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
               <Button 
-                className="bg-blue-600 hover:bg-blue-700 text-white ml-2"
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-10 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 text-lg"
                 onClick={() => setActiveTab("signup")}
               >
-                Get started
+                Start Free Discovery
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+              <Button 
+                variant="outline"
+                size="lg"
+                className="border-2 border-gray-300 text-gray-700 hover:border-gray-400 font-semibold px-10 py-4 rounded-2xl text-lg"
+                onClick={() => setActiveTab("signin")}
+              >
+                Sign In
               </Button>
             </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+              <div className="text-center p-6 rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Target className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Smart Matching</h3>
+                <p className="text-gray-600">AI analyzes your profile to find colleges that truly fit your goals and personality</p>
+              </div>
+              
+              <div className="text-center p-6 rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg">
+                <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <MessageCircle className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Expert Mentorship</h3>
+                <p className="text-gray-600">Chat with AI counselors trained on successful application strategies</p>
+              </div>
+              
+              <div className="text-center p-6 rounded-2xl bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <TrendingUp className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Growth Tracking</h3>
+                <p className="text-gray-600">Monitor your progress and get insights to continuously improve your profile</p>
+              </div>
+            </div>
           </div>
+        </div>
+        
+        {/* Background Elements */}
+        <div className="absolute top-0 left-0 w-full h-full -z-10">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+          <div className="absolute top-40 right-10 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-2000"></div>
+          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-4000"></div>
         </div>
       </div>
 
