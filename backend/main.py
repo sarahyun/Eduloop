@@ -1,12 +1,11 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseModel, Field
-from typing import Optional, List
-from datetime import datetime
-from bson import ObjectId
-import os
+from models import ChatRequest
+from database import db
 from ai_service import ai_service
+from routes.users import router as users_router
+from routes.profiles import router as profiles_router
+from routes.colleges import router as colleges_router
 
 app = FastAPI(title="College Counseling API", version="1.0.0")
 
@@ -19,10 +18,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# MongoDB connection
-MONGO_URI = os.getenv('MONGODB_URI')
-client = AsyncIOMotorClient(MONGO_URI)
-db = client['CollegeCounselingDB']
+# Include routers
+app.include_router(users_router)
+app.include_router(profiles_router)
+app.include_router(colleges_router)
 
 # Pydantic models
 class PyObjectId(ObjectId):
