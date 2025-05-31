@@ -370,7 +370,117 @@ export default function LandingPage() {
         </div>
       </div>
 
+      {/* Natural Language Search Section */}
+      <div className="bg-white/80 backdrop-blur-sm py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+              Natural Language
+              <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                College Discovery
+              </span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Forget complex filters and confusing search forms. Just tell us what you're looking for 
+              in plain English, and our AI will understand and find the perfect colleges for you.
+            </p>
+          </div>
 
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-20">
+            <div className="space-y-8">
+              {[
+                {
+                  icon: <MessageCircle className="w-8 h-8" />,
+                  title: "Natural Language Search",
+                  description: "Simply describe what you want: 'I need a college with strong engineering, diverse student body, and warm weather.' Our AI understands conversational language.",
+                  gradient: "from-blue-500 to-indigo-600"
+                },
+                {
+                  icon: <Brain className="w-8 h-8" />,
+                  title: "Intelligent Interpretation",
+                  description: "Our AI understands context, nuance, and implied preferences in your search to find colleges that truly match your vision.",
+                  gradient: "from-indigo-500 to-purple-600"
+                },
+                {
+                  icon: <Target className="w-8 h-8" />,
+                  title: "Contextual Recommendations",
+                  description: "Get results that go beyond keywords - our AI considers the deeper meaning behind what you're looking for in a college experience.",
+                  gradient: "from-purple-500 to-pink-600"
+                }
+              ].map((feature, index) => (
+                <div key={index} className="flex items-start space-x-4 group">
+                  <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1`}>
+                    <div className="text-white">{feature.icon}</div>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{feature.title}</h3>
+                    <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="relative">
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-3xl p-8 shadow-2xl">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-gray-900 text-lg">Natural Language Search</h4>
+                    <div className="text-sm text-gray-600">AI-powered discovery</div>
+                  </div>
+                  <div className="bg-white rounded-2xl p-6 shadow-lg">
+                    <div className="space-y-4">
+                      <div className="p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                        <div className="text-sm text-blue-700 mb-2">Example Search:</div>
+                        <div className="font-medium text-blue-900">"I want a mid-size university with strong computer science, vibrant campus life, and good weather"</div>
+                      </div>
+                      <div className="text-sm text-gray-600 font-medium">AI-Generated Results:</div>
+                      {[
+                        { name: "University of California, San Diego", reason: "Strong CS program, great weather" },
+                        { name: "University of Texas at Austin", reason: "Vibrant campus, excellent tech programs" },
+                        { name: "Georgia Institute of Technology", reason: "Top-tier CS, active student life" },
+                        { name: "University of Washington", reason: "Tech hub location, diverse community" }
+                      ].map((college, i) => (
+                        <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <div className="font-semibold text-gray-900">{college.name}</div>
+                            <div className="text-sm text-gray-600">{college.reason}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm text-blue-600">Perfect match</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white" onClick={() => setActiveTab("signup")}>
+                      Try Natural Search
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
+              <div className="text-3xl font-bold text-blue-600 mb-2">Smart</div>
+              <div className="text-gray-700 font-semibold">Language Processing</div>
+              <div className="text-sm text-gray-600 mt-2">Understands natural conversation and context</div>
+            </div>
+            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200">
+              <div className="text-3xl font-bold text-indigo-600 mb-2">AI-Powered</div>
+              <div className="text-gray-700 font-semibold">Discovery</div>
+              <div className="text-sm text-gray-600 mt-2">Finds colleges you never knew existed</div>
+            </div>
+            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200">
+              <div className="text-3xl font-bold text-purple-600 mb-2">Instant</div>
+              <div className="text-gray-700 font-semibold">Results</div>
+              <div className="text-sm text-gray-600 mt-2">Get answers in seconds, not hours</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Auth Modal/Overlay */}
       {(activeTab === "signin" || activeTab === "signup") && (
@@ -469,7 +579,18 @@ export default function LandingPage() {
                       <p className="text-sm text-red-600">{signUpForm.formState.errors.password.message}</p>
                     )}
                   </div>
-
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-confirm">Confirm Password</Label>
+                    <Input
+                      id="signup-confirm"
+                      type="password"
+                      placeholder="Confirm your password"
+                      {...signUpForm.register("confirmPassword")}
+                    />
+                    {signUpForm.formState.errors.confirmPassword && (
+                      <p className="text-sm text-red-600">{signUpForm.formState.errors.confirmPassword.message}</p>
+                    )}
+                  </div>
                   <Button 
                     type="submit" 
                     className="w-full bg-blue-600 hover:bg-blue-700"
