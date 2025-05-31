@@ -1,6 +1,6 @@
 import { MongoClient, Db } from 'mongodb';
 
-const MONGO_DB_URI = "mongodb+srv://sarahyun02:admin@cluster0.y9oxu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const MONGO_DB_URI = process.env.MONGODB_URI || "mongodb+srv://sarahyun02:admin@cluster0.y9oxu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 let client: MongoClient | null = null;
 let db: Db | null = null;
