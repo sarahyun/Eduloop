@@ -122,6 +122,57 @@ app.use((req, res, next) => {
     }
   });
 
+  app.get('/api/auth/me', async (req, res) => {
+    // For now, return a mock user since we're assuming successful signup
+    // In a real app, this would check session/token authentication
+    res.json({
+      id: 1,
+      userId: "mock-user-123",
+      name: "Test User",
+      email: "test@example.com",
+      role: "student",
+      grade: "12th"
+    });
+  });
+
+  app.get('/api/profile/:userId', async (req, res) => {
+    // Mock profile data for dashboard
+    res.json({
+      id: 1,
+      userId: req.params.userId,
+      careerMajor: "Computer Science",
+      dreamSchools: "Stanford, MIT",
+      gpa: "3.8",
+      profileCompletion: 75,
+      createdAt: new Date().toISOString()
+    });
+  });
+
+  app.get('/api/recommendations/:userId', async (req, res) => {
+    // Mock college recommendations
+    res.json([
+      {
+        id: 1,
+        name: "Stanford University",
+        location: "Stanford, CA",
+        matchScore: 85,
+        category: "reach"
+      },
+      {
+        id: 2,
+        name: "UC Berkeley",
+        location: "Berkeley, CA", 
+        matchScore: 78,
+        category: "match"
+      }
+    ]);
+  });
+
+  app.get('/api/saved-colleges/:userId', async (req, res) => {
+    // Mock saved colleges
+    res.json([]);
+  });
+
   // Proxy other API requests to FastAPI backend
   app.use('/api', createProxyMiddleware({
     target: 'http://localhost:8000',
