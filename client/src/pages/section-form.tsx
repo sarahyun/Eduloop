@@ -24,13 +24,12 @@ interface FormResponse {
 }
 
 const SectionForm: React.FC = () => {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   
-  // Get section from URL params
-  const urlParams = new URLSearchParams(window.location.search);
-  const section = urlParams.get('section');
+  // Track the current section in state so component re-renders when URL changes
+  const [section, setSection] = useState<string | null>(null);
   
   const [responses, setResponses] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +37,51 @@ const SectionForm: React.FC = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
+
+  // Function to get section from URL
+  const getSectionFromUrl = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sectionParam = urlParams.get('section');
+    return sectionParam ? decodeURIComponent(sectionParam) : null;
+  };
+
+  // Update section when component mounts and when URL changes
+  useEffect(() => {
+    const updateSection = () => {
+      const currentSection = getSectionFromUrl();
+      setSection(currentSection);
+    };
+
+    // Set initial section
+    updateSection();
+
+    // Listen for URL changes (back/forward buttons)
+    const handlePopState = () => {
+      updateSection();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    
+    // Also listen for pushstate/replacestate (programmatic navigation)
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+    
+    history.pushState = function(...args) {
+      originalPushState.apply(history, args);
+      setTimeout(updateSection, 0);
+    };
+    
+    history.replaceState = function(...args) {
+      originalReplaceState.apply(history, args);
+      setTimeout(updateSection, 0);
+    };
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      history.pushState = originalPushState;
+      history.replaceState = originalReplaceState;
+    };
+  }, []);
 
   // Get current section and questions from shared data
   const currentSection = section && questionsData[section as keyof typeof questionsData] 
@@ -64,10 +108,18 @@ const SectionForm: React.FC = () => {
     return descriptions[sectionId] || "Complete this section";
   }
 
-  // Load existing responses on component mount
+  // Load existing responses when section changes
   useEffect(() => {
     const loadResponses = async () => {
-      if (!user?.uid || !formId) return;
+      if (!user?.uid || !formId) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setResponses({}); // Clear previous responses
+      setHasChanges(false);
+      setLastSaved(null);
 
       try {
         const response = await fetch(`/api/responses/${user.uid}/${formId}`);
@@ -92,7 +144,7 @@ const SectionForm: React.FC = () => {
     };
 
     loadResponses();
-  }, [user?.uid, formId]);
+  }, [user?.uid, formId, section]); // Add section as dependency
 
   // Load completion status for all sections
   useEffect(() => {
@@ -206,8 +258,11 @@ const SectionForm: React.FC = () => {
       saveResponses(true);
     }
     
-    // Navigate to new section
+    // Navigate to new section with proper URL encoding
     navigate(`/section-form?section=${encodeURIComponent(newSection)}`);
+    
+    // Immediately update the section state
+    setSection(newSection);
   };
 
   const formatLastSaved = () => {
