@@ -1,14 +1,82 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MessageCircle, Target, BookOpen, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { questionsData, type Question } from '@/data/questionsData';
+
+interface FormResponse {
+  response_id?: string;
+  user_id: string;
+  form_id: string;
+  submitted_at?: string;
+  responses: Array<{
+    question_id: string;
+    question_text: string;
+    answer: string;
+  }>;
+}
 
 export default function Dashboard() {
   const { toast } = useToast();
   const { user, loading } = useAuth();
+  const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
+  const [isLoadingCompletion, setIsLoadingCompletion] = useState(true);
+
+  // Load completion status for all sections
+  useEffect(() => {
+    const loadCompletionStatus = async () => {
+      if (!user?.uid) {
+        setIsLoadingCompletion(false);
+        return;
+      }
+
+      setIsLoadingCompletion(true);
+      const completed = new Set<string>();
+      
+      for (const sectionId of Object.keys(questionsData)) {
+        const sectionFormId = sectionId.toLowerCase().replace(/\s+/g, '_');
+        const sectionQuestions = questionsData[sectionId as keyof typeof questionsData] as Question[];
+        
+        try {
+          const response = await fetch(`/api/responses/${user.uid}/${sectionFormId}`);
+          if (response.ok) {
+            const data: FormResponse = await response.json();
+            
+            // Check if ALL questions in the section have been answered
+            if (data.responses && data.responses.length > 0) {
+              const answeredQuestionIds = new Set(data.responses.map(r => r.question_id));
+              const allQuestionIds = sectionQuestions.map(q => q.id.toString());
+              
+              // Section is complete only if ALL questions have non-empty answers
+              const allQuestionsAnswered = allQuestionIds.every(questionId => {
+                const response = data.responses.find(r => r.question_id === questionId);
+                return response && response.answer.trim().length > 0;
+              });
+              
+              if (allQuestionsAnswered) {
+                completed.add(sectionId);
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Error loading completion status for ${sectionId}:`, error);
+        }
+      }
+      
+      setCompletedSections(completed);
+      setIsLoadingCompletion(false);
+    };
+
+    loadCompletionStatus();
+  }, [user?.uid]);
+
+  // Calculate completion percentage
+  const completedSectionsCount = completedSections.size;
+  const totalSections = Object.keys(questionsData).length;
+  const profileCompletion = Math.round((completedSectionsCount / totalSections) * 100);
 
   if (loading) {
     return (
@@ -49,12 +117,14 @@ export default function Dashboard() {
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-medium text-blue-900">Complete your profile for better matches</h3>
-                  <span className="text-sm font-medium text-blue-700">0% complete</span>
+                  <span className="text-sm font-medium text-blue-700">
+                    {isLoadingCompletion ? 'Loading...' : `${profileCompletion}% complete`}
+                  </span>
                 </div>
                 <div className="w-full bg-blue-200 rounded-full h-2 mb-2">
                   <div 
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: '0%' }}
+                    style={{ width: `${isLoadingCompletion ? 0 : profileCompletion}%` }}
                   />
                 </div>
                 <p className="text-sm text-blue-700">The more we learn about you, the more helpful our recommendations become.</p>
