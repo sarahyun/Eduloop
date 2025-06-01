@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { AIChat } from "@/components/AIChat";
+import { Navigation } from "@/components/Navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { MessageCircle, ArrowLeft, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { questionsData } from "@/data/questionsData";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -221,19 +227,112 @@ export default function ChatOnboarding() {
     }
   };
 
+  // Calculate progress
+  const answeredCount = Object.keys(responses).length;
+  const totalQuestions = sectionQuestions.length;
+  const progressPercentage = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+  
+  // Get section description
+  const getSectionDescription = (sectionName: string) => {
+    const descriptions: Record<string, string> = {
+      "Introduction": "Tell us about yourself and your goals",
+      "Academic Information": "Your academic interests and performance",
+      "Extracurriculars and Interests": "Your activities and passions outside the classroom",
+      "Personal Reflections": "Deeper insights into who you are",
+      "College Preferences": "What you're looking for in your college experience"
+    };
+    return descriptions[sectionName] || "Complete this section";
+  };
+
   return (
-    <div className="max-w-2xl mx-auto py-8">
-      <h2 className="text-2xl font-bold mb-4">Complete: {section}</h2>
-      <AIChat
-        messages={messages}
-        onSendMessage={handleSendMessage}
-        isLoading={isLoading}
-        currentSection={section || ''}
-        sectionQuestions={sectionQuestions}
-      />
-      {/* Progress indicator */}
-      <div className="mt-4 text-sm text-gray-600">
-        Progress: {Object.keys(responses).length} / {sectionQuestions.length} questions answered
+    <div className="min-h-screen bg-gray-50">
+      <Navigation user={{ name: user?.displayName || user?.email || 'User', email: user?.email || '' }} />
+      
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section with Context */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => window.location.href = '/profile-builder'}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Profile Builder
+            </Button>
+            <Badge variant="outline" className="text-purple-600 border-purple-200 bg-purple-50">
+              <Sparkles className="w-3 h-3 mr-1" />
+              AI-Powered
+            </Badge>
+          </div>
+          
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Complete Your {section} Section
+            </h1>
+            <p className="text-lg text-gray-600 mb-4">
+              {getSectionDescription(section || '')}
+            </p>
+            <p className="text-sm text-gray-500">
+              Our AI counselor will guide you through thoughtful questions to build your profile
+            </p>
+          </div>
+        </div>
+
+        {/* Progress Section */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-gray-900">Section Progress</h3>
+              <span className="text-sm font-medium text-gray-600">
+                {answeredCount} of {totalQuestions} completed
+              </span>
+            </div>
+            <Progress value={progressPercentage} className="mb-2" />
+            <p className="text-xs text-gray-500">
+              {progressPercentage === 100 ? 
+                "Great job! You've completed this section." : 
+                "Keep going - each answer helps us understand you better"
+              }
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Chat Interface */}
+        <Card className="shadow-lg">
+          <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-purple-50">
+            <CardTitle className="flex items-center">
+              <MessageCircle className="w-5 h-5 mr-2 text-blue-600" />
+              AI Counselor Chat
+            </CardTitle>
+            <p className="text-sm text-gray-600 mt-1">
+              Have a natural conversation about your {section?.toLowerCase()} details
+            </p>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="h-[500px]">
+              <AIChat
+                messages={messages}
+                onSendMessage={handleSendMessage}
+                isLoading={isLoading}
+                isExpanded={true}
+                user={{ fullName: user?.displayName || user?.email || 'User' }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Help Section */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-500 mb-2">
+            The AI will ask follow-up questions based on your answers. Be authentic and detailed!
+          </p>
+          <div className="flex justify-center gap-4 text-xs text-gray-400">
+            <span>• Your responses are automatically saved</span>
+            <span>• You can return anytime to continue</span>
+            <span>• All information is kept private</span>
+          </div>
+        </div>
       </div>
     </div>
   );
