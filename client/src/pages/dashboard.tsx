@@ -160,7 +160,7 @@ export default function Dashboard() {
             // Find first incomplete section for chat
             const firstIncompleteSection = Object.keys(questionsData).find(sectionId => !completedSections.has(sectionId));
             const sectionParam = firstIncompleteSection || 'Introduction';
-            window.location.href = `/chat?section=${encodeURIComponent(sectionParam)}`;
+            window.location.href = `/chat-onboarding?section=${encodeURIComponent(sectionParam)}`;
           }}>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
@@ -240,7 +240,7 @@ export default function Dashboard() {
                 // Find first incomplete section for chat
                 const firstIncompleteSection = Object.keys(questionsData).find(sectionId => !completedSections.has(sectionId));
                 const sectionParam = firstIncompleteSection || 'Introduction';
-                window.location.href = `/chat?section=${encodeURIComponent(sectionParam)}`;
+                window.location.href = `/chat-onboarding?section=${encodeURIComponent(sectionParam)}`;
               }}
             >
               <MessageCircle className="w-4 h-4 mr-2" />

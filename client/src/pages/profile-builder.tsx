@@ -131,9 +131,9 @@ export default function ProfileBuilder() {
     const targetSection = sectionId ? sections.find(s => s.id === sectionId) : getFirstIncompleteSection();
     
     if (method === 'chat') {
-      // Navigate to chat page with section parameter
+      // Navigate to chat-onboarding page with section parameter
       const sectionName = targetSection?.id || 'Introduction';
-      window.location.href = `/chat?section=${encodeURIComponent(sectionName)}`;
+      window.location.href = `/chat-onboarding?section=${encodeURIComponent(sectionName)}`;
     } else {
       // Navigate to form with specific section
       const sectionName = targetSection?.id || 'Introduction';

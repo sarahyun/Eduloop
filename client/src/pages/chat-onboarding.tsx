@@ -192,15 +192,20 @@ export default function ChatOnboarding() {
         result.aiMessage.content = cleanContent;
       }
       
-      setMessages((prev) => [
-        ...prev,
-        result.aiMessage ?? {
-          id: Date.now() + 1,
-          role: "assistant",
-          content: "Sorry, something went wrong. Please try again.",
-          createdAt: new Date().toISOString(),
-        },
-      ]);
+      // Ensure AI message has proper timestamp
+      const aiMessage = result.aiMessage ?? {
+        id: Date.now() + 1,
+        role: "assistant",
+        content: "Sorry, something went wrong. Please try again.",
+        createdAt: new Date().toISOString(),
+      };
+      
+      // Make sure createdAt is set properly
+      if (!aiMessage.createdAt) {
+        aiMessage.createdAt = new Date().toISOString();
+      }
+      
+      setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       setMessages((prev) => [
         ...prev,

@@ -21,7 +21,7 @@ export function Navigation({ user }: NavigationProps) {
   const navigation = [
     { name: "Dashboard", href: "/dashboard" },
     { name: "Profile", href: "/profile" },
-    { name: "Mentor", href: "/chat" },
+    { name: "Mentor", href: "/chat-onboarding?section=Introduction" },
   ];
 
   const isActive = (href: string) => location === href || location.startsWith(href);

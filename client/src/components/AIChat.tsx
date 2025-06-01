@@ -112,7 +112,15 @@ export function AIChat({
   ];
 
   const formatTime = (dateString: string) => {
+    if (!dateString) return "Just now";
+    
     const date = new Date(dateString);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return "Just now";
+    }
+    
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
