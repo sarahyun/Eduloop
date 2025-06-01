@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -7,12 +8,15 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, FileText, Sparkles, Clock, CheckCircle, Edit, RefreshCw } from "lucide-react";
 import { api, type User } from "@/lib/api";
-import { PROFILE_SECTIONS, getSectionCompletionStatus } from "@/data/profileSections";
+import { questionsData, type Question } from '@/data/questionsData';
 import { useAuth } from "@/context/AuthContext";
 
 export default function ProfileBuilder() {
+  const [, navigate] = useLocation();
   const { user, loading } = useAuth();
   const [selectedMethod, setSelectedMethod] = useState<'chat' | 'form' | null>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
   
   // Show loading state while auth is loading
   if (loading) {
@@ -39,7 +43,7 @@ export default function ProfileBuilder() {
   const mockUserId = 1; // This is a temporary solution until backend is updated to handle string UIDs
   
   // Load profile data to determine completion status
-  const { data: profile } = useQuery({
+  const { data: profileData } = useQuery({
     queryKey: ['/api/profile', mockUserId],
     queryFn: async () => {
       const response = await fetch(`/api/profile/${mockUserId}`);
@@ -48,8 +52,31 @@ export default function ProfileBuilder() {
     }
   });
   
-  // Get sections with completion status using the data file
-  const sections = getSectionCompletionStatus(profile);
+  // Convert questionsData to array format and check completion status
+  const sections = Object.entries(questionsData).map(([sectionId, questions]) => {
+    const isCompleted = profileData && questions.some((q: Question) => 
+      profileData.responses && profileData.responses[q.id.toString()]
+    );
+    
+    return {
+      id: sectionId,
+      title: sectionId,
+      description: getDescriptionForSection(sectionId),
+      questions: questions as Question[],
+      completed: isCompleted
+    };
+  });
+
+  // Helper function to get description for each section
+  function getDescriptionForSection(sectionId: string): string {
+    const descriptions: Record<string, string> = {
+      "Academic Information": "Your academic interests and performance", 
+      "Extracurriculars and Interests": "Your activities and passions outside the classroom",
+      "Personal Reflections": "Deeper insights into who you are",
+      "College Preferences": "What you're looking for in your college experience"
+    };
+    return descriptions[sectionId] || "Complete this section";
+  }
 
   // Find first incomplete section
   const getFirstIncompleteSection = () => {
@@ -253,7 +280,6 @@ export default function ProfileBuilder() {
                     {/* Actions for completed sections - allow updates */}
                     {section.completed && (
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">{section.lastUpdated}</span>
                         <Button 
                           size="sm" 
                           variant="ghost" 

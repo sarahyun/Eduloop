@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { PROFILE_SECTIONS, getSectionById } from '@/data/profileSections';
+import { questionsData, type Question } from '@/data/questionsData';
 import { useToast } from '@/hooks/use-toast';
 
+// Type for individual questions
 interface Answer {
   question_id: string;
   question_text: string;
@@ -38,9 +39,30 @@ const SectionForm: React.FC = () => {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
 
-  const currentSection = getSectionById(section || '');
+  // Get current section and questions from shared data
+  const currentSection = section && questionsData[section as keyof typeof questionsData] 
+    ? {
+        id: section,
+        title: section,
+        description: getDescriptionForSection(section),
+        questions: questionsData[section as keyof typeof questionsData] as Question[]
+      }
+    : null;
+
   const sectionQuestions = currentSection?.questions || [];
   const formId = section?.toLowerCase().replace(/\s+/g, '_') || '';
+
+  // Helper function to get description for each section
+  function getDescriptionForSection(sectionId: string): string {
+    const descriptions: Record<string, string> = {
+      "Introduction": "Tell us about yourself and your goals",
+      "Academic Information": "Your academic interests and performance", 
+      "Extracurriculars and Interests": "Your activities and passions outside the classroom",
+      "Personal Reflections": "Deeper insights into who you are",
+      "College Preferences": "What you're looking for in your college experience"
+    };
+    return descriptions[sectionId] || "Complete this section";
+  }
 
   // Load existing responses on component mount
   useEffect(() => {
@@ -79,19 +101,19 @@ const SectionForm: React.FC = () => {
 
       const completed = new Set<string>();
       
-      for (const profileSection of PROFILE_SECTIONS) {
-        const sectionFormId = profileSection.id.toLowerCase().replace(/\s+/g, '_');
+      for (const sectionId of Object.keys(questionsData)) {
+        const sectionFormId = sectionId.toLowerCase().replace(/\s+/g, '_');
         try {
           const response = await fetch(`/api/responses/${user.uid}/${sectionFormId}`);
           if (response.ok) {
             const data: FormResponse = await response.json();
             // Consider section completed if it has at least one response
             if (data.responses && data.responses.length > 0) {
-              completed.add(profileSection.id);
+              completed.add(sectionId);
             }
           }
         } catch (error) {
-          console.error(`Error loading completion status for ${profileSection.id}:`, error);
+          console.error(`Error loading completion status for ${sectionId}:`, error);
         }
       }
       
@@ -119,11 +141,11 @@ const SectionForm: React.FC = () => {
     
     try {
       const answersArray: Answer[] = sectionQuestions
-        .filter((q) => responses[q.id]?.trim())
+        .filter((q) => responses[q.id.toString()]?.trim())
         .map((q) => ({
-          question_id: q.id,
+          question_id: q.id.toString(),
           question_text: q.question,
-          answer: responses[q.id].trim()
+          answer: responses[q.id.toString()].trim()
         }));
 
       const payload: Omit<FormResponse, 'response_id' | 'submitted_at'> = {
@@ -217,6 +239,8 @@ const SectionForm: React.FC = () => {
     );
   }
 
+  const allSectionIds = Object.keys(questionsData);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex">
@@ -235,25 +259,25 @@ const SectionForm: React.FC = () => {
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-2">Profile Sections</h2>
               <div className="text-sm text-gray-600 mb-2">
-                {completedSections.size} of {PROFILE_SECTIONS.length} sections completed
+                {completedSections.size} of {allSectionIds.length} sections completed
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
                   className="bg-primary h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${(completedSections.size / PROFILE_SECTIONS.length) * 100}%` }}
+                  style={{ width: `${(completedSections.size / allSectionIds.length) * 100}%` }}
                 ></div>
               </div>
             </div>
             
             <div className="space-y-2">
-              {PROFILE_SECTIONS.map((profileSection) => {
-                const isCompleted = completedSections.has(profileSection.id);
-                const isCurrent = section === profileSection.id;
+              {allSectionIds.map((sectionId) => {
+                const isCompleted = completedSections.has(sectionId);
+                const isCurrent = section === sectionId;
                 
                 return (
                   <button
-                    key={profileSection.id}
-                    onClick={() => handleSectionSwitch(profileSection.id)}
+                    key={sectionId}
+                    onClick={() => handleSectionSwitch(sectionId)}
                     className={`w-full text-left p-3 rounded-lg transition-colors ${
                       isCurrent
                         ? 'bg-primary/10 border-primary/20 border text-primary'
@@ -262,8 +286,8 @@ const SectionForm: React.FC = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <div className="font-medium text-sm">{profileSection.title}</div>
-                        <div className="text-xs text-gray-500 mt-1">{profileSection.description}</div>
+                        <div className="font-medium text-sm">{sectionId}</div>
+                        <div className="text-xs text-gray-500 mt-1">{getDescriptionForSection(sectionId)}</div>
                       </div>
                       {isCompleted && (
                         <div className="h-4 w-4 text-green-500 ml-2 flex-shrink-0">✓</div>
@@ -286,12 +310,12 @@ const SectionForm: React.FC = () => {
               
               {/* Progress indicator */}
               <div className="mt-4 flex items-center gap-4 text-sm text-gray-600">
-                <span>Progress: {sectionQuestions.filter(q => responses[q.id]?.trim()).length} of {sectionQuestions.length} questions answered</span>
+                <span>Progress: {sectionQuestions.filter(q => responses[q.id.toString()]?.trim()).length} of {sectionQuestions.length} questions answered</span>
                 <div className="flex-1 bg-gray-200 rounded-full h-2">
                   <div 
                     className="bg-primary h-2 rounded-full transition-all duration-300"
                     style={{ 
-                      width: `${(sectionQuestions.filter(q => responses[q.id]?.trim()).length / sectionQuestions.length) * 100}%` 
+                      width: `${(sectionQuestions.filter(q => responses[q.id.toString()]?.trim()).length / sectionQuestions.length) * 100}%` 
                     }}
                   ></div>
                 </div>
@@ -323,9 +347,9 @@ const SectionForm: React.FC = () => {
                       {question.question}
                     </label>
                     <Textarea
-                      value={responses[question.id] || ''}
-                      onChange={(e) => handleInputChange(question.id, e.target.value)}
-                      placeholder={question.placeholder || "Share your thoughts..."}
+                      value={responses[question.id.toString()] || ''}
+                      onChange={(e) => handleInputChange(question.id.toString(), e.target.value)}
+                      placeholder="Share your thoughts..."
                       className="min-h-[100px] resize-none"
                       disabled={isSaving}
                     />
@@ -336,13 +360,13 @@ const SectionForm: React.FC = () => {
                 <div className="pt-6 border-t border-gray-200">
                   <div className="flex justify-between items-center">
                     <div>
-                      {PROFILE_SECTIONS.findIndex(s => s.id === section) > 0 && (
+                      {allSectionIds.findIndex(s => s === section) > 0 && (
                         <Button
                           variant="outline"
                           onClick={() => {
-                            const currentIndex = PROFILE_SECTIONS.findIndex(s => s.id === section);
-                            const previousSection = PROFILE_SECTIONS[currentIndex - 1];
-                            handleSectionSwitch(previousSection.id);
+                            const currentIndex = allSectionIds.findIndex(s => s === section);
+                            const previousSection = allSectionIds[currentIndex - 1];
+                            handleSectionSwitch(previousSection);
                           }}
                         >
                           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -351,15 +375,15 @@ const SectionForm: React.FC = () => {
                       )}
                     </div>
                     <div className="text-sm text-gray-500">
-                      Section {PROFILE_SECTIONS.findIndex(s => s.id === section) + 1} of {PROFILE_SECTIONS.length}
+                      Section {allSectionIds.findIndex(s => s === section) + 1} of {allSectionIds.length}
                     </div>
                     <div>
-                      {PROFILE_SECTIONS.findIndex(s => s.id === section) < PROFILE_SECTIONS.length - 1 && (
+                      {allSectionIds.findIndex(s => s === section) < allSectionIds.length - 1 && (
                         <Button
                           onClick={() => {
-                            const currentIndex = PROFILE_SECTIONS.findIndex(s => s.id === section);
-                            const nextSection = PROFILE_SECTIONS[currentIndex + 1];
-                            handleSectionSwitch(nextSection.id);
+                            const currentIndex = allSectionIds.findIndex(s => s === section);
+                            const nextSection = allSectionIds[currentIndex + 1];
+                            handleSectionSwitch(nextSection);
                           }}
                         >
                           Next Section

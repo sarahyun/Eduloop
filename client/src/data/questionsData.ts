@@ -8,6 +8,14 @@ export interface QuestionsData {
 }
 
 export const questionsData: QuestionsData = {
+  "Introduction": [
+    { id: 1, question: "Do you have a career or major in mind? No worries if not." },
+    { id: 2, question: "Got any dream schools in mind, if so why these schools?" },
+    { id: 3, question: "Aside from hanging out with friends, how do you like to spend your time outside of school?" },
+    { id: 4, question: "What are you looking for in your college experience? Also, anything that worries you about this process?" },
+    { id: 5, question: "If you have a resume or a list of extracurriculars, feel free to paste or enter them here." },
+    { id: 6, question: "What is your GPA and test scores?" }
+  ],
     "Academic Information": [
       { id: 2, question: "What are your 3 favorite classes?" },
       { id: 3, question: "What subjects do you struggle with?" },

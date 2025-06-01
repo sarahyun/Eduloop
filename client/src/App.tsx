@@ -8,9 +8,9 @@ import LandingPage from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import ChatPage from "@/pages/chat";
 import ExplorePage from "@/pages/explore";
-import OnboardingPage from "@/pages/onboarding";
 import ProfileBuilder from "@/pages/profile-builder";
 import SectionForm from "@/pages/section-form";
+import OnboardingPage from "@/pages/onboarding";
 import NotFound from "@/pages/not-found";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -56,9 +56,6 @@ function Router() {
       <Route path="/explore">
         <ProtectedRoute component={ExplorePage} />
       </Route>
-      <Route path="/onboarding">
-        <ProtectedRoute component={OnboardingPage} />
-      </Route>
       <Route path="/profile">
         <ProtectedRoute component={ProfileBuilder} />
       </Route>
@@ -67,6 +64,9 @@ function Router() {
       </Route>
       <Route path="/section-form">
         <ProtectedRoute component={SectionForm} />
+      </Route>
+      <Route path="/onboarding">
+        <ProtectedRoute component={OnboardingPage} />
       </Route>
       <Route component={NotFound} />
     </Switch>
