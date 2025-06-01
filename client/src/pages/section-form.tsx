@@ -1,227 +1,322 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { ArrowLeft, Save } from 'lucide-react';
-import { Navigation } from '@/components/Navigation';
-import { PROFILE_SECTIONS } from '@shared/questions';
+import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { PROFILE_SECTIONS, getSectionById } from '@/data/profileSections';
 import { useToast } from '@/hooks/use-toast';
 
-export default function SectionForm() {
+interface Answer {
+  question_id: string;
+  question_text: string;
+  answer: string;
+}
+
+interface FormResponse {
+  response_id?: string;
+  user_id: string;
+  form_id: string;
+  submitted_at?: string;
+  responses: Answer[];
+}
+
+const SectionForm: React.FC = () => {
   const [location, navigate] = useLocation();
+  const { user } = useAuth();
   const { toast } = useToast();
   
   // Get section from URL params
   const urlParams = new URLSearchParams(window.location.search);
-  const sectionParam = urlParams.get('section') || 'Academic Information';
+  const section = urlParams.get('section');
   
-  const [currentSection, setCurrentSection] = useState(sectionParam);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [responses, setResponses] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
 
-  // Get user profile data
-  const { data: profile } = useQuery({
-    queryKey: ['/api/profile/1'],
-  });
+  const currentSection = getSectionById(section || '');
+  const sectionQuestions = currentSection?.questions || [];
+  const formId = section?.toLowerCase().replace(/\s+/g, '_') || '';
 
-  // Populate answers from existing profile data
+  // Load existing responses on component mount
   useEffect(() => {
-    if (profile && PROFILE_SECTIONS[currentSection as keyof typeof PROFILE_SECTIONS]) {
-      const initialAnswers: Record<string, string> = {};
-      const profileData = profile as any;
+    const loadResponses = async () => {
+      if (!user?.uid || !formId) return;
+
+      try {
+        const response = await fetch(`/api/responses/${user.uid}/${formId}`);
+        if (response.ok) {
+          const data: FormResponse = await response.json();
+          const responseMap: Record<string, string> = {};
+          
+          data.responses.forEach((answer) => {
+            responseMap[answer.question_id] = answer.answer;
+          });
+          
+          setResponses(responseMap);
+          setLastSaved(new Date(data.submitted_at || ''));
+        } else if (response.status !== 404) {
+          console.error('Failed to load responses');
+        }
+      } catch (error) {
+        console.error('Error loading responses:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadResponses();
+  }, [user?.uid, formId]);
+
+  // Load completion status for all sections
+  useEffect(() => {
+    const loadCompletionStatus = async () => {
+      if (!user?.uid) return;
+
+      const completed = new Set<string>();
       
-      // Map profile fields to question IDs for each section
-      if (currentSection === 'Introduction') {
-        initialAnswers['1'] = profileData.careerMajor || '';
-        initialAnswers['2'] = profileData.dreamSchools || '';
-        initialAnswers['3'] = profileData.freeTimeActivities || '';
-        initialAnswers['4'] = profileData.collegeExperience || '';
-        initialAnswers['5'] = profileData.extracurricularsAdditionalInfo || '';
-        initialAnswers['6'] = profileData.gpaTestScores || '';
-      } else if (currentSection === 'Academic Information') {
-        initialAnswers['1'] = profileData.favoriteClasses || '';
-        initialAnswers['2'] = profileData.strugglingSubjects || '';
-        initialAnswers['3'] = profileData.academicFascinations || '';
-      } else if (currentSection === 'Extracurriculars and Interests') {
-        initialAnswers['1'] = profileData.proudOfOutsideAcademics || '';
-        initialAnswers['2'] = profileData.fieldsToExplore || '';
-        initialAnswers['3'] = profileData.freeTimeActivities || '';
-      } else if (currentSection === 'Personal Reflections') {
-        initialAnswers['1'] = profileData.whatMakesHappy || '';
-        initialAnswers['2'] = profileData.challengeOvercome || '';
-        initialAnswers['3'] = profileData.rememberedFor || '';
-        initialAnswers['4'] = profileData.importantLesson || '';
-      } else if (currentSection === 'College Preferences') {
-        initialAnswers['1'] = profileData.collegeExperience || '';
-        initialAnswers['2'] = profileData.schoolSize || '';
-        initialAnswers['3'] = profileData.locationExperiences || '';
-        initialAnswers['4'] = profileData.parentsExpectations || '';
-        initialAnswers['5'] = profileData.communityEnvironment || '';
+      for (const profileSection of PROFILE_SECTIONS) {
+        const sectionFormId = profileSection.id.toLowerCase().replace(/\s+/g, '_');
+        try {
+          const response = await fetch(`/api/responses/${user.uid}/${sectionFormId}`);
+          if (response.ok) {
+            const data: FormResponse = await response.json();
+            // Consider section completed if it has at least one response
+            if (data.responses && data.responses.length > 0) {
+              completed.add(profileSection.id);
+            }
+          }
+        } catch (error) {
+          console.error(`Error loading completion status for ${profileSection.id}:`, error);
+        }
       }
       
-      setAnswers(initialAnswers);
-    }
-  }, [profile, currentSection]);
+      setCompletedSections(completed);
+    };
 
-  // Save section mutation
-  const saveSectionMutation = useMutation({
-    mutationFn: async (sectionAnswers: Record<string, string>) => {
-      // Map question IDs back to profile field names
-      const profileUpdates: Record<string, string> = {};
-      
-      if (currentSection === 'Introduction') {
-        if (sectionAnswers['1']) profileUpdates.careerMajor = sectionAnswers['1'];
-        if (sectionAnswers['2']) profileUpdates.dreamSchools = sectionAnswers['2'];
-        if (sectionAnswers['3']) profileUpdates.freeTimeActivities = sectionAnswers['3'];
-        if (sectionAnswers['4']) profileUpdates.collegeExperience = sectionAnswers['4'];
-        if (sectionAnswers['5']) profileUpdates.extracurricularsAdditionalInfo = sectionAnswers['5'];
-        if (sectionAnswers['6']) profileUpdates.gpaTestScores = sectionAnswers['6'];
-      } else if (currentSection === 'Academic Information') {
-        if (sectionAnswers['1']) profileUpdates.favoriteClasses = sectionAnswers['1'];
-        if (sectionAnswers['2']) profileUpdates.strugglingSubjects = sectionAnswers['2'];
-        if (sectionAnswers['3']) profileUpdates.academicFascinations = sectionAnswers['3'];
-      } else if (currentSection === 'Extracurriculars and Interests') {
-        if (sectionAnswers['1']) profileUpdates.proudOfOutsideAcademics = sectionAnswers['1'];
-        if (sectionAnswers['2']) profileUpdates.fieldsToExplore = sectionAnswers['2'];
-        if (sectionAnswers['3']) profileUpdates.freeTimeActivities = sectionAnswers['3'];
-      } else if (currentSection === 'Personal Reflections') {
-        if (sectionAnswers['1']) profileUpdates.whatMakesHappy = sectionAnswers['1'];
-        if (sectionAnswers['2']) profileUpdates.challengeOvercome = sectionAnswers['2'];
-        if (sectionAnswers['3']) profileUpdates.rememberedFor = sectionAnswers['3'];
-        if (sectionAnswers['4']) profileUpdates.importantLesson = sectionAnswers['4'];
-      } else if (currentSection === 'College Preferences') {
-        if (sectionAnswers['1']) profileUpdates.collegeExperience = sectionAnswers['1'];
-        if (sectionAnswers['2']) profileUpdates.schoolSize = sectionAnswers['2'];
-        if (sectionAnswers['3']) profileUpdates.locationExperiences = sectionAnswers['3'];
-        if (sectionAnswers['4']) profileUpdates.parentsExpectations = sectionAnswers['4'];
-        if (sectionAnswers['5']) profileUpdates.communityEnvironment = sectionAnswers['5'];
+    loadCompletionStatus();
+  }, [user?.uid]);
+
+  // Autosave functionality with debouncing
+  useEffect(() => {
+    if (!hasChanges || !user?.uid) return;
+
+    const timeoutId = setTimeout(async () => {
+      await saveResponses(true); // true = autosave
+    }, 2000); // Save after 2 seconds of inactivity
+
+    return () => clearTimeout(timeoutId);
+  }, [responses, hasChanges, user?.uid]);
+
+  const saveResponses = async (isAutosave = false) => {
+    if (!user?.uid || !formId) return;
+
+    setIsSaving(true);
+    
+    try {
+      const answersArray: Answer[] = sectionQuestions
+        .filter((q) => responses[q.id]?.trim())
+        .map((q) => ({
+          question_id: q.id,
+          question_text: q.question,
+          answer: responses[q.id].trim()
+        }));
+
+      const payload: Omit<FormResponse, 'response_id' | 'submitted_at'> = {
+        user_id: user.uid,
+        form_id: formId,
+        responses: answersArray
+      };
+
+      const response = await fetch('/api/responses/upsert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        setHasChanges(false);
+        setLastSaved(new Date());
+        
+        // Update completion status
+        if (answersArray.length > 0 && section) {
+          setCompletedSections(prev => new Set([...prev, section]));
+        }
+        
+        if (!isAutosave) {
+          toast({
+            title: "Success",
+            description: "Your responses have been saved.",
+          });
+        }
+      } else {
+        throw new Error('Failed to save responses');
       }
-
-      const response = await fetch('/api/profile/1', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: 1,
-          ...profileUpdates
-        })
-      });
-      if (!response.ok) throw new Error('Failed to save answers');
-      return response.json();
-    },
-    onSuccess: () => {
-      setHasChanges(false);
-      toast({
-        title: "Section saved",
-        description: "Your answers have been saved successfully.",
-      });
-    },
-    onError: () => {
+    } catch (error) {
+      console.error('Error saving responses:', error);
       toast({
         title: "Error",
-        description: "Failed to save your answers. Please try again.",
+        description: "Failed to save responses. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
-  });
+  };
 
-  const handleAnswerChange = (questionId: string, value: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
+  const handleInputChange = (questionId: string, value: string) => {
+    setResponses(prev => ({
+      ...prev,
+      [questionId]: value
+    }));
     setHasChanges(true);
   };
 
-  const handleSave = () => {
-    saveSectionMutation.mutate(answers);
+  const handleSectionSwitch = (newSection: string) => {
+    // Save current changes before switching
+    if (hasChanges) {
+      saveResponses(true);
+    }
+    
+    // Navigate to new section
+    navigate(`/section-form?section=${encodeURIComponent(newSection)}`);
   };
 
-  const questions = PROFILE_SECTIONS[currentSection as keyof typeof PROFILE_SECTIONS] || [];
-  const regularQuestions = questions.filter(q => !q.question.includes('Additional information'));
-  const additionalInfoQuestion = questions.find(q => q.question.includes('Additional information'));
+  const formatLastSaved = () => {
+    if (!lastSaved) return '';
+    return `Last saved: ${lastSaved.toLocaleTimeString()}`;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your responses...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!section || !currentSection) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Section not found</h2>
+          <Button onClick={() => navigate('/profile-builder')}>
+            Return to Profile Builder
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/profile-builder')}
-            className="mb-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Profile
-          </Button>
-          
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{currentSection}</h1>
-          <p className="text-gray-600">
-            Answer these questions to help us understand your profile better. Your responses are automatically saved.
-          </p>
-        </div>
-
-        {/* Section Navigation */}
-        <div className="mb-6">
-          <div className="flex flex-wrap gap-2">
-            {Object.keys(PROFILE_SECTIONS).map((section) => (
-              <Button
-                key={section}
-                variant={section === currentSection ? "default" : "outline"}
-                size="sm"
-                onClick={() => setCurrentSection(section)}
-              >
-                {section}
-              </Button>
-            ))}
+      <div className="flex">
+        {/* Sidebar Navigation */}
+        <div className="w-80 bg-white border-r border-gray-200 min-h-screen">
+          <div className="p-6">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/profile-builder')}
+              className="mb-6 w-full justify-start"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Profile Builder
+            </Button>
+            
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile Sections</h2>
+            
+            <div className="space-y-2">
+              {PROFILE_SECTIONS.map((profileSection) => (
+                <button
+                  key={profileSection.id}
+                  onClick={() => handleSectionSwitch(profileSection.id)}
+                  className={`w-full text-left p-3 rounded-lg transition-colors ${
+                    section === profileSection.id
+                      ? 'bg-blue-50 border-blue-200 border text-blue-900'
+                      : 'hover:bg-gray-50 text-gray-700'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">{profileSection.title}</div>
+                      <div className="text-xs text-gray-500 mt-1">{profileSection.description}</div>
+                    </div>
+                    {completedSections.has(profileSection.id) && (
+                      <CheckCircle className="h-4 w-4 text-green-500 ml-2 flex-shrink-0" />
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Questions Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Questions</span>
-              {hasChanges && (
-                <Button 
-                  onClick={handleSave}
-                  disabled={saveSectionMutation.isPending}
-                  size="sm"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  {saveSectionMutation.isPending ? 'Saving...' : 'Save Changes'}
-                </Button>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {regularQuestions.map((question, index) => (
-              <div key={question.id} className="space-y-2">
-                <Label htmlFor={String(question.id)} className="text-base font-medium">
-                  {index + 1}. {question.question}
-                </Label>
-                <Textarea
-                  id={String(question.id)}
-                  value={answers[String(question.id)] || ''}
-                  onChange={(e) => handleAnswerChange(String(question.id), e.target.value)}
-                  placeholder="Share your thoughts here..."
-                  className="min-h-[100px]"
-                />
+        {/* Main Content */}
+        <div className="flex-1 py-8 px-6">
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">{currentSection.title}</h1>
+              <p className="text-gray-600 mt-2">{currentSection.description}</p>
+            </div>
+
+            {/* Form Card */}
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <h2 className="text-xl font-semibold">Questions</h2>
+                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <span>Responses are autosaved</span>
+                    {isSaving ? (
+                      <div className="flex items-center gap-2 text-blue-600">
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                        <span>Saving...</span>
+                      </div>
+                    ) : lastSaved ? (
+                      <span className="text-green-600 text-xs">{formatLastSaved()}</span>
+                    ) : null}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {sectionQuestions.map((question) => (
+                  <div key={question.id} className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      {question.question}
+                    </label>
+                    <Textarea
+                      value={responses[question.id] || ''}
+                      onChange={(e) => handleInputChange(question.id, e.target.value)}
+                      placeholder={question.placeholder || "Share your thoughts..."}
+                      className="min-h-[100px] resize-none"
+                      disabled={isSaving}
+                    />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Save Status */}
+            {isSaving && (
+              <div className="fixed bottom-4 right-4 bg-blue-100 border border-blue-300 rounded-lg px-4 py-2 flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <span className="text-blue-800 text-sm">Saving...</span>
               </div>
-            ))}
-
-
-          </CardContent>
-        </Card>
-
-        {/* Actions */}
-        <div className="mt-8 text-center">
-          <Button onClick={() => navigate('/dashboard')} size="lg">
-            View My Dashboard
-          </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default SectionForm;

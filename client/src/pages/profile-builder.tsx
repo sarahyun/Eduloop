@@ -7,64 +7,49 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, FileText, Sparkles, Clock, CheckCircle, Edit, RefreshCw } from "lucide-react";
 import { api, type User } from "@/lib/api";
+import { PROFILE_SECTIONS, getSectionCompletionStatus } from "@/data/profileSections";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ProfileBuilder() {
-  const [user] = useState<User>({ id: 1, username: "sarah", email: "sarah@example.com", fullName: "Sarah Johnson" });
+  const { user, loading } = useAuth();
   const [selectedMethod, setSelectedMethod] = useState<'chat' | 'form' | null>(null);
+  
+  // Show loading state while auth is loading
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Please log in to continue</h2>
+          <Button onClick={() => window.location.href = '/'}>Go to Login</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Create a mock user ID for API calls (since backend expects number but Firebase uses string)
+  const mockUserId = 1; // This is a temporary solution until backend is updated to handle string UIDs
   
   // Load profile data to determine completion status
   const { data: profile } = useQuery({
-    queryKey: ['/api/profile', user.id],
+    queryKey: ['/api/profile', mockUserId],
     queryFn: async () => {
-      const response = await fetch(`/api/profile/${user.id}`);
+      const response = await fetch(`/api/profile/${mockUserId}`);
       if (!response.ok) throw new Error('Failed to fetch profile');
       return response.json();
     }
   });
   
-  // Dynamic sections with completion tracking based on actual profile data
-  const sections = [
-    { 
-      id: 'Introduction', 
-      title: 'Introduction', 
-      completed: !!(profile && profile.careerMajor && profile.dreamSchools && profile.freeTimeActivities), 
-      method: 'both', 
-      description: 'Name, grade, school, and basic information about yourself', 
-      lastUpdated: (profile?.careerMajor && profile?.dreamSchools && profile?.freeTimeActivities) ? 'Completed' : 'Not started' 
-    },
-    { 
-      id: 'Academic Information', 
-      title: 'Academic Information', 
-      completed: !!(profile && profile.gpa && (profile.favoriteClasses || profile.academicFascinations)), 
-      method: 'both', 
-      description: 'Favorite classes, subjects, academic interests', 
-      lastUpdated: (profile?.gpa && (profile?.favoriteClasses || profile?.academicFascinations)) ? 'Completed' : 'Not started' 
-    },
-    { 
-      id: 'Extracurriculars and Interests', 
-      title: 'Extracurriculars and Interests', 
-      completed: !!(profile && profile.extracurricularsAdditionalInfo && profile.proudOfOutsideAcademics), 
-      method: 'both', 
-      description: 'What you\'re proud of, fields to explore, free time activities', 
-      lastUpdated: (profile?.extracurricularsAdditionalInfo && profile?.proudOfOutsideAcademics) ? 'Completed' : 'Not started' 
-    },
-    { 
-      id: 'Personal Reflections', 
-      title: 'Personal Reflections', 
-      completed: !!(profile && profile.whatMakesHappy && profile.challengeOvercome && profile.rememberedFor), 
-      method: 'both', 
-      description: 'What makes you happy, challenges overcome, values', 
-      lastUpdated: (profile?.whatMakesHappy && profile?.challengeOvercome && profile?.rememberedFor) ? 'Completed' : 'Not started' 
-    },
-    { 
-      id: 'College Preferences', 
-      title: 'College Preferences', 
-      completed: !!(profile && profile.collegeExperience && profile.schoolSize && profile.locationExperiences), 
-      method: 'both', 
-      description: 'College experience, school size, location preferences', 
-      lastUpdated: (profile?.collegeExperience && profile?.schoolSize && profile?.locationExperiences) ? 'Completed' : 'Not started' 
-    },
-  ];
+  // Get sections with completion status using the data file
+  const sections = getSectionCompletionStatus(profile);
 
   // Find first incomplete section
   const getFirstIncompleteSection = () => {
@@ -75,18 +60,13 @@ export default function ProfileBuilder() {
   const handleMethodSelection = (method: 'chat' | 'form', sectionId?: string) => {
     const targetSection = sectionId ? sections.find(s => s.id === sectionId) : getFirstIncompleteSection();
     
-    // Special case for Introduction - always go to onboarding
-    if (sectionId === 'Introduction') {
-      window.location.href = '/onboarding';
-      return;
-    }
-    
     if (method === 'chat') {
-      // Navigate to chat onboarding with specific section
-      window.location.href = `/chat-onboarding?section=${targetSection?.id || 'interests'}`;
+      // Navigate to main chat page
+      window.location.href = '/chat';
     } else {
       // Navigate to form with specific section
-      window.location.href = `/section-form?section=${targetSection?.id || 'Academic Information'}`;
+      const sectionName = targetSection?.id || 'Academic Information';
+      window.location.href = `/section-form?section=${encodeURIComponent(sectionName)}`;
     }
   };
 
@@ -96,7 +76,7 @@ export default function ProfileBuilder() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation user={user} />
+      <Navigation user={{ name: user.displayName || user.email || 'User', email: user.email || '' }} />
       
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
@@ -251,36 +231,22 @@ export default function ProfileBuilder() {
                     {/* Actions for incomplete sections */}
                     {!section.completed && (
                       <>
-                        {/* Introduction section only shows Form button */}
-                        {section.id === 'Introduction' ? (
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleMethodSelection('form', section.id)}
-                          >
-                            <FileText className="w-4 h-4 mr-1" />
-                            Form
-                          </Button>
-                        ) : (
-                          <>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleMethodSelection('chat', section.id)}
-                            >
-                              <MessageCircle className="w-4 h-4 mr-1" />
-                              Chat
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleMethodSelection('form', section.id)}
-                            >
-                              <FileText className="w-4 h-4 mr-1" />
-                              Form
-                            </Button>
-                          </>
-                        )}
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleMethodSelection('chat', section.id)}
+                        >
+                          <MessageCircle className="w-4 h-4 mr-1" />
+                          Chat
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleMethodSelection('form', section.id)}
+                        >
+                          <FileText className="w-4 h-4 mr-1" />
+                          Form
+                        </Button>
                       </>
                     )}
                     
@@ -288,39 +254,24 @@ export default function ProfileBuilder() {
                     {section.completed && (
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-500">{section.lastUpdated}</span>
-                        {/* Introduction section only shows Form edit button */}
-                        {section.id === 'Introduction' ? (
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            className="text-gray-600 hover:text-blue-600"
-                            onClick={() => handleMethodSelection('form', section.id)}
-                          >
-                            <Edit className="w-3 h-3 mr-1" />
-                            Edit
-                          </Button>
-                        ) : (
-                          <>
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="text-gray-600 hover:text-blue-600"
-                              onClick={() => handleMethodSelection('chat', section.id)}
-                            >
-                              <MessageCircle className="w-3 h-3 mr-1" />
-                              Chat
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="text-gray-600 hover:text-blue-600"
-                              onClick={() => handleMethodSelection('form', section.id)}
-                            >
-                              <Edit className="w-3 h-3 mr-1" />
-                              Form
-                            </Button>
-                          </>
-                        )}
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="text-gray-600 hover:text-blue-600"
+                          onClick={() => handleMethodSelection('chat', section.id)}
+                        >
+                          <MessageCircle className="w-3 h-3 mr-1" />
+                          Chat
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="text-gray-600 hover:text-blue-600"
+                          onClick={() => handleMethodSelection('form', section.id)}
+                        >
+                          <Edit className="w-3 h-3 mr-1" />
+                          Form
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -329,8 +280,6 @@ export default function ProfileBuilder() {
             </Card>
           ))}
         </div>
-
-
       </div>
     </div>
   );

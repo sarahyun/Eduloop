@@ -12,7 +12,6 @@ import OnboardingPage from "@/pages/onboarding";
 import ChatOnboarding from "@/pages/chat-onboarding";
 import ProfileBuilder from "@/pages/profile-builder";
 import SectionForm from "@/pages/section-form";
-import SampleFormPage from "@/pages/sample-form";
 import NotFound from "@/pages/not-found";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -61,9 +60,6 @@ function Router() {
       <Route path="/onboarding">
         <ProtectedRoute component={OnboardingPage} />
       </Route>
-      <Route path="/chat-onboarding">
-        <ProtectedRoute component={ChatOnboarding} />
-      </Route>
       <Route path="/profile">
         <ProtectedRoute component={ProfileBuilder} />
       </Route>
@@ -72,9 +68,6 @@ function Router() {
       </Route>
       <Route path="/section-form">
         <ProtectedRoute component={SectionForm} />
-      </Route>
-      <Route path="/sample-form">
-        <ProtectedRoute component={SampleFormPage} />
       </Route>
       <Route component={NotFound} />
     </Switch>

@@ -19,79 +19,68 @@ class PyObjectId(ObjectId):
         field_schema.update(type="string")
 
 # User models
+class User(BaseModel):
+    user_id: str  # Unique identifier for the user (Firebase UID)
+    email: str  # User's email address
+    name: Optional[str] = None  # Optional full name of the user
+    created_at: datetime = Field(default_factory=datetime.now)  # Account creation timestamp
+    last_login: Optional[datetime] = None  # Optional timestamp for the last login
+    role: str  # Role (student/counselor/parent)
+    students: Optional[List[str]] = []  # List of student IDs (for counselors/parents)
+    grade: Optional[str] = None  # Optional field for student to hold grade
+    counselor_id: Optional[str] = None  # Optional field for student to hold counselor ID
+    parent_id: Optional[str] = None  # Optional field for student to hold parent ID
+
 class UserCreate(BaseModel):
-    userId: str  # Firebase UID
+    user_id: str  # Firebase UID
     email: str
-    name: str
+    name: Optional[str] = None
     role: str = "student"
     grade: Optional[str] = None
+    counselor_id: Optional[str] = None
+    parent_id: Optional[str] = None
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    last_login: Optional[datetime] = None
+    role: Optional[str] = None
+    students: Optional[List[str]] = None
+    grade: Optional[str] = None
+    counselor_id: Optional[str] = None
+    parent_id: Optional[str] = None
 
 class UserResponse(BaseModel):
     user_id: str
     email: str
-    name: str
+    name: Optional[str] = None
+    created_at: datetime
+    last_login: Optional[datetime] = None
     role: str
+    students: Optional[List[str]] = []
     grade: Optional[str] = None
+    counselor_id: Optional[str] = None
+    parent_id: Optional[str] = None
 
-# Student profile models
-class StudentProfileCreate(BaseModel):
-    userId: str
-    careerMajor: Optional[str] = None
-    dreamSchools: Optional[str] = None
-    introFreeTimeActivities: Optional[str] = None
-    introCollegeExperience: Optional[str] = None
-    extracurriculars: Optional[str] = None
-    gpaTestScores: Optional[str] = None
-    currentGPA: Optional[str] = None
-    satScore: Optional[str] = None
-    actScore: Optional[str] = None
-    apCourses: Optional[str] = None
-    academicHonors: Optional[str] = None
-    personalBackground: Optional[str] = None
-    personalValues: Optional[str] = None
-    personalChallenges: Optional[str] = None
-    personalGrowth: Optional[str] = None
-    personalLeadership: Optional[str] = None
-    personalCommunity: Optional[str] = None
-    collegeGoals: Optional[str] = None
-    careerAspirations: Optional[str] = None
-    personalGoals: Optional[str] = None
-    preferredMajors: Optional[str] = None
-    collegeSize: Optional[str] = None
-    collegeLocation: Optional[str] = None
-    collegeCost: Optional[str] = None
-    collegeEnvironment: Optional[str] = None
-    collegeActivities: Optional[str] = None
-    profileCompletion: float = 0.0
+# Question-Answer models
+class Answer(BaseModel):
+    question_id: str
+    question_text: str
+    answer: str
 
-class StudentProfileUpdate(BaseModel):
-    careerMajor: Optional[str] = None
-    dreamSchools: Optional[str] = None
-    introFreeTimeActivities: Optional[str] = None
-    introCollegeExperience: Optional[str] = None
-    extracurriculars: Optional[str] = None
-    gpaTestScores: Optional[str] = None
-    currentGPA: Optional[str] = None
-    satScore: Optional[str] = None
-    actScore: Optional[str] = None
-    apCourses: Optional[str] = None
-    academicHonors: Optional[str] = None
-    personalBackground: Optional[str] = None
-    personalValues: Optional[str] = None
-    personalChallenges: Optional[str] = None
-    personalGrowth: Optional[str] = None
-    personalLeadership: Optional[str] = None
-    personalCommunity: Optional[str] = None
-    collegeGoals: Optional[str] = None
-    careerAspirations: Optional[str] = None
-    personalGoals: Optional[str] = None
-    preferredMajors: Optional[str] = None
-    collegeSize: Optional[str] = None
-    collegeLocation: Optional[str] = None
-    collegeCost: Optional[str] = None
-    collegeEnvironment: Optional[str] = None
-    collegeActivities: Optional[str] = None
-    profileCompletion: Optional[float] = None
+class Response(BaseModel):
+    response_id: str
+    user_id: str
+    form_id: str
+    submitted_at: datetime
+    responses: List[Answer]
+
+class ResponseCreate(BaseModel):
+    user_id: str
+    form_id: str
+    responses: List[Answer]
+
+class ResponseUpdate(BaseModel):
+    responses: List[Answer]
 
 # Conversation models
 class ConversationCreate(BaseModel):

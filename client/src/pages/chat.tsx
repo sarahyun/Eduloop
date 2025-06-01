@@ -6,20 +6,45 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Plus, Globe } from "lucide-react";
-import { api, type User, type Conversation } from "@/lib/api";
+import { api, type Conversation, type Message } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ChatPage() {
-  const [user] = useState<User>({ id: 1, username: "sarah", email: "sarah@example.com", fullName: "Sarah Johnson" });
+  const { user, loading } = useAuth();
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Show loading state while auth is loading
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Please log in to continue</h2>
+          <Button onClick={() => window.location.href = '/'}>Go to Login</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Create a mock user ID for API calls (since backend expects number but Firebase uses string)
+  const mockUserId = 1; // This is a temporary solution until backend is updated to handle string UIDs
+
   // Fetch conversations
   const { data: conversations = [] } = useQuery<Conversation[]>({
-    queryKey: ['/api/conversations', user.id],
-    enabled: !!user?.id,
+    queryKey: ['/api/conversations', mockUserId],
+    enabled: !!user,
   });
 
   // Set default conversation
@@ -30,8 +55,8 @@ export default function ChatPage() {
   }, [conversations, selectedConversationId]);
 
   // Fetch messages for selected conversation
-  const { data: messages = [] } = useQuery({
-    queryKey: [`/api/conversations/${selectedConversationId}/messages`],
+  const { data: messages = [] } = useQuery<Message[]>({
+    queryKey: [`/api/messages/${selectedConversationId}`],
     enabled: !!selectedConversationId,
   });
 
@@ -43,6 +68,9 @@ export default function ChatPage() {
       setSelectedConversationId(newConversation.id);
       toast({ title: "New conversation started!" });
     },
+    onError: () => {
+      toast({ title: "Failed to create conversation", variant: "destructive" });
+    },
   });
 
   const sendMessageMutation = useMutation({
@@ -50,29 +78,37 @@ export default function ChatPage() {
       api.sendMessage(conversationId, { role: 'user', content }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/conversations'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/conversations/${variables.conversationId}/messages`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/messages/${variables.conversationId}`] });
+    },
+    onError: () => {
+      toast({ title: "Failed to send message", variant: "destructive" });
     },
   });
 
   // Handle sending messages
   const handleSendMessage = async (content: string) => {
-    let conversationId = selectedConversationId;
-    
-    if (!conversationId) {
-      const newConversation = await createConversationMutation.mutateAsync({
-        userId: user.id,
-        title: "New Conversation"
-      });
-      conversationId = newConversation.id;
-    }
+    try {
+      let conversationId = selectedConversationId;
+      
+      if (!conversationId) {
+        const newConversation = await createConversationMutation.mutateAsync({
+          userId: mockUserId,
+          title: "New Conversation"
+        });
+        conversationId = newConversation.id;
+      }
 
-    await sendMessageMutation.mutateAsync({ conversationId, content });
+      await sendMessageMutation.mutateAsync({ conversationId, content });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({ title: "Failed to send message", variant: "destructive" });
+    }
   };
 
   // Handle creating new conversation
   const handleNewConversation = () => {
     createConversationMutation.mutate({
-      userId: user.id,
+      userId: mockUserId,
       title: "New Conversation"
     });
   };
@@ -88,7 +124,7 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation user={user} />
+      <Navigation user={{ name: user.displayName || user.email || 'User', email: user.email || '' }} />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-4 gap-8 h-[calc(100vh-12rem)]">
@@ -209,7 +245,7 @@ export default function ChatPage() {
                     onSendMessage={handleSendMessage}
                     isLoading={sendMessageMutation.isPending}
                     isExpanded={true}
-                    user={user}
+                    user={{ fullName: user.displayName || user.email || 'User' }}
                   />
                 </div>
               </CardContent>
