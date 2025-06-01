@@ -64,8 +64,112 @@ interface ProfileInsight {
 export default function CollegeRecommendations() {
   const [, navigate] = useLocation();
   const { user, loading } = useAuth();
-  const [recommendations, setRecommendations] = useState<CollegeRecommendation[]>([]);
-  const [insights, setInsights] = useState<ProfileInsight[]>([]);
+  // Mock data for UI brainstorming
+  const [recommendations] = useState<CollegeRecommendation[]>([
+    {
+      id: "1",
+      name: "Stanford University",
+      location: "Stanford, CA",
+      matchScore: 85,
+      category: "reach",
+      reasoning: "Your strong academic performance and interest in computer science align perfectly with Stanford's innovative programs. Your leadership experience and community involvement make you a competitive candidate.",
+      highlights: ["Top CS Program", "Innovation Hub", "Strong Alumni Network"],
+      stats: {
+        acceptanceRate: 4,
+        averageGPA: 3.96,
+        satRange: "1470-1570",
+        tuition: "$56,169",
+        enrollment: 17249
+      },
+      programs: ["Computer Science", "Engineering", "Entrepreneurship"],
+      campusLife: ["Tech Incubators", "Research Opportunities", "Silicon Valley Connections"],
+      financialAid: {
+        averageAid: "$53,346",
+        needMet: 100
+      },
+      whyMatch: {
+        academicFit: "Your 4.0 GPA and advanced coursework align with their academic standards",
+        culturalFit: "Innovation-focused environment matches your entrepreneurial interests",
+        careerOutcomes: "95% job placement rate in tech, average starting salary $120k+"
+      }
+    },
+    {
+      id: "2", 
+      name: "University of California, Berkeley",
+      location: "Berkeley, CA",
+      matchScore: 92,
+      category: "match",
+      reasoning: "UC Berkeley's strong engineering programs and diverse campus culture are an excellent match for your academic profile and personal values. Your test scores fall within their middle 50% range.",
+      highlights: ["Public Ivy", "Research Excellence", "Diverse Community"],
+      stats: {
+        acceptanceRate: 17,
+        averageGPA: 3.89,
+        satRange: "1330-1530",
+        tuition: "$14,226 (in-state)",
+        enrollment: 45057
+      },
+      programs: ["Engineering", "Computer Science", "Business"],
+      campusLife: ["Research Labs", "Student Organizations", "Bay Area Access"],
+      financialAid: {
+        averageAid: "$18,993",
+        needMet: 85
+      },
+      whyMatch: {
+        academicFit: "Your academic profile matches their admitted student averages",
+        culturalFit: "Values-driven education aligns with your community service background",
+        careerOutcomes: "Strong placement in tech and graduate programs"
+      }
+    },
+    {
+      id: "3",
+      name: "Cal Poly San Luis Obispo", 
+      location: "San Luis Obispo, CA",
+      matchScore: 96,
+      category: "safety",
+      reasoning: "Cal Poly's hands-on approach to engineering education and your practical project experience make this an excellent safety school with outstanding career outcomes.",
+      highlights: ["Learn by Doing", "High Job Placement", "Beautiful Campus"],
+      stats: {
+        acceptanceRate: 28,
+        averageGPA: 4.0,
+        satRange: "1240-1450", 
+        tuition: "$9,816 (in-state)",
+        enrollment: 22013
+      },
+      programs: ["Engineering", "Architecture", "Agriculture"],
+      campusLife: ["Hands-on Learning", "Student Projects", "Outdoor Activities"],
+      financialAid: {
+        averageAid: "$9,405",
+        needMet: 65
+      },
+      whyMatch: {
+        academicFit: "Your stats exceed their averages, ensuring strong admission chances",
+        culturalFit: "Practical, hands-on learning style matches your project-based interests",
+        careerOutcomes: "96% job placement rate, strong industry connections"
+      }
+    }
+  ]);
+  
+  const [insights] = useState<ProfileInsight[]>([
+    {
+      type: "strength",
+      title: "Strong Academic Foundation",
+      description: "Your 4.0 GPA and rigorous coursework demonstrate excellent academic preparation for competitive colleges.",
+      actionItems: ["Continue challenging yourself with advanced courses", "Maintain academic excellence in senior year"]
+    },
+    {
+      type: "growth_area", 
+      title: "Standardized Test Scores",
+      description: "While your SAT scores are solid, increasing them could strengthen applications to reach schools.",
+      actionItems: ["Consider retaking SAT/ACT if time permits", "Focus on test prep for weaker sections"]
+    },
+    {
+      type: "recommendation",
+      title: "Leadership Experience",
+      description: "Your leadership roles show strong potential, but expanding these experiences could further strengthen your profile.",
+      actionItems: ["Seek additional leadership opportunities", "Document impact of your leadership roles"]
+    }
+  ]);
+  
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedCollege, setSelectedCollege] = useState<CollegeRecommendation | null>(null);
   const [savedColleges, setSavedColleges] = useState<Set<string>>(new Set());
