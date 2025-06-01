@@ -13,6 +13,7 @@ import SectionForm from "@/pages/section-form";
 import OnboardingPage from "@/pages/onboarding";
 import NotFound from "@/pages/not-found";
 import ChatOnboarding from "@/pages/chat-onboarding";
+import CollegeRecommendations from "@/pages/college-recommendations";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, loading } = useAuth();
@@ -71,6 +72,9 @@ function Router() {
       </Route>
       <Route path="/chat-onboarding">
         <ProtectedRoute component={ChatOnboarding} />
+      </Route>
+      <Route path="/recommendations">
+        <ProtectedRoute component={CollegeRecommendations} />
       </Route>
       <Route component={NotFound} />
     </Switch>

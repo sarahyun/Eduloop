@@ -145,7 +145,7 @@ export default function Dashboard() {
         </div>
 
         {/* Feature Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/profile'}>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
@@ -174,6 +174,20 @@ export default function Dashboard() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">AI Mentor</h3>
                   <p className="text-gray-600 text-sm">Get personalized guidance from our AI counselor</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/recommendations'}>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <Star className="w-6 h-6 text-indigo-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">My Matches</h3>
+                  <p className="text-gray-600 text-sm">View personalized college recommendations</p>
                 </div>
               </div>
             </CardContent>
