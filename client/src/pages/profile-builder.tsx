@@ -11,12 +11,24 @@ import { api, type User } from "@/lib/api";
 import { questionsData, type Question } from '@/data/questionsData';
 import { useAuth } from "@/context/AuthContext";
 
+interface FormResponse {
+  response_id?: string;
+  user_id: string;
+  form_id: string;
+  submitted_at?: string;
+  responses: Array<{
+    question_id: string;
+    question_text: string;
+    answer: string;
+  }>;
+}
+
 export default function ProfileBuilder() {
   const [, navigate] = useLocation();
   const { user, loading } = useAuth();
   const [selectedMethod, setSelectedMethod] = useState<'chat' | 'form' | null>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [profileLoading, setProfileLoading] = useState(true);
+  const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
+  const [isLoadingCompletion, setIsLoadingCompletion] = useState(true);
   
   // Show loading state while auth is loading
   if (loading) {
@@ -39,24 +51,54 @@ export default function ProfileBuilder() {
     );
   }
 
-  // Create a mock user ID for API calls (since backend expects number but Firebase uses string)
-  const mockUserId = 1; // This is a temporary solution until backend is updated to handle string UIDs
-  
-  // Load profile data to determine completion status
-  const { data: profileData } = useQuery({
-    queryKey: ['/api/profile', mockUserId],
-    queryFn: async () => {
-      const response = await fetch(`/api/profile/${mockUserId}`);
-      if (!response.ok) throw new Error('Failed to fetch profile');
-      return response.json();
-    }
-  });
+  // Load completion status for all sections
+  useEffect(() => {
+    const loadCompletionStatus = async () => {
+      if (!user?.uid) return;
+
+      setIsLoadingCompletion(true);
+      const completed = new Set<string>();
+      
+      for (const sectionId of Object.keys(questionsData)) {
+        const sectionFormId = sectionId.toLowerCase().replace(/\s+/g, '_');
+        const sectionQuestions = questionsData[sectionId as keyof typeof questionsData] as Question[];
+        
+        try {
+          const response = await fetch(`/api/responses/${user.uid}/${sectionFormId}`);
+          if (response.ok) {
+            const data: FormResponse = await response.json();
+            
+            // Check if ALL questions in the section have been answered
+            if (data.responses && data.responses.length > 0) {
+              const answeredQuestionIds = new Set(data.responses.map(r => r.question_id));
+              const allQuestionIds = sectionQuestions.map(q => q.id.toString());
+              
+              // Section is complete only if ALL questions have non-empty answers
+              const allQuestionsAnswered = allQuestionIds.every(questionId => {
+                const response = data.responses.find(r => r.question_id === questionId);
+                return response && response.answer.trim().length > 0;
+              });
+              
+              if (allQuestionsAnswered) {
+                completed.add(sectionId);
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Error loading completion status for ${sectionId}:`, error);
+        }
+      }
+      
+      setCompletedSections(completed);
+      setIsLoadingCompletion(false);
+    };
+
+    loadCompletionStatus();
+  }, [user?.uid]);
   
   // Convert questionsData to array format and check completion status
   const sections = Object.entries(questionsData).map(([sectionId, questions]) => {
-    const isCompleted = profileData && questions.some((q: Question) => 
-      profileData.responses && profileData.responses[q.id.toString()]
-    );
+    const isCompleted = completedSections.has(sectionId);
     
     return {
       id: sectionId,
@@ -70,6 +112,7 @@ export default function ProfileBuilder() {
   // Helper function to get description for each section
   function getDescriptionForSection(sectionId: string): string {
     const descriptions: Record<string, string> = {
+      "Introduction": "Tell us about yourself and your goals",
       "Academic Information": "Your academic interests and performance", 
       "Extracurriculars and Interests": "Your activities and passions outside the classroom",
       "Personal Reflections": "Deeper insights into who you are",
@@ -92,14 +135,15 @@ export default function ProfileBuilder() {
       window.location.href = '/chat';
     } else {
       // Navigate to form with specific section
-      const sectionName = targetSection?.id || 'Academic Information';
+      const sectionName = targetSection?.id || 'Introduction';
       window.location.href = `/section-form?section=${encodeURIComponent(sectionName)}`;
     }
   };
 
   // Calculate completion percentage based on actual completed sections
-  const completedSections = sections.filter(section => section.completed).length;
-  const profileCompletion = Math.round((completedSections / sections.length) * 100);
+  const completedSectionsCount = completedSections.size;
+  const totalSections = Object.keys(questionsData).length;
+  const profileCompletion = Math.round((completedSectionsCount / totalSections) * 100);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -118,11 +162,15 @@ export default function ProfileBuilder() {
           <div className="bg-white rounded-lg p-6 border">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-900">Profile Completion</h3>
-              <span className="text-sm text-gray-500">{profileCompletion}% complete</span>
+              <span className="text-sm text-gray-500">
+                {isLoadingCompletion ? 'Loading...' : `${profileCompletion}% complete`}
+              </span>
             </div>
-            <Progress value={profileCompletion} className="mb-4" />
+            <Progress value={isLoadingCompletion ? 0 : profileCompletion} className="mb-4" />
             <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-              <span>{completedSections} of {sections.length} sections completed</span>
+              <span>
+                {isLoadingCompletion ? 'Checking completion...' : `${completedSectionsCount} of ${totalSections} sections completed`}
+              </span>
               <span>You can always update your answers later</span>
             </div>
             <p className="text-sm text-gray-600">
@@ -258,14 +306,17 @@ export default function ProfileBuilder() {
                     {/* Actions for incomplete sections */}
                     {!section.completed && (
                       <>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleMethodSelection('chat', section.id)}
-                        >
-                          <MessageCircle className="w-4 h-4 mr-1" />
-                          Chat
-                        </Button>
+                        {/* Only show chat button for non-Introduction sections */}
+                        {section.id !== "Introduction" && (
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleMethodSelection('chat', section.id)}
+                          >
+                            <MessageCircle className="w-4 h-4 mr-1" />
+                            Chat
+                          </Button>
+                        )}
                         <Button 
                           size="sm" 
                           variant="outline"
@@ -280,15 +331,18 @@ export default function ProfileBuilder() {
                     {/* Actions for completed sections - allow updates */}
                     {section.completed && (
                       <div className="flex items-center gap-2">
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-gray-600 hover:text-blue-600"
-                          onClick={() => handleMethodSelection('chat', section.id)}
-                        >
-                          <MessageCircle className="w-3 h-3 mr-1" />
-                          Chat
-                        </Button>
+                        {/* Only show chat button for non-Introduction sections */}
+                        {section.id !== "Introduction" && (
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="text-gray-600 hover:text-blue-600"
+                            onClick={() => handleMethodSelection('chat', section.id)}
+                          >
+                            <MessageCircle className="w-3 h-3 mr-1" />
+                            Chat
+                          </Button>
+                        )}
                         <Button 
                           size="sm" 
                           variant="ghost" 

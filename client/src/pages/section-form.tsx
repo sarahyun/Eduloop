@@ -155,13 +155,27 @@ const SectionForm: React.FC = () => {
       
       for (const sectionId of Object.keys(questionsData)) {
         const sectionFormId = sectionId.toLowerCase().replace(/\s+/g, '_');
+        const sectionQuestions = questionsData[sectionId as keyof typeof questionsData] as Question[];
+        
         try {
           const response = await fetch(`/api/responses/${user.uid}/${sectionFormId}`);
           if (response.ok) {
             const data: FormResponse = await response.json();
-            // Consider section completed if it has at least one response
+            
+            // Check if ALL questions in the section have been answered
             if (data.responses && data.responses.length > 0) {
-              completed.add(sectionId);
+              const answeredQuestionIds = new Set(data.responses.map(r => r.question_id));
+              const allQuestionIds = sectionQuestions.map(q => q.id.toString());
+              
+              // Section is complete only if ALL questions have non-empty answers
+              const allQuestionsAnswered = allQuestionIds.every(questionId => {
+                const response = data.responses.find(r => r.question_id === questionId);
+                return response && response.answer.trim().length > 0;
+              });
+              
+              if (allQuestionsAnswered) {
+                completed.add(sectionId);
+              }
             }
           }
         } catch (error) {
