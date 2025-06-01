@@ -29,6 +29,7 @@ export default function ProfileBuilder() {
   const [selectedMethod, setSelectedMethod] = useState<'chat' | 'form' | null>(null);
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
   const [isLoadingCompletion, setIsLoadingCompletion] = useState(true);
+  const [sectionProgress, setSectionProgress] = useState<Record<string, { answered: number; total: number }>>({});
   
   // Show loading state while auth is loading
   if (loading) {
@@ -58,28 +59,35 @@ export default function ProfileBuilder() {
 
       setIsLoadingCompletion(true);
       const completed = new Set<string>();
+      const progress: Record<string, { answered: number; total: number }> = {};
       
       for (const sectionId of Object.keys(questionsData)) {
         const sectionFormId = sectionId.toLowerCase().replace(/\s+/g, '_');
         const sectionQuestions = questionsData[sectionId as keyof typeof questionsData] as Question[];
+        
+        progress[sectionId] = { answered: 0, total: sectionQuestions.length };
         
         try {
           const response = await fetch(`/api/responses/${user.uid}/${sectionFormId}`);
           if (response.ok) {
             const data: FormResponse = await response.json();
             
-            // Check if ALL questions in the section have been answered
+            // Check if at least 50% of questions in the section have been answered
             if (data.responses && data.responses.length > 0) {
               const answeredQuestionIds = new Set(data.responses.map(r => r.question_id));
               const allQuestionIds = sectionQuestions.map(q => q.id.toString());
               
-              // Section is complete only if ALL questions have non-empty answers
-              const allQuestionsAnswered = allQuestionIds.every(questionId => {
+              // Count questions with non-empty answers
+              const answeredCount = allQuestionIds.filter(questionId => {
                 const response = data.responses.find(r => r.question_id === questionId);
                 return response && response.answer.trim().length > 0;
-              });
+              }).length;
               
-              if (allQuestionsAnswered) {
+              progress[sectionId].answered = answeredCount;
+              
+              // Section is complete if at least 50% of questions are answered
+              const completionThreshold = Math.ceil(allQuestionIds.length * 0.5);
+              if (answeredCount >= completionThreshold) {
                 completed.add(sectionId);
               }
             }
@@ -90,6 +98,7 @@ export default function ProfileBuilder() {
       }
       
       setCompletedSections(completed);
+      setSectionProgress(progress);
       setIsLoadingCompletion(false);
     };
 
@@ -172,10 +181,10 @@ export default function ProfileBuilder() {
               <span>
                 {isLoadingCompletion ? 'Checking completion...' : `${completedSectionsCount} of ${totalSections} sections completed`}
               </span>
-              <span>You can always update your answers later</span>
+              <span>Sections complete at 50% answered</span>
             </div>
             <p className="text-sm text-gray-600">
-              Complete your profile to unlock personalized recommendations and better college matches.
+              Each section is marked complete when you answer at least half of its questions. You can always add more details later.
             </p>
           </div>
         </div>
@@ -255,7 +264,7 @@ export default function ProfileBuilder() {
                     </div>
                     <div className="flex items-center text-sm text-gray-600">
                       <Clock className="w-4 h-4 text-gray-400 mr-2" />
-                      2-3 minutes per section
+                      5-10 minutes per section
                     </div>
                   </div>
                   
@@ -283,11 +292,16 @@ export default function ProfileBuilder() {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-900">Profile Sections</h2>
           
-          {sections.map((section) => (
+          {sections.map((section) => {
+            const progress = sectionProgress[section.id] || { answered: 0, total: section.questions.length };
+            const completionThreshold = Math.ceil(progress.total * 0.5);
+            const progressPercentage = progress.total > 0 ? (progress.answered / progress.total) * 100 : 0;
+            
+            return (
             <Card key={section.id} className={`${section.completed ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}`}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center">
+                  <div className="flex items-center flex-1">
                     <div className={`p-2 rounded-lg mr-4 ${section.completed ? 'bg-green-100' : 'bg-gray-100'}`}>
                       {section.completed ? (
                         <CheckCircle className="w-5 h-5 text-green-600" />
@@ -295,15 +309,43 @@ export default function ProfileBuilder() {
                         <div className="w-5 h-5 border-2 border-gray-300 rounded-full" />
                       )}
                     </div>
-                    <div>
-                      <h3 className={`font-medium ${section.completed ? 'text-green-900' : 'text-gray-900'}`}>
-                        {section.title}
-                      </h3>
-                      <p className="text-sm text-gray-500 mt-1">{section.description}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className={`font-medium ${section.completed ? 'text-green-900' : 'text-gray-900'}`}>
+                          {section.title}
+                        </h3>
+                        <span className="text-xs text-gray-500">
+                          {progress.answered}/{progress.total} answered
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500 mb-2">{section.description}</p>
+                      
+                      {/* Progress bar */}
+                      <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1">
+                        <div 
+                          className={`h-1.5 rounded-full transition-all duration-300 ${
+                            section.completed ? 'bg-green-500' : 'bg-blue-500'
+                          }`}
+                          style={{ width: `${progressPercentage}%` }}
+                        />
+                      </div>
+                      
+                      <div className="text-xs text-gray-500">
+                        {section.completed ? (
+                          <span className="text-green-600 font-medium">✓ Complete (50%+ answered)</span>
+                        ) : (
+                          <span>
+                            {completionThreshold - progress.answered > 0 
+                              ? `${completionThreshold - progress.answered} more needed to complete`
+                              : 'Ready to mark complete'
+                            }
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 ml-4">
                     {/* Actions for incomplete sections */}
                     {!section.completed && (
                       <>
@@ -357,7 +399,8 @@ export default function ProfileBuilder() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

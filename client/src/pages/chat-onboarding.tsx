@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
 import { AIChat } from "@/components/AIChat";
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +19,7 @@ export default function ChatOnboarding() {
   const [messages, setMessages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [responsesLoaded, setResponsesLoaded] = useState(false);
 
   // Fetch existing responses on mount
   useEffect(() => {
@@ -35,37 +35,60 @@ export default function ChatOnboarding() {
           }
           setResponses(respObj);
         }
+        setResponsesLoaded(true); // Mark responses as loaded
       }
     }
     fetchResponses();
   }, [user, section]);
 
-  // On first load, send intro/context to AI
+  // On first load, send intro/context to AI - ONLY after responses are loaded
   useEffect(() => {
     console.log("section", section);
     console.log("sectionQuestions", sectionQuestions);
     console.log("responses", responses);
-    if (!initialized && section && sectionQuestions.length > 0) {
+    console.log("responsesLoaded", responsesLoaded);
+    
+    if (!initialized && section && sectionQuestions.length > 0 && responsesLoaded) {
       // Find the first unanswered question
       const firstUnanswered = sectionQuestions.find((q: any) => !responses[q.id]);
+      const answeredCount = Object.keys(responses).length;
+      const completionThreshold = Math.ceil(sectionQuestions.length * 0.5);
+      const isComplete = answeredCount >= completionThreshold;
+      
       console.log("firstUnanswered", firstUnanswered);
+      console.log("isComplete", isComplete, "answeredCount", answeredCount, "threshold", completionThreshold);
+      
+      let initialMessage = "";
+      if (isComplete && !firstUnanswered) {
+        initialMessage = "Excellent! You've completed this section. All questions have been answered. Feel free to review or update any of your responses.";
+      } else if (isComplete) {
+        initialMessage = `Great progress! This section is already marked as complete since you've answered ${answeredCount} out of ${sectionQuestions.length} questions. Would you like to continue with the remaining questions or review your existing answers?`;
+      } else if (firstUnanswered) {
+        initialMessage = firstUnanswered.question;
+      } else {
+        initialMessage = "Let's work on completing this section together!";
+      }
+      
       setMessages([
         {
           id: Date.now(),
           role: "assistant",
-          content: firstUnanswered
-            ? firstUnanswered.question
-            : "Great job! You've already completed this section.",
+          content: initialMessage,
           createdAt: new Date().toISOString(),
         },
       ]);
       setInitialized(true);
     }
-  }, [section, sectionQuestions, initialized, responses]);
+  }, [section, sectionQuestions, initialized, responses, responsesLoaded]);
 
   // Helper to build OpenAI context prompt with function calling
   function buildContextPrompt(userMessage: string) {
+    const answeredCount = Object.keys(responses).length;
+    const completionThreshold = Math.ceil(sectionQuestions.length * 0.5);
+    const isComplete = answeredCount >= completionThreshold;
+    
     let context = `CONTEXT: You are a helpful college counselor helping a student complete their "${section}" profile section.\n\n`;
+    context += `SECTION STATUS: ${isComplete ? `✅ COMPLETE (${answeredCount}/${sectionQuestions.length} answered, ${completionThreshold} needed)` : `⏳ IN PROGRESS (${answeredCount}/${sectionQuestions.length} answered, ${completionThreshold - answeredCount} more needed to complete)`}\n\n`;
     context += `SECTION QUESTIONS (with exact IDs to use):\n`;
     sectionQuestions.forEach((q: any) => {
       const answer = responses[q.id];
@@ -76,6 +99,7 @@ export default function ChatOnboarding() {
       }
     });
     context += `\nINSTRUCTIONS:\n`;
+    context += `- This section is considered complete when at least ${completionThreshold} questions (50%) are answered\n`;
     context += `- Ask questions one at a time in a conversational way\n`;
     context += `- Focus on unanswered questions first\n`;
     context += `- You may ask ONE thoughtful follow-up question if relevant\n`;
@@ -84,7 +108,7 @@ export default function ChatOnboarding() {
     context += `- IMPORTANT: Use the EXACT question ID numbers shown above (e.g., 1, 2, 3, etc.)\n`;
     context += `- Format: [SAVE_RESPONSE:QUESTION_ID:ANSWER:QUESTION_TEXT]\n`;
     context += `- Example: [SAVE_RESPONSE:1:computer science:Do you have a career or major in mind?]\n`;
-    context += `- If they've answered everything, congratulate them and suggest they can always update answers\n\n`;
+    context += `- If the section is already complete, congratulate them and mention they can continue adding details or move to other sections\n\n`;
     
     // Add conversation history for context
     if (messages.length > 0) {
@@ -231,6 +255,8 @@ export default function ChatOnboarding() {
   const answeredCount = Object.keys(responses).length;
   const totalQuestions = sectionQuestions.length;
   const progressPercentage = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+  const completionThreshold = Math.ceil(totalQuestions * 0.5);
+  const isComplete = answeredCount >= completionThreshold;
   
   // Get section description
   const getSectionDescription = (sectionName: string) => {
@@ -279,48 +305,69 @@ export default function ChatOnboarding() {
           </div>
         </div>
 
-        {/* Progress Section */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-900">Section Progress</h3>
-              <span className="text-sm font-medium text-gray-600">
-                {answeredCount} of {totalQuestions} completed
-              </span>
-            </div>
-            <Progress value={progressPercentage} className="mb-2" />
-            <p className="text-xs text-gray-500">
-              {progressPercentage === 100 ? 
-                "Great job! You've completed this section." : 
-                "Keep going - each answer helps us understand you better"
-              }
-            </p>
-          </CardContent>
-        </Card>
+        {/* Show loading state while fetching responses */}
+        {!responsesLoaded ? (
+          <Card className="mb-6">
+            <CardContent className="p-8 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading your existing responses...</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            {/* Progress Section */}
+            <Card className="mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-gray-900">Section Progress</h3>
+                  <span className="text-sm font-medium text-gray-600">
+                    {answeredCount} of {totalQuestions} questions answered
+                  </span>
+                </div>
+                <Progress value={progressPercentage} className="mb-2" />
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <span>
+                    {isComplete ? 
+                      "✅ Section complete!" : 
+                      `${completionThreshold - answeredCount} more answers needed to complete`
+                    }
+                  </span>
+                  <span>{Math.round(progressPercentage)}%</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  {isComplete ? 
+                    "Great job! This section is marked as complete. You can continue adding more details or move to other sections." : 
+                    `Answer at least ${completionThreshold} questions (50%) to mark this section as complete.`
+                  }
+                </p>
+              </CardContent>
+            </Card>
 
-        {/* Chat Interface */}
-        <Card className="shadow-lg">
-          <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-purple-50">
-            <CardTitle className="flex items-center">
-              <MessageCircle className="w-5 h-5 mr-2 text-blue-600" />
-              AI Counselor Chat
-            </CardTitle>
-            <p className="text-sm text-gray-600 mt-1">
-              Have a natural conversation about your {section?.toLowerCase()} details
-            </p>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="h-[500px]">
-              <AIChat
-                messages={messages}
-                onSendMessage={handleSendMessage}
-                isLoading={isLoading}
-                isExpanded={true}
-                user={{ fullName: user?.displayName || user?.email || 'User' }}
-              />
-            </div>
-          </CardContent>
-        </Card>
+            {/* Chat Interface */}
+            <Card className="shadow-lg">
+              <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-purple-50">
+                <CardTitle className="flex items-center">
+                  <MessageCircle className="w-5 h-5 mr-2 text-blue-600" />
+                  AI Counselor Chat
+                </CardTitle>
+                <p className="text-sm text-gray-600 mt-1">
+                  Have a natural conversation about your {section?.toLowerCase()} details
+                </p>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="h-[500px]">
+                  <AIChat
+                    messages={messages}
+                    onSendMessage={handleSendMessage}
+                    isLoading={isLoading}
+                    isExpanded={true}
+                    user={{ fullName: user?.displayName || user?.email || 'User' }}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
 
         {/* Help Section */}
         <div className="mt-6 text-center">

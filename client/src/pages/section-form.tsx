@@ -175,18 +175,20 @@ const SectionForm: React.FC = () => {
           if (response.ok) {
             const data: FormResponse = await response.json();
             
-            // Check if ALL questions in the section have been answered
+            // Check if at least 50% of questions in the section have been answered
             if (data.responses && data.responses.length > 0) {
               const answeredQuestionIds = new Set(data.responses.map(r => r.question_id));
               const allQuestionIds = sectionQuestions.map(q => q.id.toString());
               
-              // Section is complete only if ALL questions have non-empty answers
-              const allQuestionsAnswered = allQuestionIds.every(questionId => {
+              // Count questions with non-empty answers
+              const answeredCount = allQuestionIds.filter(questionId => {
                 const response = data.responses.find(r => r.question_id === questionId);
                 return response && response.answer.trim().length > 0;
-              });
+              }).length;
               
-              if (allQuestionsAnswered) {
+              // Section is complete if at least 50% of questions are answered
+              const completionThreshold = Math.ceil(allQuestionIds.length * 0.5);
+              if (answeredCount >= completionThreshold) {
                 completed.add(sectionId);
               }
             }
@@ -245,9 +247,21 @@ const SectionForm: React.FC = () => {
         setHasChanges(false);
         setLastSaved(new Date());
         
-        // Update completion status
-        if (answersArray.length > 0 && section) {
-          setCompletedSections(prev => new Set([...prev, section]));
+        // Update completion status based on 50% threshold
+        if (section) {
+          const totalQuestions = sectionQuestions.length;
+          const completionThreshold = Math.ceil(totalQuestions * 0.5);
+          
+          if (answersArray.length >= completionThreshold) {
+            setCompletedSections(prev => new Set([...prev, section]));
+          } else {
+            // Remove from completed if it falls below threshold
+            setCompletedSections(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(section);
+              return newSet;
+            });
+          }
         }
         
         if (!isAutosave) {
@@ -544,32 +558,6 @@ STUDENT MESSAGE: ${content}`;
               </div>
             )}
 
-            <AIChat 
-              messages={filteredChatMessages}
-              onSendMessage={handleSendMessage}
-              isLoading={isChatLoading}
-              currentSection={section}
-              sectionQuestions={sectionQuestions.map(q => ({ id: q.id, question: q.question }))}
-              onSaveResponse={async (questionId: string, answer: string, questionText: string) => {
-                try {
-                  // Find the question index and save the response
-                  const questionIndex = sectionQuestions.findIndex(q => q.id.toString() === questionId);
-                  if (questionIndex !== -1) {
-                    const updatedResponses = { ...responses };
-                    updatedResponses[questionIndex] = answer;
-                    setResponses(updatedResponses);
-                    
-                    // Save to backend
-                    await saveResponses(false);
-                    
-                    // Show success message
-                    console.log(`Saved response for question: ${questionText}`);
-                  }
-                } catch (error) {
-                  console.error('Error saving response:', error);
-                }
-              }}
-            />
           </div>
         </div>
       </div>

@@ -45,18 +45,20 @@ export default function Dashboard() {
           if (response.ok) {
             const data: FormResponse = await response.json();
             
-            // Check if ALL questions in the section have been answered
+            // Check if at least 50% of questions in the section have been answered
             if (data.responses && data.responses.length > 0) {
               const answeredQuestionIds = new Set(data.responses.map(r => r.question_id));
               const allQuestionIds = sectionQuestions.map(q => q.id.toString());
               
-              // Section is complete only if ALL questions have non-empty answers
-              const allQuestionsAnswered = allQuestionIds.every(questionId => {
+              // Count questions with non-empty answers
+              const answeredCount = allQuestionIds.filter(questionId => {
                 const response = data.responses.find(r => r.question_id === questionId);
                 return response && response.answer.trim().length > 0;
-              });
+              }).length;
               
-              if (allQuestionsAnswered) {
+              // Section is complete if at least 50% of questions are answered
+              const completionThreshold = Math.ceil(allQuestionIds.length * 0.5);
+              if (answeredCount >= completionThreshold) {
                 completed.add(sectionId);
               }
             }
@@ -127,7 +129,9 @@ export default function Dashboard() {
                     style={{ width: `${isLoadingCompletion ? 0 : profileCompletion}%` }}
                   />
                 </div>
-                <p className="text-sm text-blue-700">The more we learn about you, the more helpful our recommendations become.</p>
+                <p className="text-sm text-blue-700">
+                  Each section is complete when you answer at least 50% of its questions. The more we learn about you, the more helpful our recommendations become.
+                </p>
               </div>
               <Button 
                 onClick={() => window.location.href = '/profile'}
