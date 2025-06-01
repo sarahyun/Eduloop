@@ -41,7 +41,7 @@ export interface College {
 
 export interface Conversation {
   id: number;
-  userId: number;
+  userId: string;
   title?: string;
   createdAt: string;
   updatedAt: string;
@@ -78,6 +78,18 @@ export interface ProfileInsight {
   title: string;
   description: string;
   actionItems: string[];
+}
+
+export interface FormResponse {
+  response_id?: string;
+  user_id: string;
+  form_id: string;
+  submitted_at?: string;
+  responses: Array<{
+    question_id: string;
+    question_text: string;
+    answer: string;
+  }>;
 }
 
 export const api = {
@@ -166,7 +178,7 @@ export const api = {
   },
 
   // Conversations
-  async getConversations(userId: number): Promise<Conversation[]> {
+  async getConversations(userId: string): Promise<Conversation[]> {
     try {
       const response = await apiRequest('GET', `/api/conversations/${userId}`);
       return response.json();
@@ -176,7 +188,7 @@ export const api = {
     }
   },
 
-  async createConversation(conversationData: { userId: number; title?: string }): Promise<Conversation> {
+  async createConversation(conversationData: { userId: string; title?: string }): Promise<Conversation> {
     try {
       const response = await apiRequest('POST', '/api/conversations', conversationData);
       return response.json();
@@ -277,5 +289,72 @@ export const api = {
       console.error('Failed to get search history:', error);
       return [];
     }
+  },
+
+  // Form Responses
+  async getFormResponses(userId: string, formId: string): Promise<FormResponse | null> {
+    try {
+      const response = await apiRequest('GET', `/api/responses/${userId}/${formId}`);
+      if (response.ok) {
+        return response.json();
+      }
+      return null;
+    } catch (error) {
+      console.error('Failed to get form responses:', error);
+      return null;
+    }
+  },
+
+  async saveFormResponse(userId: string, formId: string, responses: Array<{ question_id: string; question_text: string; answer: string }>): Promise<FormResponse> {
+    try {
+      const responseData = {
+        user_id: userId,
+        form_id: formId,
+        responses: responses
+      };
+      const response = await apiRequest('POST', '/api/responses', responseData);
+      return response.json();
+    } catch (error) {
+      console.error('Failed to save form response:', error);
+      throw error;
+    }
+  },
+
+  async updateFormResponse(userId: string, formId: string, questionId: string, answer: string, questionText: string): Promise<void> {
+    try {
+      // First get existing responses
+      const existingData = await this.getFormResponses(userId, formId);
+      let responses = existingData?.responses || [];
+      
+      // Update or add the response
+      const existingIndex = responses.findIndex(r => r.question_id === questionId);
+      if (existingIndex >= 0) {
+        responses[existingIndex].answer = answer;
+      } else {
+        responses.push({
+          question_id: questionId,
+          question_text: questionText,
+          answer: answer
+        });
+      }
+      
+      // Save updated responses
+      await this.saveFormResponse(userId, formId, responses);
+    } catch (error) {
+      console.error('Failed to update form response:', error);
+      throw error;
+    }
   }
 };
+
+// Export individual functions for convenience
+export const getConversations = (userId: string) => api.getConversations(userId);
+export const createConversation = (conversationData: { userId: string; title?: string }) => api.createConversation(conversationData);
+export const sendMessage = (conversationId: number, role: string, content: string) => 
+  api.sendMessage(conversationId, { role, content });
+export const getMessages = (conversationId: number) => api.getMessages(conversationId);
+export const getFormResponses = (userId: string, formId: string) => api.getFormResponses(userId, formId);
+export const saveFormResponse = (userId: string, formId: string, responses: Array<{ question_id: string; question_text: string; answer: string }>) => 
+  api.saveFormResponse(userId, formId, responses);
+export const updateFormResponse = (userId: string, formId: string, questionId: string, answer: string, questionText: string) => 
+  api.updateFormResponse(userId, formId, questionId, answer, questionText);

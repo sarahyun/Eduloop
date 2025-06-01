@@ -7,6 +7,8 @@ import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { questionsData, type Question } from '@/data/questionsData';
 import { useToast } from '@/hooks/use-toast';
+import { AIChat } from '@/components/AIChat';
+import { sendMessage, getMessages, type Message } from '@/lib/api';
 
 // Type for individual questions
 interface Answer {
@@ -37,6 +39,17 @@ const SectionForm: React.FC = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
+  const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const [isChatLoading, setIsChatLoading] = useState(false);
+
+  // Filter out context messages from chat display
+  const filteredChatMessages = chatMessages.filter(message => {
+    // Filter out messages that contain the context prompt
+    if (message.role === 'user' && message.content.includes('CONTEXT: You are a helpful college counselor')) {
+      return false;
+    }
+    return true;
+  });
 
   // Function to get section from URL
   const getSectionFromUrl = () => {
@@ -284,6 +297,64 @@ const SectionForm: React.FC = () => {
     return `Last saved: ${lastSaved.toLocaleTimeString()}`;
   };
 
+  const handleSendMessage = async (content: string) => {
+    setIsChatLoading(true);
+    try {
+      let messageToSend = content;
+      let isProfileCompletionRequest = false;
+      
+      // Check if this is a profile completion request
+      if (content.toLowerCase().includes('help me complete my profile') || 
+          content.toLowerCase().includes('complete my profile')) {
+        isProfileCompletionRequest = true;
+        // Create context for profile completion
+        const unansweredQuestions = sectionQuestions
+          .filter((_, index) => !responses[index] || responses[index].trim() === '')
+          .map((q, originalIndex) => `○ ${q.question} (Not yet answered)`)
+          .join('\n');
+
+        messageToSend = `CONTEXT: You are a helpful college counselor helping a student complete their "${section}" profile section.
+
+SECTION QUESTIONS:
+${unansweredQuestions}
+
+INSTRUCTIONS:
+- Ask questions one at a time in a conversational way
+- Focus on unanswered questions first
+- You may ask ONE thoughtful follow-up question if relevant
+- Be encouraging and help the student think through their answers
+- If they've answered everything, congratulate them and suggest they can always update answers
+
+STUDENT MESSAGE: ${content}`;
+      }
+
+      const result = await sendMessage(1, 'user', messageToSend);
+      
+      // For profile completion requests, only show the AI response, not the context message
+      if (isProfileCompletionRequest) {
+        // Add the original user message (not the context) and AI response
+        const userMessage: Message = {
+          id: Date.now(),
+          conversationId: 1,
+          role: 'user',
+          content: content, // Use original content, not the context
+          createdAt: new Date().toISOString()
+        };
+        
+        const newMessages = [userMessage, result.aiMessage].filter(Boolean) as Message[];
+        setChatMessages(prev => [...prev, ...newMessages]);
+      } else {
+        // For regular chat, add both user message and AI response
+        const newMessages = [result.userMessage, result.aiMessage].filter(Boolean) as Message[];
+        setChatMessages(prev => [...prev, ...newMessages]);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -472,6 +543,33 @@ const SectionForm: React.FC = () => {
                 <span className="text-primary text-sm">Saving...</span>
               </div>
             )}
+
+            <AIChat 
+              messages={filteredChatMessages}
+              onSendMessage={handleSendMessage}
+              isLoading={isChatLoading}
+              currentSection={section}
+              sectionQuestions={sectionQuestions.map(q => ({ id: q.id, question: q.question }))}
+              onSaveResponse={async (questionId: string, answer: string, questionText: string) => {
+                try {
+                  // Find the question index and save the response
+                  const questionIndex = sectionQuestions.findIndex(q => q.id.toString() === questionId);
+                  if (questionIndex !== -1) {
+                    const updatedResponses = { ...responses };
+                    updatedResponses[questionIndex] = answer;
+                    setResponses(updatedResponses);
+                    
+                    // Save to backend
+                    await saveResponses(false);
+                    
+                    // Show success message
+                    console.log(`Saved response for question: ${questionText}`);
+                  }
+                } catch (error) {
+                  console.error('Error saving response:', error);
+                }
+              }}
+            />
           </div>
         </div>
       </div>

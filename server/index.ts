@@ -8,17 +8,21 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Session configuration
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key-here',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: false, // Set to true in production with HTTPS
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
-}));
+// OpenAI configuration
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+
+// Session configuration (commented out for now since session is not imported)
+// app.use(session({
+//   secret: process.env.SESSION_SECRET || 'your-secret-key-here',
+//   resave: false,
+//   saveUninitialized: false,
+//   cookie: {
+//     secure: false, // Set to true in production with HTTPS
+//     httpOnly: true,
+//     maxAge: 24 * 60 * 60 * 1000 // 24 hours
+//   }
+// }));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -47,6 +51,17 @@ app.use((req, res, next) => {
     }
   });
 
+  next();
+});
+
+app.use((req, res, next) => {
+  const start = Date.now();
+  const oldSend = res.send;
+  res.send = function (data) {
+    console.log(`${req.method} ${req.path} - ${res.statusCode} - ${Date.now() - start}ms`);
+    res.send = oldSend;
+    return oldSend.apply(res, arguments);
+  };
   next();
 });
 
@@ -170,6 +185,208 @@ app.use((req, res, next) => {
   app.get('/api/saved-colleges/:userId', async (req, res) => {
     // Mock saved colleges
     res.json([]);
+  });
+
+  // Helper function to call OpenAI API
+  async function callOpenAI(messages: Array<{role: string, content: string}>) {
+    if (!OPENAI_API_KEY) {
+      throw new Error('OpenAI API key not configured');
+    }
+
+    try {
+      const response = await fetch(OPENAI_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: messages,
+          max_tokens: 500,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content;
+    } catch (error) {
+      console.error('OpenAI API error:', error);
+      throw error;
+    }
+  }
+
+  // Helper function to generate profile completion response
+  function generateProfileCompletionResponse(userInput: string, context: string) {
+    // Extract unanswered questions from context
+    const questionMatches = context.match(/Question \d+: ([^?]+\?)/g) || [];
+    const unansweredQuestions = questionMatches.slice(0, 3); // Limit to first 3 questions
+    
+    if (unansweredQuestions.length === 0) {
+      return "Great! It looks like you've completed this section. Is there anything specific you'd like to discuss about your college planning?";
+    }
+    
+    const questionsText = unansweredQuestions.join('\n');
+    
+    return `I see you're working on completing your profile. Based on your input "${userInput}", let me help you with the remaining questions in this section:\n\n${questionsText}\n\nWould you like to answer any of these questions? I'm here to help guide you through them.`;
+  }
+
+  // Enhanced message handling endpoint
+  app.post('/api/messages', async (req: Request, res: Response) => {
+    try {
+      const { conversationId, role, content } = req.body;
+      
+      // Check if this is a profile completion context
+      const isProfileCompletion = content.includes("CONTEXT: You are a helpful college counselor");
+      
+      let aiResponse;
+      let userMessage = null;
+      
+      if (isProfileCompletion) {
+        // For profile completion, extract the actual user message from context
+        const userMessageMatch = content.match(/STUDENT MESSAGE: (.+)$/);
+        const actualUserMessage = userMessageMatch ? userMessageMatch[1] : content;
+        
+        // Create user message with the actual content (not the context)
+        userMessage = {
+          id: Date.now(),
+          conversationId,
+          role: 'user',
+          content: actualUserMessage,
+          createdAt: new Date().toISOString()
+        };
+        
+        // Use OpenAI with the full context for AI response
+        try {
+          const messages = [
+            {
+              role: "system",
+              content: content // Send the full context as system message
+            }
+          ];
+          
+          aiResponse = await callOpenAI(messages);
+        } catch (error) {
+          console.error('OpenAI error:', error);
+          aiResponse = "I'm here to help you complete your profile! What would you like to work on?";
+        }
+      } else {
+        // For regular chat, create normal user message
+        userMessage = {
+          id: Date.now(),
+          conversationId,
+          role,
+          content,
+          createdAt: new Date().toISOString()
+        };
+        
+        // Use OpenAI for regular chat
+        try {
+          const messages = [
+            {
+              role: "system",
+              content: "You are a helpful college counselor assistant. Provide guidance on college planning, applications, and academic decisions."
+            },
+            {
+              role: "user",
+              content: content
+            }
+          ];
+          
+          aiResponse = await callOpenAI(messages);
+        } catch (error) {
+          console.error('OpenAI error:', error);
+          aiResponse = "I'm sorry, I'm having trouble connecting to my AI service right now. Please try again in a moment.";
+        }
+      }
+      
+      // Create AI message
+      const aiMessage = {
+        id: Date.now() + 1,
+        conversationId,
+        role: 'assistant',
+        content: aiResponse,
+        createdAt: new Date().toISOString()
+      };
+      
+      res.json({
+        userMessage,
+        aiMessage
+      });
+    } catch (error) {
+      console.error('Message handling error:', error);
+      res.status(500).json({ error: 'Failed to process message' });
+    }
+  });
+
+  // Get conversations for a user (updated to handle string userId)
+  app.get('/api/conversations/:userId', (req: Request, res: Response) => {
+    const { userId } = req.params;
+    
+    // Mock conversation data with string userId
+    const conversations = [
+      {
+        id: 1,
+        userId: userId, // Now a string
+        title: 'College Planning Discussion',
+        lastMessage: 'How can I improve my college application?',
+        timestamp: new Date().toISOString()
+      },
+      {
+        id: 2,
+        userId: userId, // Now a string
+        title: 'Profile Completion Help',
+        lastMessage: 'Let me help you complete your profile.',
+        timestamp: new Date().toISOString()
+      }
+    ];
+    
+    res.json(conversations);
+  });
+
+  // Create new conversation (updated to handle string userId)
+  app.post('/api/conversations', (req: Request, res: Response) => {
+    const { userId, title } = req.body;
+    
+    const newConversation = {
+      id: Date.now(),
+      userId: userId, // Now a string
+      title: title || 'New Conversation',
+      lastMessage: '',
+      timestamp: new Date().toISOString()
+    };
+    
+    res.json(newConversation);
+  });
+
+  // Get messages for a conversation
+  app.get('/api/messages/:conversationId', (req: Request, res: Response) => {
+    const { conversationId } = req.params;
+    
+    // Mock messages data - filter out any context messages
+    const allMessages = [
+      {
+        id: 1,
+        conversationId: parseInt(conversationId),
+        role: 'assistant',
+        content: 'Hello! I\'m here to help you with your college planning. How can I assist you today?',
+        createdAt: new Date().toISOString()
+      }
+    ];
+    
+    // Filter out context messages before returning
+    const messages = allMessages.filter(message => {
+      if (message.role === 'user' && message.content.includes('CONTEXT: You are a helpful college counselor')) {
+        return false;
+      }
+      return true;
+    });
+    
+    res.json(messages);
   });
 
   // Proxy other API requests to FastAPI backend

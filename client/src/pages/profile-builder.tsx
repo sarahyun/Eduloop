@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, FileText, Sparkles, Clock, CheckCircle, Edit, RefreshCw } from "lucide-react";
+import { MessageCircle, FileText, Sparkles, Clock, CheckCircle, Edit } from "lucide-react";
 import { api, type User } from "@/lib/api";
 import { questionsData, type Question } from '@/data/questionsData';
 import { useAuth } from "@/context/AuthContext";
@@ -131,8 +131,9 @@ export default function ProfileBuilder() {
     const targetSection = sectionId ? sections.find(s => s.id === sectionId) : getFirstIncompleteSection();
     
     if (method === 'chat') {
-      // Navigate to main chat page
-      window.location.href = '/chat';
+      // Navigate to chat page with section parameter
+      const sectionName = targetSection?.id || 'Introduction';
+      window.location.href = `/chat?section=${encodeURIComponent(sectionName)}`;
     } else {
       // Navigate to form with specific section
       const sectionName = targetSection?.id || 'Introduction';
@@ -306,17 +307,16 @@ export default function ProfileBuilder() {
                     {/* Actions for incomplete sections */}
                     {!section.completed && (
                       <>
-                        {/* Only show chat button for non-Introduction sections */}
-                        {section.id !== "Introduction" && (
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleMethodSelection('chat', section.id)}
-                          >
-                            <MessageCircle className="w-4 h-4 mr-1" />
-                            Chat
-                          </Button>
-                        )}
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            window.location.href = `/chat-onboarding?section=${encodeURIComponent(section.id)}`;
+                          }}
+                        >
+                          <MessageCircle className="w-4 h-4 mr-1" />
+                          Chat
+                        </Button>
                         <Button 
                           size="sm" 
                           variant="outline"
@@ -331,18 +331,17 @@ export default function ProfileBuilder() {
                     {/* Actions for completed sections - allow updates */}
                     {section.completed && (
                       <div className="flex items-center gap-2">
-                        {/* Only show chat button for non-Introduction sections */}
-                        {section.id !== "Introduction" && (
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            className="text-gray-600 hover:text-blue-600"
-                            onClick={() => handleMethodSelection('chat', section.id)}
-                          >
-                            <MessageCircle className="w-3 h-3 mr-1" />
-                            Chat
-                          </Button>
-                        )}
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="text-gray-600 hover:text-blue-600"
+                          onClick={() => {
+                            window.location.href = `/chat-onboarding?section=${encodeURIComponent(section.id)}`;
+                          }}
+                        >
+                          <MessageCircle className="w-3 h-3 mr-1" />
+                          Chat
+                        </Button>
                         <Button 
                           size="sm" 
                           variant="ghost" 

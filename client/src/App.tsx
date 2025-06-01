@@ -12,6 +12,7 @@ import ProfileBuilder from "@/pages/profile-builder";
 import SectionForm from "@/pages/section-form";
 import OnboardingPage from "@/pages/onboarding";
 import NotFound from "@/pages/not-found";
+import ChatOnboarding from "@/pages/chat-onboarding";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, loading } = useAuth();
@@ -67,6 +68,9 @@ function Router() {
       </Route>
       <Route path="/onboarding">
         <ProtectedRoute component={OnboardingPage} />
+      </Route>
+      <Route path="/chat-onboarding">
+        <ProtectedRoute component={ChatOnboarding} />
       </Route>
       <Route component={NotFound} />
     </Switch>

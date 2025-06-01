@@ -156,7 +156,12 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/chat'}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => {
+            // Find first incomplete section for chat
+            const firstIncompleteSection = Object.keys(questionsData).find(sectionId => !completedSections.has(sectionId));
+            const sectionParam = firstIncompleteSection || 'Introduction';
+            window.location.href = `/chat?section=${encodeURIComponent(sectionParam)}`;
+          }}>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
@@ -231,7 +236,12 @@ export default function Dashboard() {
             </Button>
             <Button 
               variant="outline"
-              onClick={() => window.location.href = '/chat'}
+              onClick={() => {
+                // Find first incomplete section for chat
+                const firstIncompleteSection = Object.keys(questionsData).find(sectionId => !completedSections.has(sectionId));
+                const sectionParam = firstIncompleteSection || 'Introduction';
+                window.location.href = `/chat?section=${encodeURIComponent(sectionParam)}`;
+              }}
             >
               <MessageCircle className="w-4 h-4 mr-2" />
               Ask AI Mentor

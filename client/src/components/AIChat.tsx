@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Cpu, Send, Maximize2, Minimize2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Message, Conversation } from "@/lib/api";
+import ChatOnboarding from "@/pages/chat-onboarding";
 
 interface AIChatProps {
   conversation?: Conversation;
@@ -14,6 +15,9 @@ interface AIChatProps {
   isExpanded?: boolean;
   onToggleExpanded?: () => void;
   user?: { fullName: string };
+  onSaveResponse?: (questionId: string, answer: string, questionText: string) => Promise<void>;
+  currentSection?: string;
+  sectionQuestions?: Array<{ id: number; question: string }>;
 }
 
 export function AIChat({ 
@@ -23,9 +27,15 @@ export function AIChat({
   isLoading = false,
   isExpanded = false,
   onToggleExpanded,
-  user 
+  user,
+  onSaveResponse,
+  currentSection,
+  sectionQuestions = []
 }: AIChatProps) {
   const [inputValue, setInputValue] = useState("");
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
+  const [pendingResponse, setPendingResponse] = useState("");
+  const [currentQuestionId, setCurrentQuestionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -41,8 +51,49 @@ export function AIChat({
     if (inputValue.trim() && !isLoading) {
       const content = inputValue.trim();
       setInputValue("");
+      
+      // Check if this looks like an answer to a question and we're in profile completion mode
+      if (onSaveResponse && currentSection && sectionQuestions.length > 0) {
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage?.role === 'assistant' && lastMessage.content.includes('?')) {
+          // AI just asked a question, this might be an answer
+          setPendingResponse(content);
+          setShowSavePrompt(true);
+          
+          // Try to identify which question is being answered
+          const questionMatch = sectionQuestions.find(q => 
+            lastMessage.content.toLowerCase().includes(q.question.toLowerCase().substring(0, 20))
+          );
+          if (questionMatch) {
+            setCurrentQuestionId(questionMatch.id.toString());
+          }
+          return; // Don't send the message yet
+        }
+      }
+      
       await onSendMessage(content);
     }
+  };
+
+  const handleSaveResponse = async (save: boolean) => {
+    if (save && onSaveResponse && currentQuestionId && pendingResponse) {
+      const question = sectionQuestions.find(q => q.id.toString() === currentQuestionId);
+      if (question) {
+        try {
+          await onSaveResponse(currentQuestionId, pendingResponse, question.question);
+        } catch (error) {
+          console.error('Error saving response:', error);
+        }
+      }
+    }
+    
+    // Send the message regardless of whether we saved it
+    await onSendMessage(pendingResponse);
+    
+    // Reset state
+    setShowSavePrompt(false);
+    setPendingResponse("");
+    setCurrentQuestionId(null);
   };
 
   const quickActions = [
@@ -194,7 +245,7 @@ export function AIChat({
             variant="secondary"
             className="cursor-pointer hover:bg-gray-200 transition-colors text-xs"
             onClick={() => {
-              setInputValue(action);
+              onSendMessage(action);
             }}
           >
             {action}

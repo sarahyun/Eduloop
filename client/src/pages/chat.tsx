@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { AIChat } from "@/components/AIChat";
 import { Button } from "@/components/ui/button";
@@ -11,13 +10,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 
 export default function ChatPage() {
-  const { user, loading } = useAuth();
-  const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
-  const [selectedLanguage, setSelectedLanguage] = useState("English");
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const { user, loading } = useAuth();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Show loading state while auth is loading
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -26,7 +23,6 @@ export default function ChatPage() {
     );
   }
 
-  // Redirect if not authenticated
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -38,82 +34,41 @@ export default function ChatPage() {
     );
   }
 
-  // Create a mock user ID for API calls (since backend expects number but Firebase uses string)
-  const mockUserId = 1; // This is a temporary solution until backend is updated to handle string UIDs
-
-  // Fetch conversations
-  const { data: conversations = [] } = useQuery<Conversation[]>({
-    queryKey: ['/api/conversations', mockUserId],
-    enabled: !!user,
-  });
-
-  // Set default conversation
-  useEffect(() => {
-    if (conversations.length > 0 && !selectedConversationId) {
-      setSelectedConversationId(conversations[0].id);
-    }
-  }, [conversations, selectedConversationId]);
-
-  // Fetch messages for selected conversation
-  const { data: messages = [] } = useQuery<Message[]>({
-    queryKey: [`/api/messages/${selectedConversationId}`],
-    enabled: !!selectedConversationId,
-  });
-
-  // Mutations
-  const createConversationMutation = useMutation({
-    mutationFn: (data: { userId: number; title?: string }) => api.createConversation(data),
-    onSuccess: (newConversation) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/conversations'] });
-      setSelectedConversationId(newConversation.id);
-      toast({ title: "New conversation started!" });
-    },
-    onError: () => {
-      toast({ title: "Failed to create conversation", variant: "destructive" });
-    },
-  });
-
-  const sendMessageMutation = useMutation({
-    mutationFn: ({ conversationId, content }: { conversationId: number; content: string }) =>
-      api.sendMessage(conversationId, { role: 'user', content }),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/conversations'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/messages/${variables.conversationId}`] });
-    },
-    onError: () => {
-      toast({ title: "Failed to send message", variant: "destructive" });
-    },
-  });
+  
 
   // Handle sending messages
   const handleSendMessage = async (content: string) => {
+    const userMessage: Message = {
+      id: Date.now(),
+      conversationId: 1,
+      role: 'user',
+      content,
+      createdAt: new Date().toISOString()
+    };
+    setMessages(prev => [...prev, userMessage]);
+    setIsLoading(true);
     try {
-      let conversationId = selectedConversationId;
-      
-      if (!conversationId) {
-        const newConversation = await createConversationMutation.mutateAsync({
-          userId: mockUserId,
-          title: "New Conversation"
-        });
-        conversationId = newConversation.id;
-      }
-
-      await sendMessageMutation.mutateAsync({ conversationId, content });
+      const response = await api.sendMessage(1, { role: 'user', content });
+      setMessages(prev => [...prev, response.aiMessage ?? {
+        id: Date.now() + 2,
+        conversationId: 1,
+        role: 'assistant',
+        content: 'Sorry, something went wrong. Please try again.',
+        createdAt: new Date().toISOString()
+      }]);
     } catch (error) {
-      console.error('Error sending message:', error);
+      setMessages(prev => [...prev, {
+        id: Date.now() + 2,
+        conversationId: 1,
+        role: 'assistant',
+        content: 'Sorry, something went wrong. Please try again.',
+        createdAt: new Date().toISOString()
+      }]);
       toast({ title: "Failed to send message", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  // Handle creating new conversation
-  const handleNewConversation = () => {
-    createConversationMutation.mutate({
-      userId: mockUserId,
-      title: "New Conversation"
-    });
-  };
-
-  const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
   const languages = [
     { code: "en", name: "English", flag: "🇺🇸" },
@@ -121,71 +76,30 @@ export default function ChatPage() {
     { code: "zh", name: "中文", flag: "🇨🇳" },
     { code: "ko", name: "한국어", flag: "🇰🇷" },
   ];
+  const [selectedLanguage, setSelectedLanguage] = useState("English");
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation user={{ name: user.displayName || user.email || 'User', email: user.email || '' }} />
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-4 gap-8 h-[calc(100vh-12rem)]">
-          
-          {/* Conversation List Sidebar */}
+          {/* Sidebar (optional, can be simplified further) */}
           <div className="lg:col-span-1 space-y-6">
-            
-            {/* New Conversation */}
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">Conversations</CardTitle>
-                  <Button 
-                    size="sm"
-                    onClick={handleNewConversation}
-                    disabled={createConversationMutation.isPending}
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    New
-                  </Button>
+                  <CardTitle className="text-lg">AI Mentor Chat</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {conversations.length === 0 ? (
-                    <div className="text-center py-4">
-                      <MessageCircle className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                      <p className="text-sm text-gray-500">No conversations yet</p>
-                    </div>
-                  ) : (
-                    conversations.map((conversation) => (
-                      <div
-                        key={conversation.id}
-                        className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                          selectedConversationId === conversation.id
-                            ? "border-primary bg-primary/5"
-                            : "border-gray-200 hover:bg-gray-50"
-                        }`}
-                        onClick={() => setSelectedConversationId(conversation.id)}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium text-gray-900 truncate">
-                            {conversation.title || "Untitled Conversation"}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {new Date(conversation.updatedAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-600 truncate">
-                          Last updated {new Date(conversation.updatedAt).toLocaleTimeString()}
-                        </p>
-                      </div>
-                    ))
-                  )}
+                  <div className="text-center py-4">
+                    <MessageCircle className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                    <p className="text-sm text-gray-500">Start a conversation with your AI mentor!</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-
-
-
-            {/* Language Support */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center">
@@ -215,7 +129,6 @@ export default function ChatPage() {
               </CardContent>
             </Card>
           </div>
-
           {/* Main Chat Area */}
           <div className="lg:col-span-3">
             <Card className="h-full flex flex-col">
@@ -224,7 +137,7 @@ export default function ChatPage() {
                   <div>
                     <CardTitle className="flex items-center">
                       <MessageCircle className="w-5 h-5 mr-2 text-primary" />
-                      {selectedConversation?.title || "AI Mentor Chat"}
+                      AI Mentor Chat
                     </CardTitle>
                     <p className="text-sm text-gray-600 mt-1">
                       Your intelligent college counselor and mentor
@@ -240,10 +153,9 @@ export default function ChatPage() {
               <CardContent className="flex-1 p-0">
                 <div className="h-full p-6">
                   <AIChat
-                    conversation={selectedConversation}
                     messages={messages}
                     onSendMessage={handleSendMessage}
-                    isLoading={sendMessageMutation.isPending}
+                    isLoading={isLoading}
                     isExpanded={true}
                     user={{ fullName: user.displayName || user.email || 'User' }}
                   />

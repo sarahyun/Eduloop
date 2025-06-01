@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Union
 from datetime import datetime
 from bson import ObjectId
 
@@ -88,7 +88,7 @@ class ConversationCreate(BaseModel):
     title: Optional[str] = None
 
 class MessageCreate(BaseModel):
-    conversationId: str
+    conversationId: Union[str, int]  # Accept both string and int
     role: str
     content: str
     metadata: Optional[dict] = None
