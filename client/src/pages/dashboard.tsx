@@ -146,15 +146,15 @@ export default function Dashboard() {
 
         {/* Feature Cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/profile'}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/profile-view'}>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                   <Target className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Build Profile</h3>
-                  <p className="text-gray-600 text-sm">Complete your profile to get personalized recommendations</p>
+                  <h3 className="text-lg font-semibold text-gray-900">View Profile</h3>
+                  <p className="text-gray-600 text-sm">See your comprehensive student profile overview</p>
                 </div>
               </div>
             </CardContent>
