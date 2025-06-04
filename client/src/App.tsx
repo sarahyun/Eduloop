@@ -78,6 +78,9 @@ function Router() {
       <Route path="/recommendations">
         <ProtectedRoute component={CollegeRecommendations} />
       </Route>
+      <Route path="/college-recommendations">
+        <ProtectedRoute component={CollegeRecommendations} />
+      </Route>
       <Route path="/profile-view">
         <ProtectedRoute component={StudentProfileView} />
       </Route>
