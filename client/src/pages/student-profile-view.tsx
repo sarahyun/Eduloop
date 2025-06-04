@@ -75,14 +75,50 @@ export default function StudentProfileView() {
       
       case 'bullets':
         return (
-          <ul className="space-y-4">
-            {(section.content as string[]).map((item, index) => (
-              <li key={index} className="flex items-start">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                <div className="text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
-              </li>
-            ))}
-          </ul>
+          <div className="space-y-4">
+            {(section.content as string[]).map((item, index) => {
+              // Clean up the item by removing markdown-style formatting and extracting emoji + title
+              const cleanItem = item.replace(/\*\*(.*?)\*\*/g, '$1');
+              const emojiMatch = cleanItem.match(/^([\u{1F300}-\u{1F9FF}]|\u{2600}-\u{26FF}|\u{2700}-\u{27BF})\s*/u);
+              const emoji = emojiMatch ? emojiMatch[0].trim() : null;
+              const textContent = emoji ? cleanItem.replace(/^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]\s*/u, '') : cleanItem;
+              
+              // Extract title (text before first dash or colon) and description
+              let titleMatch = textContent.match(/^([^:]+):\s*(.*)$/);
+              if (!titleMatch) {
+                titleMatch = textContent.match(/^([^–]+)–\s*(.*)$/);
+              }
+              if (!titleMatch) {
+                titleMatch = textContent.match(/^([^—]+)—\s*(.*)$/);
+              }
+              if (!titleMatch) {
+                titleMatch = textContent.match(/^([^-]+)-\s*(.*)$/);
+              }
+              const title = titleMatch ? titleMatch[1].trim() : '';
+              const description = titleMatch ? titleMatch[2].trim() : textContent;
+              
+              return (
+                <div key={index} className="flex items-start space-x-4 p-4 rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors border border-gray-100">
+                  {emoji && (
+                    <div className="flex-shrink-0 w-10 h-10 bg-white rounded-full flex items-center justify-center text-lg shadow-sm border">
+                      {emoji}
+                    </div>
+                  )}
+                  {!emoji && (
+                    <div className="flex-shrink-0 w-3 h-3 bg-blue-500 rounded-full mt-2"></div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    {title && (
+                      <h4 className="font-semibold text-gray-900 mb-2 text-base">{title}</h4>
+                    )}
+                    <p className="text-gray-700 leading-relaxed">
+                      {description}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         );
       
       case 'table':
