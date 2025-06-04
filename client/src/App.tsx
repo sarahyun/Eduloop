@@ -15,6 +15,7 @@ import NotFound from "@/pages/not-found";
 import ChatOnboarding from "@/pages/chat-onboarding";
 import CollegeRecommendations from "@/pages/college-recommendations";
 import StudentProfileView from "@/pages/student-profile-view";
+import { ProfileGeneration } from "@/pages/profile-generation";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, loading } = useAuth();

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import { MessageCircle, Target, BookOpen, Users, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -113,35 +114,12 @@ export default function Dashboard() {
             Find colleges that match your interests and goals.
           </p>
           
-          {/* Profile Completion Nudge */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium text-blue-900">Complete your profile for better matches</h3>
-                  <span className="text-sm font-medium text-blue-700">
-                    {isLoadingCompletion ? 'Loading...' : `${profileCompletion}% complete`}
-                  </span>
-                </div>
-                <div className="w-full bg-blue-200 rounded-full h-2 mb-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${isLoadingCompletion ? 0 : profileCompletion}%` }}
-                  />
-                </div>
-                <p className="text-sm text-blue-700">
-                  Each section is complete when you answer at least 50% of its questions. The more we learn about you, the more helpful our recommendations become.
-                </p>
-              </div>
-              <Button 
-                onClick={() => window.location.href = '/profile'}
-                size="sm"
-                className="bg-blue-600 text-white hover:bg-blue-700 ml-4"
-              >
-                Build Profile
-              </Button>
-            </div>
-          </div>
+          {/* Smart Profile Completion Banner */}
+          <ProfileCompletionBanner 
+            completionPercentage={profileCompletion}
+            isFullyComplete={profileCompletion >= 100}
+            className="mb-6"
+          />
         </div>
 
         {/* Feature Cards */}
