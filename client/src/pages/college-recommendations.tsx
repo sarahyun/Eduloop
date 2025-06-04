@@ -22,6 +22,7 @@ export default function CollegeRecommendations() {
   const [, setLocation] = useLocation();
   const [recommendations, setRecommendations] = useState<SchoolRecommendation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   useEffect(() => {
     loadRecommendations();
@@ -37,6 +38,25 @@ export default function CollegeRecommendations() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleFeedbackSubmit = (feedback: any) => {
+    setRecommendations(prev => 
+      prev.map(rec => 
+        rec.name === feedback.schoolName 
+          ? { ...rec, userFeedback: feedback }
+          : rec
+      )
+    );
+    setFeedbackSubmitted(true);
+  };
+
+  const handleUpdateRecommendations = async () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setFeedbackSubmitted(false);
+    }, 2000);
   };
 
   const categorizedRecommendations = SchoolRecommendationsService.categorizeRecommendations(recommendations);
@@ -99,6 +119,34 @@ export default function CollegeRecommendations() {
               </div>
             </div>
           </div>
+
+          {/* Update Recommendations Section */}
+          {feedbackSubmitted && (
+            <div className="flex justify-center mb-8">
+              <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-blue-600 rounded-full flex items-center justify-center">
+                        <Lightbulb className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 text-lg">Ready for Better Matches?</h3>
+                        <p className="text-gray-600">Your feedback helps us find even better college recommendations for you</p>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={handleUpdateRecommendations}
+                      disabled={isLoading}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-6 py-3"
+                    >
+                      {isLoading ? "Updating..." : "Get Updated Recommendations"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* Summary Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -178,6 +226,7 @@ export default function CollegeRecommendations() {
                   <SchoolRecommendationCard
                     key={`${recommendation.name}-${index}`}
                     recommendation={recommendation}
+                    onFeedbackSubmit={handleFeedbackSubmit}
                   />
                 ))}
               </div>
@@ -189,6 +238,7 @@ export default function CollegeRecommendations() {
                   <SchoolRecommendationCard
                     key={`reach-${recommendation.name}-${index}`}
                     recommendation={recommendation}
+                    onFeedbackSubmit={handleFeedbackSubmit}
                   />
                 ))}
               </div>
@@ -200,6 +250,7 @@ export default function CollegeRecommendations() {
                   <SchoolRecommendationCard
                     key={`match-${recommendation.name}-${index}`}
                     recommendation={recommendation}
+                    onFeedbackSubmit={handleFeedbackSubmit}
                   />
                 ))}
               </div>
@@ -211,6 +262,7 @@ export default function CollegeRecommendations() {
                   <SchoolRecommendationCard
                     key={`safety-${recommendation.name}-${index}`}
                     recommendation={recommendation}
+                    onFeedbackSubmit={handleFeedbackSubmit}
                   />
                 ))}
               </div>
