@@ -23,50 +23,14 @@ import {
   Award
 } from 'lucide-react';
 import { Navigation } from '@/components/Navigation';
-// Mock data for demonstration
-const mockStudentProfileData = {
-  student_profile: [
-    {
-      section_id: "core_snapshot",
-      title: "🌱 Core Snapshot", 
-      type: "paragraph",
-      content: "You are an electric blend of creator, athlete, and thinker—someone who thrives in motion, whether that's on a baseball diamond, in a debate round, or sketching out a fashion concept. You experience life with intensity and introspection, always attuned to the world around you. Your energy is generative: you take in ideas, emotions, aesthetics, and experience, and channel them into something tangible."
-    },
-    {
-      section_id: "academic_profile",
-      title: "📘 Academic Profile",
-      type: "bullets", 
-      content: [
-        "You come alive in discussion-based and project-oriented environments. Your favorite classes emphasize analysis, creativity, and meaningful dialogue.",
-        "Your academic performance shows a steep upward trajectory from a 3.0 freshman year to a 3.92 junior year, demonstrating resilience and intentional growth.",
-        "You excel in courses like American Studies, Film History, and World History that combine analytical thinking with creative expression."
-      ]
-    },
-    {
-      section_id: "extracurricular_profile", 
-      title: "🏆 Extracurricular Profile",
-      type: "bullets",
-      content: [
-        "Baseball team captain with strong leadership and teamwork skills developed over multiple seasons",
-        "Active debate team member, demonstrating public speaking abilities and critical thinking under pressure", 
-        "Fashion design as a creative outlet, showing artistic vision and attention to detail",
-        "Community service initiatives reflecting commitment to social impact and civic engagement"
-      ]
-    },
-    {
-      section_id: "personal_growth",
-      title: "🌟 Personal Growth & Values", 
-      type: "paragraph",
-      content: "Your journey shows remarkable self-awareness and capacity for transformation. You've demonstrated the ability to recalibrate, take ownership, and transform your habits when facing personal challenges. What's most striking is your intuitive awareness of how environment shapes identity—you're not just looking for the right college, you're searching for the context that will unlock your full creative and intellectual range."
-    }
-  ]
-};
+// Import the actual mock data
+import mockStudentProfileData from '@/data/mockStudentProfileData';
 
 interface ProfileSection {
   section_id: string;
   title: string;
-  type: 'paragraph' | 'bullets' | 'key_value' | 'timeline';
-  content: string | string[] | Record<string, any>[];
+  type: 'paragraph' | 'bullets' | 'key_value' | 'timeline' | 'table';
+  content: string | string[] | Record<string, any>[] | Record<string, string>;
 }
 
 export default function StudentProfileView() {
@@ -102,21 +66,43 @@ export default function StudentProfileView() {
     switch (section.type) {
       case 'paragraph':
         return (
-          <p className="text-gray-700 leading-relaxed">
-            {section.content as string}
-          </p>
+          <div className="prose max-w-none">
+            <p className="text-gray-700 leading-relaxed text-base">
+              {section.content as string}
+            </p>
+          </div>
         );
       
       case 'bullets':
         return (
-          <ul className="space-y-3">
+          <ul className="space-y-4">
             {(section.content as string[]).map((item, index) => (
               <li key={index} className="flex items-start">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                <span className="text-gray-700">{item}</span>
+                <div className="text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
               </li>
             ))}
           </ul>
+        );
+      
+      case 'table':
+        return (
+          <div className="overflow-hidden rounded-lg border border-gray-200">
+            <table className="min-w-full divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-gray-200">
+                {Object.entries(section.content as Record<string, string>).map(([key, value], index) => (
+                  <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="font-medium text-gray-900">{key}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-gray-700 leading-relaxed">{value}</div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         );
       
       case 'key_value':
@@ -158,25 +144,32 @@ export default function StudentProfileView() {
     switch (sectionId) {
       case 'core_snapshot': return <User className="w-5 h-5" />;
       case 'academic_profile': return <BookOpen className="w-5 h-5" />;
-      case 'extracurricular_profile': return <Trophy className="w-5 h-5" />;
-      case 'personal_growth': return <TrendingUp className="w-5 h-5" />;
-      case 'college_preferences': return <GraduationCap className="w-5 h-5" />;
-      case 'career_aspirations': return <Target className="w-5 h-5" />;
+      case 'intellectual_interests': return <Lightbulb className="w-5 h-5" />;
+      case 'extracurriculars': return <Trophy className="w-5 h-5" />;
+      case 'core_values_and_drives': return <Heart className="w-5 h-5" />;
+      case 'hidden_strengths': return <Star className="w-5 h-5" />;
+      case 'college_fit': return <GraduationCap className="w-5 h-5" />;
+      case 'future_direction': return <Target className="w-5 h-5" />;
+      case 'final_insight': return <Award className="w-5 h-5" />;
       default: return <Star className="w-5 h-5" />;
     }
   };
 
   // Group sections by category for better organization
   const academicSections = profileData.filter(section => 
-    ['academic_profile', 'test_scores', 'coursework'].includes(section.section_id)
+    ['academic_profile', 'intellectual_interests'].includes(section.section_id)
   );
   
   const personalSections = profileData.filter(section => 
-    ['core_snapshot', 'personal_growth', 'values', 'challenges'].includes(section.section_id)
+    ['core_snapshot', 'core_values_and_drives', 'hidden_strengths'].includes(section.section_id)
   );
   
   const extracurricularSections = profileData.filter(section => 
-    ['extracurricular_profile', 'leadership', 'community_service'].includes(section.section_id)
+    ['extracurriculars'].includes(section.section_id)
+  );
+  
+  const futureSections = profileData.filter(section => 
+    ['college_fit', 'future_direction', 'final_insight'].includes(section.section_id)
   );
   
 
@@ -232,11 +225,12 @@ export default function StudentProfileView() {
 
         {/* Profile Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="academic">Academic</TabsTrigger>
             <TabsTrigger value="personal">Personal</TabsTrigger>
             <TabsTrigger value="activities">Activities</TabsTrigger>
+            <TabsTrigger value="future">Future</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
