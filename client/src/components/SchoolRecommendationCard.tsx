@@ -13,7 +13,9 @@ import {
   DollarSign,
   AlertTriangle,
   Lightbulb,
-  PenTool
+  PenTool,
+  Check,
+  MapPin
 } from 'lucide-react';
 import { SchoolRecommendation, SchoolRecommendationsService } from '@/services/schoolRecommendationsService';
 
@@ -47,26 +49,39 @@ export function SchoolRecommendationCard({ recommendation, className = "" }: Sch
   };
 
   return (
-    <Card className={`hover:shadow-lg transition-all duration-300 ${className}`}>
-      <CardHeader className="pb-4">
+    <Card className={`group hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-500 border-0 bg-gradient-to-br from-white to-gray-50/30 ${className}`}>
+      <CardHeader className="pb-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <CardTitle className="text-xl font-bold text-gray-900">
+            <div className="flex items-center gap-3 mb-3">
+              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent group-hover:from-blue-600 group-hover:to-purple-600 transition-all duration-300">
                 {recommendation.name}
               </CardTitle>
-              <Badge className={`${typeColor} font-medium px-3 py-1`}>
+              <Badge className={`${typeColor} font-semibold px-4 py-2 text-sm rounded-full shadow-sm`}>
                 {recommendation.type}
               </Badge>
             </div>
             
-            <div className="flex items-center gap-4 mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-600">Overall Fit:</span>
-                <div className="flex items-center gap-1">
-                  <Progress value={fitScore} className="w-16 h-2" />
-                  <span className="text-sm font-semibold text-gray-700">{fitScore}%</span>
+            <div className="flex items-center gap-6 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+                    <span className="text-white font-bold text-sm">{fitScore}%</span>
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                    <Check className="h-3 w-3 text-white" />
+                  </div>
                 </div>
+                <div>
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Overall Fit</span>
+                  <div className="text-sm text-gray-700 font-medium">
+                    {fitScore >= 80 ? 'Excellent Match' : fitScore >= 60 ? 'Good Match' : 'Moderate Match'}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-gray-600">
+                <MapPin className="h-4 w-4" />
+                <span className="text-sm font-medium">{recommendation.location}</span>
               </div>
             </div>
 
