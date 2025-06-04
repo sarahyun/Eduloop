@@ -2,11 +2,8 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { SchoolRecommendationCard } from '@/components/SchoolRecommendationCard';
 import { Navigation } from '@/components/Navigation';
 import { SchoolRecommendationsService, SchoolRecommendation } from '@/services/schoolRecommendationsService';
@@ -16,12 +13,7 @@ import {
   Shield, 
   BookOpen,
   Brain,
-  Sparkles,
-  RefreshCw,
-  Filter,
-  Search,
-  ArrowLeft,
-  TrendingUp
+  ArrowLeft
 } from 'lucide-react';
 
 export default function CollegeRecommendations() {
@@ -29,9 +21,6 @@ export default function CollegeRecommendations() {
   const [, setLocation] = useLocation();
   const [recommendations, setRecommendations] = useState<SchoolRecommendation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('fit-score');
-  const [filterType, setFilterType] = useState('all');
 
   useEffect(() => {
     loadRecommendations();
@@ -50,26 +39,6 @@ export default function CollegeRecommendations() {
   };
 
   const categorizedRecommendations = SchoolRecommendationsService.categorizeRecommendations(recommendations);
-
-  const filteredRecommendations = recommendations.filter(rec => {
-    const matchesSearch = rec.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = filterType === 'all' || rec.type === filterType;
-    return matchesSearch && matchesType;
-  });
-
-  const sortedRecommendations = [...filteredRecommendations].sort((a, b) => {
-    switch (sortBy) {
-      case 'fit-score':
-        return SchoolRecommendationsService.calculateFitScore(b.fit) - SchoolRecommendationsService.calculateFitScore(a.fit);
-      case 'name':
-        return a.name.localeCompare(b.name);
-      case 'type':
-        const typeOrder = { 'Safety': 0, 'Match': 1, 'Reach': 2 };
-        return typeOrder[a.type] - typeOrder[b.type];
-      default:
-        return 0;
-    }
-  });
 
   if (loading) {
     return (
@@ -122,7 +91,7 @@ export default function CollegeRecommendations() {
           </div>
 
           {/* Summary Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <Card>
               <CardContent className="p-4 text-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -152,72 +121,10 @@ export default function CollegeRecommendations() {
                 <p className="text-sm text-gray-600">Safety Schools</p>
               </CardContent>
             </Card>
-            
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <TrendingUp className="h-5 w-5 text-orange-500" />
-                  <span className="font-semibold text-orange-600">
-                    {recommendations.length > 0 
-                      ? Math.round(recommendations.reduce((sum, rec) => 
-                          sum + SchoolRecommendationsService.calculateFitScore(rec.fit), 0) / recommendations.length)
-                      : 0}%
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600">Avg. Fit Score</p>
-              </CardContent>
-            </Card>
           </div>
         </div>
 
-        {/* Controls */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search schools..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-          
-          <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-[180px]">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="Reach">Reach Schools</SelectItem>
-              <SelectItem value="Match">Match Schools</SelectItem>
-              <SelectItem value="Safety">Safety Schools</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="fit-score">Sort by Fit Score</SelectItem>
-              <SelectItem value="name">Sort by Name</SelectItem>
-              <SelectItem value="type">Sort by Type</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Button 
-            onClick={loadRecommendations}
-            disabled={isLoading}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-        </div>
+
 
         {/* Recommendations */}
         {isLoading ? (
@@ -248,7 +155,7 @@ export default function CollegeRecommendations() {
 
             <TabsContent value="all" className="mt-6">
               <div className="grid gap-6">
-                {sortedRecommendations.map((recommendation, index) => (
+                {recommendations.map((recommendation, index) => (
                   <SchoolRecommendationCard
                     key={`${recommendation.name}-${index}`}
                     recommendation={recommendation}
@@ -293,20 +200,18 @@ export default function CollegeRecommendations() {
         )}
 
         {/* Empty State */}
-        {!isLoading && sortedRecommendations.length === 0 && (
+        {!isLoading && recommendations.length === 0 && (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="h-8 w-8 text-gray-400" />
+              <Brain className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No recommendations found</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No recommendations available</h3>
             <p className="text-gray-600 mb-4">
-              {searchQuery ? 'Try adjusting your search terms or filters.' : 'Complete your profile to get personalized recommendations.'}
+              Complete your profile to get personalized school recommendations.
             </p>
-            {!searchQuery && (
-              <Button onClick={() => setLocation('/profile-builder')}>
-                Complete Profile
-              </Button>
-            )}
+            <Button onClick={() => setLocation('/profile-builder')}>
+              Complete Profile
+            </Button>
           </div>
         )}
       </div>
