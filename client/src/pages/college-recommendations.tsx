@@ -31,10 +31,14 @@ export default function CollegeRecommendations() {
   const loadRecommendations = async () => {
     try {
       setIsLoading(true);
+      // Use mock data service to avoid API dependency
       const data = await SchoolRecommendationsService.getSchoolRecommendations(user?.uid);
       setRecommendations(data.recommendations);
     } catch (error) {
-      console.error('Error loading recommendations:', error);
+      console.error('Error loading recommendations, using mock data:', error);
+      // Fallback to mock data if API is unavailable
+      const mockData = await SchoolRecommendationsService.getSchoolRecommendations();
+      setRecommendations(mockData.recommendations);
     } finally {
       setIsLoading(false);
     }
