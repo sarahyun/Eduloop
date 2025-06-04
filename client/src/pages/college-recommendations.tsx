@@ -78,47 +78,61 @@ export default function CollegeRecommendations() {
             </Button>
           </div>
           
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-              <Brain className="h-6 w-6 text-white" />
+          <div className="text-center space-y-6 mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+              <Star className="h-4 w-4" />
+              Personalized for You
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">AI-Powered School Recommendations</h1>
-              <p className="text-gray-600">
-                Personalized recommendations based on your profile and preferences
+            
+            <div className="space-y-4">
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+                Your College Matches
+              </h1>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                We've analyzed your profile to find schools that align perfectly with your academic goals, 
+                interests, and preferences. Each recommendation includes detailed fit analysis and personalized insights.
               </p>
             </div>
           </div>
 
           {/* Summary Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Target className="h-5 w-5 text-purple-500" />
-                  <span className="font-semibold text-purple-600">{categorizedRecommendations.reach.length}</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-purple-50 to-purple-100/50">
+              <CardContent className="p-6 text-center">
+                <div className="flex items-center justify-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <Target className="h-6 w-6 text-white" />
+                  </div>
+                  <span className="text-3xl font-bold text-purple-600">{categorizedRecommendations.reach.length}</span>
                 </div>
-                <p className="text-sm text-gray-600">Reach Schools</p>
+                <p className="text-sm font-medium text-purple-700 uppercase tracking-wide">Reach Schools</p>
+                <p className="text-xs text-gray-600 mt-1">Competitive choices</p>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Star className="h-5 w-5 text-blue-500" />
-                  <span className="font-semibold text-blue-600">{categorizedRecommendations.match.length}</span>
+            <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-blue-50 to-blue-100/50">
+              <CardContent className="p-6 text-center">
+                <div className="flex items-center justify-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <Star className="h-6 w-6 text-white" />
+                  </div>
+                  <span className="text-3xl font-bold text-blue-600">{categorizedRecommendations.match.length}</span>
                 </div>
-                <p className="text-sm text-gray-600">Match Schools</p>
+                <p className="text-sm font-medium text-blue-700 uppercase tracking-wide">Match Schools</p>
+                <p className="text-xs text-gray-600 mt-1">Strong fit options</p>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Shield className="h-5 w-5 text-green-500" />
-                  <span className="font-semibold text-green-600">{categorizedRecommendations.safety.length}</span>
+            <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-green-50 to-green-100/50">
+              <CardContent className="p-6 text-center">
+                <div className="flex items-center justify-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <Shield className="h-6 w-6 text-white" />
+                  </div>
+                  <span className="text-3xl font-bold text-green-600">{categorizedRecommendations.safety.length}</span>
                 </div>
-                <p className="text-sm text-gray-600">Safety Schools</p>
+                <p className="text-sm font-medium text-green-700 uppercase tracking-wide">Safety Schools</p>
+                <p className="text-xs text-gray-600 mt-1">Reliable acceptances</p>
               </CardContent>
             </Card>
           </div>

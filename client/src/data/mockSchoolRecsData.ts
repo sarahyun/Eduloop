@@ -148,6 +148,7 @@ export const mockSchoolRecsData = {
     {
       "type": "Match",
       "name": "Vassar College",
+      "location": "Poughkeepsie, NY",
       "fit": {
         "academic": "Great",
         "social_cultural": "Great",
@@ -176,6 +177,7 @@ export const mockSchoolRecsData = {
     {
       "type": "Safety",
       "name": "Occidental College",
+      "location": "Los Angeles, CA",
       "fit": {
         "academic": "Good",
         "social_cultural": "Great",
@@ -216,6 +218,7 @@ export const mockSchoolRecsData = {
     {
       "type": "Safety",
       "name": "Fordham University – Lincoln Center",
+      "location": "New York, NY",
       "fit": {
         "academic": "Good",
         "social_cultural": "Good",
