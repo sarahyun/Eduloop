@@ -8,6 +8,7 @@ export interface SchoolOpportunity {
 export interface SchoolRecommendation {
   type: 'Reach' | 'Match' | 'Safety';
   name: string;
+  location: string;
   fit: {
     academic: 'Great' | 'Good' | 'Fair';
     social_cultural: 'Great' | 'Good' | 'Fair';

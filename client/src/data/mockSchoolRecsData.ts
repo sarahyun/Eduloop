@@ -3,6 +3,7 @@ export const mockSchoolRecsData = {
     {
       "type": "Reach",
       "name": "Yale University",
+      "location": "New Haven, CT",
       "fit": {
         "academic": "Great",
         "social_cultural": "Great",
@@ -31,6 +32,7 @@ export const mockSchoolRecsData = {
     {
       "type": "Reach",
       "name": "University of Chicago",
+      "location": "Chicago, IL",
       "fit": {
         "academic": "Great",
         "social_cultural": "Good",
@@ -59,6 +61,7 @@ export const mockSchoolRecsData = {
     {
       "type": "Reach",
       "name": "Wesleyan University",
+      "location": "Middletown, CT",
       "fit": {
         "academic": "Great",
         "social_cultural": "Great",
@@ -87,6 +90,7 @@ export const mockSchoolRecsData = {
     {
       "type": "Match",
       "name": "Barnard College",
+      "location": "New York, NY",
       "fit": {
         "academic": "Great",
         "social_cultural": "Great",
@@ -115,6 +119,7 @@ export const mockSchoolRecsData = {
     {
       "type": "Match",
       "name": "Tufts University",
+      "location": "Medford, MA",
       "fit": {
         "academic": "Great",
         "social_cultural": "Good",
