@@ -13,7 +13,8 @@ import {
   Shield, 
   BookOpen,
   Brain,
-  ArrowLeft
+  ArrowLeft,
+  Lightbulb
 } from 'lucide-react';
 
 export default function CollegeRecommendations() {
@@ -86,12 +87,16 @@ export default function CollegeRecommendations() {
             
             <div className="space-y-4">
               <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
-                Your College Matches
+                Your Initial College Matches
               </h1>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                We've analyzed your profile to find schools that align perfectly with your academic goals, 
-                interests, and preferences. Each recommendation includes detailed fit analysis and personalized insights.
+                Based on your profile responses, here are your first personalized recommendations. 
+                After researching these schools, you can provide feedback to help us refine and improve your matches.
               </p>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                <Lightbulb className="h-4 w-4" />
+                Research these schools and share your thoughts to get even better recommendations
+              </div>
             </div>
           </div>
 

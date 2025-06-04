@@ -5,6 +5,17 @@ export interface SchoolOpportunity {
   url: string;
 }
 
+export interface SchoolFeedback {
+  schoolName: string;
+  userId: string;
+  interest: 'very-interested' | 'somewhat-interested' | 'not-interested';
+  rating: number; // 1-5 stars
+  feedback: string;
+  specificConcerns: string[];
+  whatAttractsYou: string[];
+  submittedAt: Date;
+}
+
 export interface SchoolRecommendation {
   type: 'Reach' | 'Match' | 'Safety';
   name: string;
@@ -18,6 +29,7 @@ export interface SchoolRecommendation {
   distinctive_opportunities: SchoolOpportunity[];
   potential_challenges: string[];
   why_school_essay_points: string[];
+  userFeedback?: SchoolFeedback;
 }
 
 export interface SchoolRecommendationsData {

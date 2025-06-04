@@ -17,15 +17,24 @@ import {
   Check,
   MapPin
 } from 'lucide-react';
-import { SchoolRecommendation, SchoolRecommendationsService } from '@/services/schoolRecommendationsService';
+import { SchoolRecommendation, SchoolRecommendationsService, SchoolFeedback } from '@/services/schoolRecommendationsService';
 
 interface SchoolRecommendationCardProps {
   recommendation: SchoolRecommendation;
   className?: string;
+  onFeedbackSubmit?: (feedback: SchoolFeedback) => void;
 }
 
-export function SchoolRecommendationCard({ recommendation, className = "" }: SchoolRecommendationCardProps) {
+export function SchoolRecommendationCard({ recommendation, className = "", onFeedbackSubmit }: SchoolRecommendationCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackData, setFeedbackData] = useState({
+    interest: 'somewhat-interested' as 'very-interested' | 'somewhat-interested' | 'not-interested',
+    rating: 3,
+    feedback: '',
+    specificConcerns: [] as string[],
+    whatAttractsYou: [] as string[]
+  });
   
   const fitScore = SchoolRecommendationsService.calculateFitScore(recommendation.fit);
   const typeColor = SchoolRecommendationsService.getTypeColor(recommendation.type);
@@ -223,6 +232,130 @@ export function SchoolRecommendationCard({ recommendation, className = "" }: Sch
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Feedback Section */}
+        <div className="border-t border-gray-100 pt-4 mt-6">
+          {!showFeedback && !recommendation.userFeedback ? (
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                <span className="font-medium">Share your thoughts</span> on this recommendation to improve future matches
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowFeedback(true)}
+                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+              >
+                Give Feedback
+              </Button>
+            </div>
+          ) : recommendation.userFeedback ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-green-700">Your feedback submitted</span>
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star 
+                      key={i} 
+                      className={`h-4 w-4 ${i < recommendation.userFeedback!.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                    />
+                  ))}
+                </div>
+              </div>
+              <p className="text-sm text-gray-600">{recommendation.userFeedback.feedback}</p>
+            </div>
+          ) : (
+            <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-medium text-gray-900">How do you feel about {recommendation.name}?</h4>
+              
+              {/* Interest Level */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Interest Level</label>
+                <div className="flex gap-2">
+                  {[
+                    { value: 'very-interested', label: 'Very Interested', color: 'green' },
+                    { value: 'somewhat-interested', label: 'Somewhat Interested', color: 'yellow' },
+                    { value: 'not-interested', label: 'Not Interested', color: 'red' }
+                  ].map((option) => (
+                    <Button
+                      key={option.value}
+                      variant={feedbackData.interest === option.value ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setFeedbackData(prev => ({ ...prev, interest: option.value as any }))}
+                      className={`text-xs ${
+                        feedbackData.interest === option.value 
+                          ? option.color === 'green' ? 'bg-green-600' 
+                            : option.color === 'yellow' ? 'bg-yellow-500' 
+                            : 'bg-red-600'
+                          : ''
+                      }`}
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Rating */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Overall Rating</label>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((rating) => (
+                    <button
+                      key={rating}
+                      onClick={() => setFeedbackData(prev => ({ ...prev, rating }))}
+                      className="p-1"
+                    >
+                      <Star 
+                        className={`h-5 w-5 ${rating <= feedbackData.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Feedback Text */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Additional Comments</label>
+                <textarea
+                  value={feedbackData.feedback}
+                  onChange={(e) => setFeedbackData(prev => ({ ...prev, feedback: e.target.value }))}
+                  placeholder="What do you think about this recommendation? Any specific concerns or attractions?"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none"
+                  rows={3}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 pt-2">
+                <Button 
+                  size="sm"
+                  onClick={() => {
+                    if (onFeedbackSubmit) {
+                      onFeedbackSubmit({
+                        schoolName: recommendation.name,
+                        userId: 'current-user', // This would come from auth context
+                        ...feedbackData,
+                        submittedAt: new Date()
+                      });
+                    }
+                    setShowFeedback(false);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Submit Feedback
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowFeedback(false)}
+                >
+                  Cancel
+                </Button>
               </div>
             </div>
           )}
