@@ -369,6 +369,33 @@ export default function StudentProfileView() {
               )}
             </div>
           </TabsContent>
+
+          {/* Future Tab */}
+          <TabsContent value="future" className="space-y-6">
+            <div className="space-y-6">
+              {futureSections.length > 0 ? futureSections.map((section) => (
+                <Card key={section.section_id}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      {getSectionIcon(section.section_id)}
+                      <span className="ml-2">{section.title}</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {renderContent(section)}
+                  </CardContent>
+                </Card>
+              )) : (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Future Plans</h3>
+                    <p className="text-gray-600">College preferences and career aspirations will be displayed here.</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
         </Tabs>
 
         {/* Action Buttons */}
