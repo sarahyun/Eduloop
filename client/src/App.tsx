@@ -81,6 +81,9 @@ function Router() {
       <Route path="/profile-view">
         <ProtectedRoute component={StudentProfileView} />
       </Route>
+      <Route path="/profile-generation">
+        <ProtectedRoute component={ProfileGeneration} />
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
