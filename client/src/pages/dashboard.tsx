@@ -7,6 +7,7 @@ import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import { User, Star, ArrowRight, Clock, Sparkles, MessageCircle, GraduationCap } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { questionsData, type Question } from '@/data/questionsData';
+import { SchoolRecommendationsService, SchoolRecommendation } from '@/services/schoolRecommendationsService';
 
 interface FormResponse {
   response_id?: string;
@@ -20,17 +21,13 @@ interface FormResponse {
   }>;
 }
 
-interface CollegeRecommendation {
-  type: string;
-  name: string;
-  location: string;
-  fit_score: string;
-}
+
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
-  const [recommendations, setRecommendations] = useState<CollegeRecommendation[]>([]);
+  const [recommendations, setRecommendations] = useState<SchoolRecommendation[]>([]);
+  const [hasRealRecommendations, setHasRealRecommendations] = useState(false);
 
   // Calculate completion percentage
   const completedSectionsCount = completedSections.size;
@@ -45,10 +42,15 @@ export default function Dashboard() {
       }
 
       try {
-        const response = await fetch(`/recommendations/user/${user.uid}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.recommendations) {
+        // First check if user has generated recommendations
+        const status = await SchoolRecommendationsService.getGenerationStatus(user.uid);
+        const hasGenerated = status.status === 'completed';
+        setHasRealRecommendations(hasGenerated);
+
+        if (hasGenerated) {
+          // Load actual recommendations
+          const data = await SchoolRecommendationsService.getSchoolRecommendations(user.uid);
+          if (data.recommendations && data.recommendations.length > 0) {
             // Take first 3 recommendations for preview
             setRecommendations(data.recommendations.slice(0, 3));
           }
@@ -254,7 +256,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             {profileCompletion >= 100 ? (
-              recommendations.length > 0 ? (
+              hasRealRecommendations && recommendations.length > 0 ? (
                 <div className="space-y-4">
                   <div className="grid md:grid-cols-3 gap-4">
                     {recommendations.map((school, index) => (
@@ -286,9 +288,9 @@ export default function Dashboard() {
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Star className="w-8 h-8 text-blue-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Generating Your Matches</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready for Recommendations</h3>
                   <p className="text-gray-600 mb-4">
-                    Your profile is complete. We're preparing your personalized college recommendations.
+                    Your profile is complete. Visit the recommendations page to generate your personalized college matches.
                   </p>
                 </div>
               )
