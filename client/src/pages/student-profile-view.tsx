@@ -193,26 +193,28 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 p-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-center min-h-[400px]">
-            <Card className="max-w-md w-full border-red-200 bg-red-50">
-              <CardContent className="p-6 text-center">
-                <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-red-900 mb-2">Profile Not Available</h3>
-                <p className="text-red-700 mb-4">{error}</p>
-                <div className="space-y-2">
+            <Card className="max-w-md w-full border-2 border-red-100 bg-red-50/50 shadow-lg">
+              <CardContent className="p-8 text-center">
+                <div className="p-3 bg-red-100 rounded-full w-fit mx-auto mb-4">
+                  <AlertCircle className="h-8 w-8 text-red-500" />
+                </div>
+                <h3 className="text-xl font-semibold text-red-900 mb-3">Profile Not Available</h3>
+                <p className="text-red-700 mb-6 leading-relaxed">{error}</p>
+                <div className="space-y-3">
                   <Button 
                     onClick={fetchProfileData} 
                     variant="outline" 
-                    className="w-full border-red-300 text-red-700 hover:bg-red-100"
+                    className="w-full border-red-200 text-red-700 hover:bg-red-50"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Try Again
                   </Button>
                   <Button 
                     onClick={() => window.location.href = '/profile-generation'} 
-                    className="w-full bg-red-600 hover:bg-red-700"
+                    className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md"
                   >
                     Generate Profile
                   </Button>
@@ -227,17 +229,19 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
 
   if (!profileData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 p-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-center min-h-[400px]">
-            <Card className="max-w-md w-full">
-              <CardContent className="p-6 text-center">
-                <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Profile Data</h3>
-                <p className="text-gray-600 mb-4">Your profile hasn't been generated yet.</p>
+            <Card className="max-w-md w-full border-2 border-gray-200 shadow-lg">
+              <CardContent className="p-8 text-center">
+                <div className="p-3 bg-gray-100 rounded-full w-fit mx-auto mb-4">
+                  <User className="h-8 w-8 text-gray-500" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">No Profile Data</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">Your profile hasn't been generated yet.</p>
                 <Button 
                   onClick={() => window.location.href = '/profile-generation'} 
-                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-md"
                 >
                   Generate Profile
                 </Button>
@@ -250,14 +254,14 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 p-6">
+      <div className="max-w-6xl mx-auto space-y-8">
         {/* Return to Dashboard Button */}
         <div className="mb-6">
           <Button 
-            variant="outline" 
+            variant="ghost" 
             onClick={() => window.location.href = '/dashboard'}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 hover:bg-gray-100 text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft className="w-4 h-4" />
             Return to Dashboard
@@ -265,25 +269,27 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
         </div>
 
         {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-3">
-            <div className="p-3 bg-blue-100 rounded-full">
-              <User className="h-8 w-8 text-blue-600" />
+        <div className="text-center space-y-6">
+          <div className="flex items-center justify-center gap-4">
+            <div className="p-4 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-xl shadow-sm">
+              <User className="h-8 w-8 text-purple-600" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Your Student Profile</h1>
-              <p className="text-gray-600">AI-generated insights based on your responses</p>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                Your Student Profile
+              </h1>
+              <p className="text-lg text-gray-600 mt-2">AI-generated insights based on your responses</p>
             </div>
           </div>
           
-          <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
-            <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              <span>Updated {new Date(profileData.updated_at).toLocaleDateString()}</span>
+          <div className="flex items-center justify-center gap-6 text-sm">
+            <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg shadow-sm border border-gray-200">
+              <Calendar className="h-4 w-4 text-gray-500" />
+              <span className="text-gray-600">Updated {new Date(profileData.updated_at).toLocaleDateString()}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <span>Profile Complete</span>
+            <div className="flex items-center gap-2 px-3 py-2 bg-green-50 rounded-lg border border-green-200">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-green-700 font-medium">Profile Complete</span>
             </div>
           </div>
         </div>
@@ -293,12 +299,27 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
           {profileData.student_profile.student_profile?.map((section, index) => {
             const IconComponent = getSectionIcon(section.section_id);
             
+            // Color variations for different sections
+            const getColorTheme = (sectionId: string, index: number) => {
+              const themes = [
+                { bg: 'bg-gradient-to-r from-purple-50 to-pink-50', icon: 'text-purple-600', border: 'border-purple-100' },
+                { bg: 'bg-gradient-to-r from-emerald-50 to-teal-50', icon: 'text-emerald-600', border: 'border-emerald-100' },
+                { bg: 'bg-gradient-to-r from-amber-50 to-orange-50', icon: 'text-amber-600', border: 'border-amber-100' },
+                { bg: 'bg-gradient-to-r from-slate-50 to-gray-50', icon: 'text-slate-600', border: 'border-slate-100' },
+                { bg: 'bg-gradient-to-r from-indigo-50 to-blue-50', icon: 'text-indigo-600', border: 'border-indigo-100' },
+                { bg: 'bg-gradient-to-r from-rose-50 to-red-50', icon: 'text-rose-600', border: 'border-rose-100' },
+              ];
+              return themes[index % themes.length];
+            };
+            
+            const colorTheme = getColorTheme(section.section_id, index);
+            
             return (
-              <Card key={section.section_id || index} className="overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+              <Card key={section.section_id || index} className={`overflow-hidden border-2 ${colorTheme.border} hover:shadow-lg transition-all duration-200`}>
+                <CardHeader className={`${colorTheme.bg} border-b border-gray-100`}>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white rounded-lg shadow-sm">
-                      <IconComponent className="h-5 w-5 text-blue-600" />
+                    <div className="p-2.5 bg-white rounded-xl shadow-sm">
+                      <IconComponent className={`h-5 w-5 ${colorTheme.icon}`} />
                     </div>
                     <div>
                       <CardTitle className="text-lg font-semibold text-gray-900">
@@ -307,7 +328,7 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="p-6 bg-white">
                   {renderSectionContent(section)}
                 </CardContent>
               </Card>
