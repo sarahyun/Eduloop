@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { User, Star, ArrowRight, CheckCircle, Clock, Sparkles } from "lucide-react";
+import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
+import { User, Star, ArrowRight, CheckCircle, Clock, Sparkles, MessageCircle, GraduationCap } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { questionsData, type Question } from '@/data/questionsData';
 
@@ -99,13 +100,20 @@ export default function Dashboard() {
       
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Welcome Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Hi {user.displayName ? user.displayName.split(' ')[0] : 'there'}!
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Welcome back, {user.displayName ? user.displayName.split(' ')[0] : 'there'}!
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            Let's find your perfect college match in 3 simple steps
+          <p className="text-gray-600 mb-6">
+            Find colleges that match your interests and goals.
           </p>
+          
+          {/* Smart Profile Completion Banner */}
+          <ProfileCompletionBanner 
+            completionPercentage={profileCompletion}
+            isFullyComplete={profileCompletion >= 100}
+            className="mb-6"
+          />
         </div>
 
         {/* Three Main Action Cards */}
@@ -295,16 +303,98 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Progress Summary */}
-        <div className="mt-12 text-center">
-          <p className="text-gray-600 mb-4">
-            {profileCompletion < 50 
-              ? "Start by completing your profile to unlock all features"
-              : profileCompletion < 100 
-                ? "Almost there! Complete your profile to get college recommendations"
-                : "Your profile is complete! Explore your insights and college matches"
-            }
-          </p>
+        {/* College Recommendations Preview */}
+        <Card className="mt-8">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5" />
+                Your College Matches
+              </CardTitle>
+              {profileCompletion >= 100 ? (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.location.href = '/recommendations'}
+                  className="flex items-center gap-2"
+                >
+                  <span>View All</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  disabled
+                  className="opacity-50 cursor-not-allowed"
+                >
+                  Complete Profile to Unlock
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {profileCompletion >= 100 ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Star className="w-8 h-8 text-green-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready for Recommendations!</h3>
+                <p className="text-gray-600 mb-4">
+                  Your profile is complete. Click "View All" above to see your personalized college matches.
+                </p>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Complete Your Profile</h3>
+                <p className="text-gray-600 mb-4">
+                  Build your profile to unlock personalized college recommendations tailored to your interests and goals.
+                </p>
+                <div className="max-w-sm mx-auto mb-4">
+                  <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                    <span>{profileCompletion}% Complete</span>
+                    <span>{Math.ceil((100 - profileCompletion) / (100 / Object.keys(questionsData).length))} sections left</span>
+                  </div>
+                  <Progress value={profileCompletion} className="h-2" />
+                </div>
+                <Button 
+                  onClick={() => window.location.href = '/profile'}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Continue Profile
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Quick Access Actions */}
+        <div className="mt-8 flex justify-center gap-4">
+          <Button 
+            variant="outline"
+            onClick={() => {
+              const firstIncompleteSection = Object.keys(questionsData).find(sectionId => !completedSections.has(sectionId));
+              const sectionParam = firstIncompleteSection || 'Introduction';
+              window.location.href = `/chat-onboarding?section=${encodeURIComponent(sectionParam)}`;
+            }}
+            className="flex items-center gap-2"
+          >
+            <MessageCircle className="w-4 h-4" />
+            Chat with AI Mentor
+          </Button>
+          {profileCompletion >= 50 && (
+            <Button 
+              variant="outline"
+              onClick={() => window.location.href = '/profile-view'}
+              className="flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4" />
+              View Profile Insights
+            </Button>
+          )}
         </div>
       </div>
     </div>
