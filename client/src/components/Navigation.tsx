@@ -20,8 +20,10 @@ export function Navigation({ user }: NavigationProps) {
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard" },
-    { name: "Profile", href: "/profile" },
-    { name: "Mentor", href: "/chat-onboarding?section=Introduction" },
+    { name: "Profile", href: "/build-profile" },
+    { name: "Insights", href: "/profile-view" },
+    { name: "Schools", href: "/recommendations" },
+    { name: "Mentor", href: "/chat" },
   ];
 
   const isActive = (href: string) => location === href || location.startsWith(href);
