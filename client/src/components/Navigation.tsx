@@ -20,7 +20,7 @@ export function Navigation({ user }: NavigationProps) {
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard" },
-    { name: "Profile", href: "/build-profile" },
+    { name: "Profile", href: "/profile" },
     { name: "Insights", href: "/profile-view" },
     { name: "Schools", href: "/recommendations" },
     { name: "Mentor", href: "/chat" },
