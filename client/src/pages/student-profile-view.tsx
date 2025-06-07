@@ -252,6 +252,18 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
       <div className="max-w-6xl mx-auto space-y-6">
+        {/* Return to Dashboard Button */}
+        <div className="mb-6">
+          <Button 
+            variant="outline" 
+            onClick={() => window.location.href = '/dashboard'}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Return to Dashboard
+          </Button>
+        </div>
+
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3">

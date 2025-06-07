@@ -4,7 +4,7 @@ import { AIChat } from "@/components/AIChat";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Plus, Globe } from "lucide-react";
+import { MessageCircle, Plus, Globe, ArrowLeft } from "lucide-react";
 import { api, type Conversation, type Message } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -82,6 +82,17 @@ export default function ChatPage() {
     <div className="min-h-screen bg-gray-50">
       <Navigation user={{ name: user.displayName || user.email || 'User', email: user.email || '' }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Return to Dashboard Button */}
+        <div className="mb-6">
+          <Button 
+            variant="outline" 
+            onClick={() => window.location.href = '/dashboard'}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Return to Dashboard
+          </Button>
+        </div>
         <div className="grid lg:grid-cols-4 gap-8 h-[calc(100vh-12rem)]">
           {/* Sidebar (optional, can be simplified further) */}
           <div className="lg:col-span-1 space-y-6">

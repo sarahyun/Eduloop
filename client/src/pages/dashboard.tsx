@@ -189,11 +189,7 @@ export default function Dashboard() {
           </Card>
 
           {/* AI Mentor Chat */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => {
-            const firstIncompleteSection = Object.keys(questionsData).find(sectionId => !completedSections.has(sectionId));
-            const sectionParam = firstIncompleteSection || 'Introduction';
-            window.location.href = `/chat-onboarding?section=${encodeURIComponent(sectionParam)}`;
-          }}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/chat'}>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
