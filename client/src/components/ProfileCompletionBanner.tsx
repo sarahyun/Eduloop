@@ -1,9 +1,6 @@
-import { useState } from 'react';
-import { useLocation } from 'wouter';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Sparkles, ArrowRight, CheckCircle, Clock } from 'lucide-react';
+import { CheckCircle, Clock } from 'lucide-react';
 
 interface ProfileCompletionBannerProps {
   completionPercentage: number;
@@ -16,13 +13,6 @@ export function ProfileCompletionBanner({
   isFullyComplete, 
   className = "" 
 }: ProfileCompletionBannerProps) {
-  const [, setLocation] = useLocation();
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  const handleViewProfile = () => {
-    setLocation('/profile-view');
-  };
-
   if (!isFullyComplete && completionPercentage < 85) {
     return null; // Don't show banner until nearly complete
   }
@@ -54,32 +44,18 @@ export function ProfileCompletionBanner({
               </div>
               <p className="text-gray-600 text-sm">
                 {isFullyComplete 
-                  ? 'Your responses are ready to be transformed into a personalized college profile.'
-                  : `Complete ${100 - completionPercentage}% more to unlock AI-powered profile generation.`
+                  ? 'Your profile is ready to generate insights and college recommendations.'
+                  : `Complete ${100 - completionPercentage}% more to unlock profile insights and recommendations.`
                 }
               </p>
             </div>
           </div>
           
           {isFullyComplete && (
-            <Button 
-              onClick={handleGenerateProfile}
-              disabled={isGenerating}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-            >
-              {isGenerating ? (
-                <>
-                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Brain className="mr-2 h-4 w-4" />
-                  Generate My Profile
-                  <Sparkles className="ml-2 h-4 w-4" />
-                </>
-              )}
-            </Button>
+            <div className="text-right">
+              <div className="text-sm font-medium text-green-700 mb-1">Profile Complete!</div>
+              <div className="text-xs text-green-600">Ready for insights & recommendations</div>
+            </div>
           )}
         </div>
         
