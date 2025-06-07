@@ -54,9 +54,9 @@ export default function Dashboard() {
           const data = await SchoolRecommendationsService.getSchoolRecommendations(user.uid);
           console.log('Loaded recommendations for dashboard:', data);
           if (data.recommendations && data.recommendations.length > 0) {
-            // Take first 3 recommendations for preview
-            setRecommendations(data.recommendations.slice(0, 3));
-            console.log('Set dashboard recommendations:', data.recommendations.slice(0, 3));
+            // Store all recommendations for the carousel
+            setRecommendations(data.recommendations);
+            console.log('Set dashboard recommendations:', data.recommendations);
           }
         }
       } catch (error) {
