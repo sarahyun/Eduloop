@@ -19,9 +19,8 @@ export function ProfileCompletionBanner({
   const [, setLocation] = useLocation();
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleGenerateProfile = () => {
-    setIsGenerating(true);
-    setLocation('/profile-generation');
+  const handleViewProfile = () => {
+    setLocation('/profile-view');
   };
 
   if (!isFullyComplete && completionPercentage < 85) {
