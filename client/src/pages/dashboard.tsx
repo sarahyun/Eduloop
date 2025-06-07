@@ -8,6 +8,7 @@ import { User, Star, ArrowRight, Clock, Sparkles, MessageCircle, GraduationCap, 
 import { useAuth } from "@/context/AuthContext";
 import { questionsData, type Question } from '@/data/questionsData';
 import { SchoolRecommendationsService, SchoolRecommendation } from '@/services/schoolRecommendationsService';
+import { ProfileDataService } from '@/services/profileDataService';
 
 interface FormResponse {
   response_id?: string;
@@ -28,6 +29,7 @@ export default function Dashboard() {
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
   const [recommendations, setRecommendations] = useState<SchoolRecommendation[]>([]);
   const [hasRealRecommendations, setHasRealRecommendations] = useState(false);
+  const [hasProfileData, setHasProfileData] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Calculate completion percentage
@@ -66,6 +68,24 @@ export default function Dashboard() {
 
     loadRecommendations();
   }, [user?.uid, profileCompletion]);
+
+  // Check if profile data exists
+  useEffect(() => {
+    const checkProfileData = async () => {
+      if (!user?.uid) {
+        return;
+      }
+
+      try {
+        await ProfileDataService.getStudentProfile(user.uid);
+        setHasProfileData(true);
+      } catch (error) {
+        setHasProfileData(false);
+      }
+    };
+
+    checkProfileData();
+  }, [user?.uid]);
 
   // Load completion status for all sections
   useEffect(() => {
@@ -203,8 +223,9 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Profile Insights - Only show when data exists */}
-          <Card className="opacity-60">
+          {/* Profile Insights */}
+          <Card className={`hover:shadow-lg transition-shadow ${hasProfileData ? 'cursor-pointer' : 'opacity-60'}`} 
+                onClick={() => hasProfileData && (window.location.href = '/student-profile-view')}>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
@@ -213,7 +234,7 @@ export default function Dashboard() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Profile Insights</h3>
                   <p className="text-gray-600 text-sm">
-                    Generate profile to view insights
+                    {hasProfileData ? 'View your analysis' : 'Generate profile to view insights'}
                   </p>
                 </div>
               </div>
