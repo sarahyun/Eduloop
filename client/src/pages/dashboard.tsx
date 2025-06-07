@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
-import { User, Star, ArrowRight, Clock, Sparkles, MessageCircle, GraduationCap } from "lucide-react";
+import { User, Star, ArrowRight, Clock, Sparkles, MessageCircle, GraduationCap, ChevronLeft, ChevronRight, MapPin, TrendingUp } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { questionsData, type Question } from '@/data/questionsData';
 import { SchoolRecommendationsService, SchoolRecommendation } from '@/services/schoolRecommendationsService';
@@ -28,6 +28,7 @@ export default function Dashboard() {
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
   const [recommendations, setRecommendations] = useState<SchoolRecommendation[]>([]);
   const [hasRealRecommendations, setHasRealRecommendations] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   // Calculate completion percentage
   const completedSectionsCount = completedSections.size;
@@ -111,6 +112,19 @@ export default function Dashboard() {
 
     loadCompletionStatus();
   }, [user?.uid]);
+
+  // Carousel navigation functions
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % recommendations.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + recommendations.length) % recommendations.length);
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentSlide(index);
+  };
 
   if (loading) {
     return (
@@ -260,30 +274,142 @@ export default function Dashboard() {
           <CardContent>
             {profileCompletion >= 100 ? (
               hasRealRecommendations && recommendations.length > 0 ? (
-                <div className="space-y-4">
-                  <div className="grid md:grid-cols-3 gap-4">
-                    {recommendations.map((school, index) => (
-                      <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-start justify-between mb-2">
-                          <h4 className="font-semibold text-gray-900 text-sm">{school.name}</h4>
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${
-                            school.type === 'Reach' ? 'bg-red-100 text-red-700' :
-                            school.type === 'Match' ? 'bg-blue-100 text-blue-700' :
-                            'bg-green-100 text-green-700'
-                          }`}>
-                            {school.type}
-                          </span>
-                        </div>
-                        <p className="text-gray-600 text-xs mb-2">{school.location}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-500">Fit Score</span>
-                          <span className="text-sm font-medium text-blue-600">{school.fit_score}%</span>
-                        </div>
+                <div className="space-y-6">
+                  {/* Carousel Container */}
+                  <div className="relative">
+                    {/* Current School Card */}
+                    <div className="overflow-hidden rounded-xl">
+                      <div 
+                        className="flex transition-transform duration-500 ease-in-out"
+                        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                      >
+                        {recommendations.map((school, index) => (
+                          <div key={index} className="w-full flex-shrink-0">
+                            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-8 border border-blue-200 dark:border-blue-800">
+                              {/* School Header */}
+                              <div className="flex items-start justify-between mb-6">
+                                <div className="flex-1">
+                                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{school.name}</h3>
+                                  <div className="flex items-center text-gray-600 dark:text-gray-300 mb-3">
+                                    <MapPin className="h-4 w-4 mr-2" />
+                                    <span className="text-sm">{school.location}</span>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                    school.type === 'Reach' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
+                                    school.type === 'Match' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                                    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                                  }`}>
+                                    {school.type} School
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Fit Score */}
+                              <div className="mb-6">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Overall Fit Score</span>
+                                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{school.fit_score}%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                  <div 
+                                    className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full transition-all duration-700"
+                                    style={{ width: `${school.fit_score}%` }}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Fit Categories */}
+                              <div className="grid grid-cols-3 gap-4 mb-6">
+                                <div className="text-center">
+                                  <div className={`w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center ${
+                                    school.fit.academic === 'Great' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
+                                    school.fit.academic === 'Good' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                                    'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                  }`}>
+                                    <TrendingUp className="h-5 w-5" />
+                                  </div>
+                                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Academic</p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">{school.fit.academic}</p>
+                                </div>
+                                <div className="text-center">
+                                  <div className={`w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center ${
+                                    school.fit.social_cultural === 'Great' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
+                                    school.fit.social_cultural === 'Good' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                                    'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                  }`}>
+                                    <User className="h-5 w-5" />
+                                  </div>
+                                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Social</p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">{school.fit.social_cultural}</p>
+                                </div>
+                                <div className="text-center">
+                                  <div className={`w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center ${
+                                    school.fit.financial === 'Great' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
+                                    school.fit.financial === 'Good' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                                    'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                  }`}>
+                                    <Star className="h-5 w-5" />
+                                  </div>
+                                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Financial</p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">{school.fit.financial}</p>
+                                </div>
+                              </div>
+
+                              {/* Quick Summary */}
+                              <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-4">
+                                <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
+                                  {school.overall_fit_rationale[0]}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
+
+                    {/* Navigation Arrows */}
+                    {recommendations.length > 1 && (
+                      <>
+                        <button
+                          onClick={prevSlide}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors z-10"
+                        >
+                          <ChevronLeft className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                        </button>
+                        <button
+                          onClick={nextSlide}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors z-10"
+                        >
+                          <ChevronRight className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                        </button>
+                      </>
+                    )}
                   </div>
-                  <div className="text-center pt-4 border-t">
-                    <p className="text-sm text-gray-600 mb-2">Showing 3 of your top matches</p>
+
+                  {/* Carousel Indicators */}
+                  {recommendations.length > 1 && (
+                    <div className="flex justify-center space-x-2">
+                      {recommendations.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => goToSlide(index)}
+                          className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                            currentSlide === index
+                              ? 'bg-blue-600 dark:bg-blue-400 scale-110'
+                              : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Footer Info */}
+                  <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      Showing {recommendations.length} of your top matches
+                    </p>
                   </div>
                 </div>
               ) : (
