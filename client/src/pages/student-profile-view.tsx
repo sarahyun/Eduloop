@@ -58,6 +58,7 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [, navigate] = useLocation();
   const { user, loading: authLoading } = useAuth();
@@ -91,6 +92,36 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
       setError('Failed to load profile data. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const regenerateProfile = async () => {
+    try {
+      setIsRegenerating(true);
+      setError(null);
+      
+      // Call the profile generation API endpoint
+      const response = await fetch(`http://127.0.0.1:8000/profile/${userId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Profile regeneration started:', result);
+        
+        // Show success message and navigate to generation page
+        window.location.href = '/profile-generation';
+      } else {
+        throw new Error('Failed to start profile regeneration');
+      }
+    } catch (err) {
+      console.error('Failed to regenerate profile:', err);
+      setError('Failed to start profile regeneration. Please try again.');
+    } finally {
+      setIsRegenerating(false);
     }
   };
 
@@ -213,10 +244,18 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
                     Try Again
                   </Button>
                   <Button 
-                    onClick={() => window.location.href = '/profile-generation'} 
+                    onClick={regenerateProfile}
+                    disabled={isRegenerating}
                     className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md"
                   >
-                    Generate Profile
+                    {isRegenerating ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      'Generate Profile'
+                    )}
                   </Button>
                 </div>
               </CardContent>
@@ -240,10 +279,18 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">No Profile Data</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">Your profile hasn't been generated yet.</p>
                 <Button 
-                  onClick={() => window.location.href = '/profile-generation'} 
+                  onClick={regenerateProfile}
+                  disabled={isRegenerating}
                   className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-md"
                 >
-                  Generate Profile
+                  {isRegenerating ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    'Generate Profile'
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -291,6 +338,23 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
               <CheckCircle className="h-4 w-4 text-green-600" />
               <span className="text-green-700 font-medium">Profile Complete</span>
             </div>
+            <Button
+              onClick={regenerateProfile}
+              disabled={isRegenerating}
+              className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-md"
+            >
+              {isRegenerating ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Regenerating...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Regenerate Profile
+                </>
+              )}
+            </Button>
           </div>
         </div>
 
