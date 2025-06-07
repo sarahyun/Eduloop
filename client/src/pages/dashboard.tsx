@@ -44,15 +44,18 @@ export default function Dashboard() {
       try {
         // First check if user has generated recommendations
         const status = await SchoolRecommendationsService.getGenerationStatus(user.uid);
+        console.log('Generation status:', status);
         const hasGenerated = status.status === 'completed';
         setHasRealRecommendations(hasGenerated);
 
         if (hasGenerated) {
           // Load actual recommendations
           const data = await SchoolRecommendationsService.getSchoolRecommendations(user.uid);
+          console.log('Loaded recommendations for dashboard:', data);
           if (data.recommendations && data.recommendations.length > 0) {
             // Take first 3 recommendations for preview
             setRecommendations(data.recommendations.slice(0, 3));
+            console.log('Set dashboard recommendations:', data.recommendations.slice(0, 3));
           }
         }
       } catch (error) {
