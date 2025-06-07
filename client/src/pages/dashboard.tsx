@@ -113,13 +113,16 @@ export default function Dashboard() {
     loadCompletionStatus();
   }, [user?.uid]);
 
-  // Carousel navigation functions
+  // Carousel navigation functions for groups of 3
+  const schoolsPerPage = 3;
+  const totalPages = Math.ceil(recommendations.length / schoolsPerPage);
+  
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % recommendations.length);
+    setCurrentSlide((prev) => (prev + 1) % totalPages);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + recommendations.length) % recommendations.length);
+    setCurrentSlide((prev) => (prev - 1 + totalPages) % totalPages);
   };
 
   const goToSlide = (index: number) => {
@@ -277,92 +280,96 @@ export default function Dashboard() {
                 <div className="space-y-6">
                   {/* Carousel Container */}
                   <div className="relative">
-                    {/* Current School Card */}
+                    {/* Schools Grid */}
                     <div className="overflow-hidden rounded-xl">
                       <div 
                         className="flex transition-transform duration-500 ease-in-out"
                         style={{ transform: `translateX(-${currentSlide * 100}%)` }}
                       >
-                        {recommendations.map((school, index) => (
-                          <div key={index} className="w-full flex-shrink-0">
-                            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-8 border border-blue-200 dark:border-blue-800">
-                              {/* School Header */}
-                              <div className="flex items-start justify-between mb-6">
-                                <div className="flex-1">
-                                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{school.name}</h3>
-                                  <div className="flex items-center text-gray-600 dark:text-gray-300 mb-3">
-                                    <MapPin className="h-4 w-4 mr-2" />
-                                    <span className="text-sm">{school.location}</span>
+                        {Array.from({ length: totalPages }).map((_, pageIndex) => (
+                          <div key={pageIndex} className="w-full flex-shrink-0">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {recommendations
+                                .slice(pageIndex * schoolsPerPage, (pageIndex + 1) * schoolsPerPage)
+                                .map((school, schoolIndex) => (
+                                <div key={schoolIndex} className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800 hover:shadow-lg transition-shadow">
+                                  {/* School Header */}
+                                  <div className="flex items-start justify-between mb-4">
+                                    <div className="flex-1">
+                                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 line-clamp-1">{school.name}</h3>
+                                      <div className="flex items-center text-gray-600 dark:text-gray-300 mb-2">
+                                        <MapPin className="h-3 w-3 mr-1" />
+                                        <span className="text-xs">{school.location}</span>
+                                      </div>
+                                    </div>
+                                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                      school.type === 'Reach' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
+                                      school.type === 'Match' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                                      'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                                    }`}>
+                                      {school.type}
+                                    </span>
                                   </div>
-                                </div>
-                                <div className="text-right">
-                                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                                    school.type === 'Reach' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
-                                    school.type === 'Match' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
-                                    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                                  }`}>
-                                    {school.type} School
-                                  </span>
-                                </div>
-                              </div>
 
-                              {/* Fit Score */}
-                              <div className="mb-6">
-                                <div className="flex items-center justify-between mb-2">
-                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Overall Fit Score</span>
-                                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{school.fit_score}%</span>
-                                </div>
-                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                  <div 
-                                    className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full transition-all duration-700"
-                                    style={{ width: `${school.fit_score}%` }}
-                                  />
-                                </div>
-                              </div>
+                                  {/* Fit Score */}
+                                  <div className="mb-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Fit Score</span>
+                                      <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{school.fit_score}%</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                      <div 
+                                        className="bg-gradient-to-r from-blue-500 to-indigo-600 h-1.5 rounded-full transition-all duration-700"
+                                        style={{ width: `${school.fit_score}%` }}
+                                      />
+                                    </div>
+                                  </div>
 
-                              {/* Fit Categories */}
-                              <div className="grid grid-cols-3 gap-4 mb-6">
-                                <div className="text-center">
-                                  <div className={`w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center ${
-                                    school.fit.academic === 'Great' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
-                                    school.fit.academic === 'Good' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
-                                    'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
-                                  }`}>
-                                    <TrendingUp className="h-5 w-5" />
+                                  {/* Fit Categories */}
+                                  <div className="grid grid-cols-3 gap-2 mb-4">
+                                    <div className="text-center">
+                                      <div className={`w-8 h-8 rounded-full mx-auto mb-1 flex items-center justify-center ${
+                                        school.fit.academic === 'Great' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
+                                        school.fit.academic === 'Good' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                                        'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                      }`}>
+                                        <TrendingUp className="h-3 w-3" />
+                                      </div>
+                                      <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Academic</p>
+                                      <p className="text-xs text-gray-500 dark:text-gray-400">{school.fit.academic}</p>
+                                    </div>
+                                    <div className="text-center">
+                                      <div className={`w-8 h-8 rounded-full mx-auto mb-1 flex items-center justify-center ${
+                                        school.fit.social_cultural === 'Great' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
+                                        school.fit.social_cultural === 'Good' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                                        'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                      }`}>
+                                        <User className="h-3 w-3" />
+                                      </div>
+                                      <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Social</p>
+                                      <p className="text-xs text-gray-500 dark:text-gray-400">{school.fit.social_cultural}</p>
+                                    </div>
+                                    <div className="text-center">
+                                      <div className={`w-8 h-8 rounded-full mx-auto mb-1 flex items-center justify-center ${
+                                        school.fit.financial === 'Great' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
+                                        school.fit.financial === 'Good' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                                        'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                      }`}>
+                                        <Star className="h-3 w-3" />
+                                      </div>
+                                      <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Financial</p>
+                                      <p className="text-xs text-gray-500 dark:text-gray-400">{school.fit.financial}</p>
+                                    </div>
                                   </div>
-                                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Academic</p>
-                                  <p className="text-xs text-gray-500 dark:text-gray-400">{school.fit.academic}</p>
-                                </div>
-                                <div className="text-center">
-                                  <div className={`w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center ${
-                                    school.fit.social_cultural === 'Great' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
-                                    school.fit.social_cultural === 'Good' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
-                                    'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
-                                  }`}>
-                                    <User className="h-5 w-5" />
-                                  </div>
-                                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Social</p>
-                                  <p className="text-xs text-gray-500 dark:text-gray-400">{school.fit.social_cultural}</p>
-                                </div>
-                                <div className="text-center">
-                                  <div className={`w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center ${
-                                    school.fit.financial === 'Great' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
-                                    school.fit.financial === 'Good' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
-                                    'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
-                                  }`}>
-                                    <Star className="h-5 w-5" />
-                                  </div>
-                                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Financial</p>
-                                  <p className="text-xs text-gray-500 dark:text-gray-400">{school.fit.financial}</p>
-                                </div>
-                              </div>
 
-                              {/* Quick Summary */}
-                              <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-4">
-                                <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
-                                  {school.overall_fit_rationale[0]}
-                                </p>
-                              </div>
+                                  {/* Quick Summary */}
+                                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-3">
+                                    <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-2">
+                                      {school.overall_fit_rationale[0]}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         ))}
@@ -370,7 +377,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Navigation Arrows */}
-                    {recommendations.length > 1 && (
+                    {totalPages > 1 && (
                       <>
                         <button
                           onClick={prevSlide}
@@ -389,9 +396,9 @@ export default function Dashboard() {
                   </div>
 
                   {/* Carousel Indicators */}
-                  {recommendations.length > 1 && (
+                  {totalPages > 1 && (
                     <div className="flex justify-center space-x-2">
-                      {recommendations.map((_, index) => (
+                      {Array.from({ length: totalPages }).map((_, index) => (
                         <button
                           key={index}
                           onClick={() => goToSlide(index)}
@@ -408,7 +415,8 @@ export default function Dashboard() {
                   {/* Footer Info */}
                   <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                      Showing {recommendations.length} of your top matches
+                      Showing {Math.min((currentSlide + 1) * schoolsPerPage, recommendations.length)} of {recommendations.length} matches
+                      {totalPages > 1 && ` • Page ${currentSlide + 1} of ${totalPages}`}
                     </p>
                   </div>
                 </div>
