@@ -15,7 +15,8 @@ import {
   Lightbulb,
   PenTool,
   Check,
-  MapPin
+  MapPin,
+  Target
 } from 'lucide-react';
 import { SchoolRecommendation, SchoolRecommendationsService, SchoolFeedback } from '@/services/schoolRecommendationsService';
 
@@ -36,7 +37,7 @@ export function SchoolRecommendationCard({ recommendation, className = "", onFee
     whatAttractsYou: [] as string[]
   });
   
-  const fitScore = SchoolRecommendationsService.calculateFitScore(recommendation.fit);
+  const fit_score = SchoolRecommendationsService.calculatefit_score(recommendation.fit, recommendation.fit_score);
   const typeColor = SchoolRecommendationsService.getTypeColor(recommendation.type);
 
   const getFitIcon = (fitLevel: string) => {
@@ -75,7 +76,7 @@ export function SchoolRecommendationCard({ recommendation, className = "", onFee
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-                    <span className="text-white font-bold text-sm">{fitScore}%</span>
+                    <span className="text-white font-bold text-sm">{fit_score}%</span>
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
                     <Check className="h-3 w-3 text-white" />
@@ -84,7 +85,7 @@ export function SchoolRecommendationCard({ recommendation, className = "", onFee
                 <div>
                   <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Overall Fit</span>
                   <div className="text-sm text-gray-700 font-medium">
-                    {fitScore >= 80 ? 'Excellent Match' : fitScore >= 60 ? 'Good Match' : 'Moderate Match'}
+                    {fit_score >= 80 ? 'Excellent Match' : fit_score >= 60 ? 'Good Match' : 'Moderate Match'}
                   </div>
                 </div>
               </div>
@@ -134,26 +135,6 @@ export function SchoolRecommendationCard({ recommendation, className = "", onFee
             <p className="text-gray-700 leading-relaxed">
               {recommendation.overall_fit_rationale[0]}
             </p>
-          </div>
-
-          {/* Distinctive Opportunities Preview */}
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-              <Lightbulb className="h-4 w-4 text-yellow-500" />
-              Key Opportunities ({recommendation.distinctive_opportunities.length})
-            </h4>
-            <div className="flex flex-wrap gap-2">
-              {recommendation.distinctive_opportunities.slice(0, 2).map((opportunity, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {opportunity.title}
-                </Badge>
-              ))}
-              {recommendation.distinctive_opportunities.length > 2 && (
-                <Badge variant="outline" className="text-xs text-gray-500">
-                  +{recommendation.distinctive_opportunities.length - 2} more
-                </Badge>
-              )}
-            </div>
           </div>
 
           {/* Expand/Collapse Button */}
@@ -233,6 +214,24 @@ export function SchoolRecommendationCard({ recommendation, className = "", onFee
                   ))}
                 </div>
               </div>
+
+              {/* How to Stand Out */}
+              {recommendation.how_to_stand_out && recommendation.how_to_stand_out.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Target className="h-4 w-4 text-emerald-500" />
+                    How to Stand Out
+                  </h4>
+                  <div className="space-y-2">
+                    {recommendation.how_to_stand_out.map((tip, index) => (
+                      <div key={index} className="flex items-start gap-3 p-3 bg-emerald-50 rounded-lg">
+                        <div className="w-2 h-2 bg-emerald-400 rounded-full mt-2 flex-shrink-0"></div>
+                        <p className="text-sm text-emerald-800">{tip}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

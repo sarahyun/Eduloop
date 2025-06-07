@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SchoolRecommendationCard } from '@/components/SchoolRecommendationCard';
 import { Navigation } from '@/components/Navigation';
-import { SchoolRecommendationsService, SchoolRecommendation } from '@/services/schoolRecommendationsService';
+import { SchoolRecommendationsService, SchoolRecommendation, GenerationStatus } from '@/services/schoolRecommendationsService';
 import { 
   Target, 
   Star, 
@@ -14,7 +14,11 @@ import {
   BookOpen,
   Brain,
   ArrowLeft,
-  Lightbulb
+  Lightbulb,
+  RefreshCw,
+  Clock,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 
 export default function CollegeRecommendations() {
@@ -22,25 +26,232 @@ export default function CollegeRecommendations() {
   const [, setLocation] = useLocation();
   const [recommendations, setRecommendations] = useState<SchoolRecommendation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationStatus, setGenerationStatus] = useState<GenerationStatus | null>(null);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string>('');
+  
+  // Use ref to track generation state for setTimeout closure
+  const isGeneratingRef = useRef(false);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Update ref whenever isGenerating changes
+  useEffect(() => {
+    isGeneratingRef.current = isGenerating;
+  }, [isGenerating]);
+
+  // Cleanup intervals on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+      if (pollingTimeoutRef.current) {
+        clearTimeout(pollingTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const stopPolling = () => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+    if (pollingTimeoutRef.current) {
+      clearTimeout(pollingTimeoutRef.current);
+      pollingTimeoutRef.current = null;
+    }
+  };
 
   useEffect(() => {
-    loadRecommendations();
-  }, []);
+    if (user?.uid) {
+      // Initialize page state properly on load/refresh
+      initializePage();
+    }
+  }, [user?.uid]);
+
+  const initializePage = async () => {
+    if (!user?.uid) return;
+    
+    try {
+      setIsLoading(true);
+      
+      // First, check generation status
+      const status = await SchoolRecommendationsService.getGenerationStatus(user.uid);
+      setGenerationStatus(status);
+      
+      const isCurrentlyGenerating = status.status === 'generating';
+      
+      // Set generation state immediately based on status
+      if (isCurrentlyGenerating) {
+        setIsGenerating(true);
+        setStatusMessage('Generation in progress... This may take 1-2 minutes.');
+        
+        // Start polling for this ongoing generation
+        startPolling();
+      } else {
+        setIsGenerating(false);
+        
+        // Set appropriate status message based on status
+        if (status.status === 'completed') {
+          setStatusMessage('Your personalized recommendations are ready!');
+        } else if (status.status === 'failed') {
+          setStatusMessage('Previous generation failed. You can try generating new recommendations.');
+        } else {
+          // not_found status - will be updated by loadRecommendations if needed
+          setStatusMessage('No recommendations found. Generate your first set of personalized recommendations!');
+        }
+      }
+      
+      // Then load recommendations
+      await loadRecommendationsWithoutStatusUpdate();
+      
+    } catch (error) {
+      console.error('Error initializing page:', error);
+      setIsGenerating(false);
+      setStatusMessage('Unable to check generation status.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadRecommendationsWithoutStatusUpdate = async () => {
+    try {
+      const data = await SchoolRecommendationsService.getSchoolRecommendations(user?.uid);
+      setRecommendations(data.recommendations);
+    } catch (error) {
+      console.error('Error loading recommendations:', error);
+      // Don't update status message here - let the generation status control it
+    }
+  };
 
   const loadRecommendations = async () => {
     try {
       setIsLoading(true);
-      // Use mock data service to avoid API dependency
       const data = await SchoolRecommendationsService.getSchoolRecommendations(user?.uid);
       setRecommendations(data.recommendations);
+      
+      // Only update status message if we're not in a generating state
+      // This prevents overwriting generation status messages
+      if (!isGenerating && (!generationStatus || generationStatus.status !== 'generating')) {
+        if (data.recommendations.length > 0 && user?.uid) {
+          setStatusMessage('Showing your personalized recommendations');
+        } else {
+          setStatusMessage('Showing sample recommendations - generate yours for personalized matches');
+        }
+      }
     } catch (error) {
-      console.error('Error loading recommendations, using mock data:', error);
-      // Fallback to mock data if API is unavailable
-      const mockData = await SchoolRecommendationsService.getSchoolRecommendations();
-      setRecommendations(mockData.recommendations);
+      console.error('Error loading recommendations:', error);
+      // Only show error message if not generating
+      if (!isGenerating && (!generationStatus || generationStatus.status !== 'generating')) {
+        setStatusMessage('Error loading recommendations, showing sample data');
+      }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const startPolling = () => {
+    if (!user?.uid) return;
+    
+    // Stop any existing polling before starting new one
+    stopPolling();
+    
+    // Start polling for completion every 10 seconds
+    pollingIntervalRef.current = setInterval(async () => {
+      try {
+        const updatedStatus = await SchoolRecommendationsService.getGenerationStatus(user.uid);
+        setGenerationStatus(updatedStatus);
+        
+        if (updatedStatus.status === 'completed') {
+          setIsGenerating(false);
+          stopPolling();
+          await loadRecommendations(); // Reload recommendations
+          setStatusMessage('New recommendations generated successfully!');
+        } else if (updatedStatus.status === 'failed') {
+          setIsGenerating(false);
+          stopPolling();
+          // Check if the error indicates a timeout/deadlock
+          const errorMessage = updatedStatus.error && updatedStatus.error.includes('deadlock detected') 
+            ? 'Generation timed out after taking too long. Please try generating again.' 
+            : 'Generation failed. Please try again.';
+          setStatusMessage(errorMessage);
+        } else if (updatedStatus.status === 'generating') {
+          // Still generating - update message to show it's still working
+          setStatusMessage('Still generating your personalized recommendations...');
+        }
+      } catch (error) {
+        console.error('Error polling generation status:', error);
+        setIsGenerating(false);
+        stopPolling();
+        setStatusMessage('Unable to check generation status. Please refresh to see if recommendations are ready.');
+      }
+    }, 10000);
+    
+    // Clear interval after 5 minutes to prevent infinite polling
+    pollingTimeoutRef.current = setTimeout(() => {
+      stopPolling();
+      if (isGeneratingRef.current) {
+        setIsGenerating(false);
+        setStatusMessage('Generation taking longer than expected. Please refresh the page to check status.');
+      }
+    }, 300000);
+  };
+
+  const checkGenerationStatus = async () => {
+    if (!user?.uid) return;
+    
+    try {
+      const status = await SchoolRecommendationsService.getGenerationStatus(user.uid);
+      setGenerationStatus(status);
+      
+      if (status.status === 'generating') {
+        // Set state immediately when we detect ongoing generation
+        setIsGenerating(true);
+        setStatusMessage('Generation in progress... This may take 1-2 minutes.');
+        
+        startPolling();
+      } else if (status.status === 'completed') {
+        setIsGenerating(false);
+        setStatusMessage('Your personalized recommendations are ready!');
+      } else if (status.status === 'failed') {
+        setIsGenerating(false);
+        // Check if the error indicates a timeout/deadlock
+        const errorMessage = status.error && status.error.includes('deadlock detected') 
+          ? 'Previous generation timed out. You can try generating new recommendations.' 
+          : 'Previous generation failed. You can try generating new recommendations.';
+        setStatusMessage(errorMessage);
+      } else {
+        // not_found status
+        setIsGenerating(false);
+        setStatusMessage('No recommendations found. Generate your first set of personalized recommendations!');
+      }
+    } catch (error) {
+      console.error('Error checking generation status:', error);
+      setIsGenerating(false);
+      setStatusMessage('Unable to check generation status.');
+    }
+  };
+
+  const handleGenerateRecommendations = async () => {
+    if (!user?.uid) return;
+    
+    try {
+      setIsGenerating(true);
+      const result = await SchoolRecommendationsService.generateRecommendations(user.uid);
+      
+      if (result.success) {
+        setStatusMessage(result.message);
+        checkGenerationStatus(); // Start polling for status
+      } else {
+        setStatusMessage(result.message);
+        setIsGenerating(false);
+      }
+    } catch (error) {
+      console.error('Error generating recommendations:', error);
+      setStatusMessage('Failed to start generation. Please try again.');
+      setIsGenerating(false);
     }
   };
 
@@ -56,11 +267,7 @@ export default function CollegeRecommendations() {
   };
 
   const handleUpdateRecommendations = async () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setFeedbackSubmitted(false);
-    }, 2000);
+    handleGenerateRecommendations();
   };
 
   const categorizedRecommendations = SchoolRecommendationsService.categorizeRecommendations(recommendations);
@@ -83,6 +290,21 @@ export default function CollegeRecommendations() {
       </div>
     );
   }
+
+  const getStatusIcon = () => {
+    if (!generationStatus) return null;
+    
+    switch (generationStatus.status) {
+      case 'generating':
+        return <Clock className="h-5 w-5 text-blue-500 animate-pulse" />;
+      case 'completed':
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'failed':
+        return <AlertCircle className="h-5 w-5 text-red-500" />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -110,17 +332,49 @@ export default function CollegeRecommendations() {
             </div>
             
             <div className="space-y-4">
-              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
-                Your Initial College Matches
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+                Your College Matches
               </h1>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Based on your profile responses, here are your first personalized recommendations. 
+                Based on your profile responses, here are your personalized recommendations. 
                 After researching these schools, you can provide feedback to help us refine and improve your matches.
               </p>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
-                <Lightbulb className="h-4 w-4" />
-                Research these schools and share your thoughts to get even better recommendations
-              </div>
+              
+              {/* Status Message */}
+              {statusMessage && (
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                  {getStatusIcon()}
+                  {statusMessage}
+                </div>
+              )}
+              
+              {/* Generate Button */}
+              {!isGenerating && generationStatus?.status !== 'generating' && (
+                <div className="flex justify-center">
+                  <Button 
+                    onClick={handleGenerateRecommendations}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-6 py-3 flex items-center gap-2"
+                    disabled={isLoading}
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                    {generationStatus?.status === 'not_found' 
+                      ? 'Generate Your First Recommendations' 
+                      : 'Generate New Recommendations'
+                    }
+                  </Button>
+                </div>
+              )}
+              
+              {/* Generation Status */}
+              {(generationStatus?.status === 'generating' || isGenerating) && (
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-sm">
+                  <Clock className="h-4 w-4 animate-pulse" />
+                  Generating your personalized recommendations... This may take 1-2 minutes.
+                  <div className="ml-2 text-xs text-blue-600">
+                    (Safe to refresh - generation will continue in background)
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -141,10 +395,10 @@ export default function CollegeRecommendations() {
                     </div>
                     <Button 
                       onClick={handleUpdateRecommendations}
-                      disabled={isLoading}
+                      disabled={isLoading || isGenerating}
                       className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-6 py-3"
                     >
-                      {isLoading ? "Updating..." : "Get Updated Recommendations"}
+                      {isGenerating ? "Generating..." : "Get Updated Recommendations"}
                     </Button>
                   </div>
                 </CardContent>
@@ -194,8 +448,6 @@ export default function CollegeRecommendations() {
             </Card>
           </div>
         </div>
-
-
 
         {/* Recommendations */}
         {isLoading ? (

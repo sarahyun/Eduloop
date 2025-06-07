@@ -1,16 +1,29 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from services.ai_service import ai_service
 from models import ChatRequest, ConversationCreate, MessageCreate, QuestionResponseCreate
 from database import db, serialize_doc
-from ai_service import ai_service
+from core.database import db_manager
 from routes.users import router as users_router
-from routes.profiles import router as responses_router
-from routes.colleges import router as colleges_router
+from routes.responses import router as responses_router
+from routes.profiles import router as profiles_router
 from routes.auth import router as auth_router
+from routes.recommendations import router as recommendations_router
 from datetime import datetime
 import time
 
 app = FastAPI(title="College Counseling API", version="1.0.0")
+
+# Database initialization
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database connection on startup."""
+    await db_manager.connect()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Close database connection on shutdown."""
+    await db_manager.disconnect()
 
 # CORS middleware
 app.add_middleware(
@@ -25,7 +38,8 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(responses_router)
-app.include_router(colleges_router)
+app.include_router(profiles_router)
+app.include_router(recommendations_router)
 
 # Conversation routes
 @app.post("/conversations")
@@ -259,48 +273,26 @@ async def chat_with_mentor(request: ChatRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to process chat: {str(e)}")
 
-@app.get("/college-recommendations/{user_id}")
-async def get_college_recommendations(user_id: str):
-    try:
-        profile = await db.studentProfiles.find_one({"userId": user_id})
-        if not profile:
-            raise HTTPException(status_code=404, detail="Student profile not found")
-        
-        recommendations = await ai_service.generate_college_recommendations(profile)
-        return {"recommendations": recommendations}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get recommendations: {str(e)}")
-
-@app.get("/profile-insights/{user_id}")
-async def get_profile_insights(user_id: str):
-    try:
-        profile = await db.studentProfiles.find_one({"userId": user_id})
-        if not profile:
-            raise HTTPException(status_code=404, detail="Student profile not found")
-        
-        # Get conversation history for additional context
-        conversation_history = []
-        async for message in db.messages.find({"userId": user_id}).sort("createdAt", 1):
-            conversation_history.append({
-                "role": message["role"],
-                "content": message["content"]
-            })
-        
-        insights = await ai_service.generate_profile_insights(profile, conversation_history)
-        return {"insights": insights}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get insights: {str(e)}")
-
 @app.get("/")
 async def root():
     return {"message": "College Counseling API is running"}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "message": "College Counseling API is running"}
+
+@app.get("/api/calendar")
+async def calendar_health_check(range: str = None, access_token: str = None):
+    """Legacy health check endpoint for Railway compatibility"""
+    if access_token == "health":
+        return {"status": "healthy", "message": "Health check passed"}
+    return {"status": "healthy", "message": "College Counseling API is running"}
 
 if __name__ == "__main__":
     import uvicorn
     import os
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    host = os.environ.get("HOST", "0.0.0.0")
+    workers = int(os.environ.get("WORKERS", 1))  # Default to 1 worker for Railway
+    print(f"🚀 Starting FastAPI server on {host}:{port} with {workers} worker(s)")
+    uvicorn.run(app, host=host, port=port, workers=workers)

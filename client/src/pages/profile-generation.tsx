@@ -3,17 +3,27 @@ import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Brain, Sparkles, User, FileText, ArrowRight } from 'lucide-react';
+import { CheckCircle, Brain, Sparkles, User, FileText, ArrowRight, AlertCircle } from 'lucide-react';
 
 interface ProfileGenerationProps {
   userId?: string;
 }
 
-export function ProfileGeneration({ userId }: ProfileGenerationProps) {
+interface GenerationStatus {
+  status: 'pending' | 'generating' | 'completed' | 'failed';
+  created_at: string;
+  updated_at: string;
+  error?: string;
+  generation_id: string;
+}
+
+export function ProfileGeneration({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: ProfileGenerationProps) {
   const [, setLocation] = useLocation();
   const [generationStep, setGenerationStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationComplete, setGenerationComplete] = useState(false);
+  const [generationStatus, setGenerationStatus] = useState<GenerationStatus | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const generationSteps = [
     { label: "Analyzing your responses", icon: Brain, description: "Processing your answers across all sections" },
@@ -22,27 +32,118 @@ export function ProfileGeneration({ userId }: ProfileGenerationProps) {
     { label: "Finalizing insights", icon: FileText, description: "Generating actionable recommendations" }
   ];
 
+  // Check for existing profile generation on component mount
+  useEffect(() => {
+    checkExistingGeneration();
+  }, [userId]);
+
+  // Poll for status updates when generating
+  useEffect(() => {
+    let pollInterval: NodeJS.Timeout;
+    
+    if (isGenerating && generationStatus?.status === 'generating') {
+      pollInterval = setInterval(async () => {
+        await checkGenerationStatus();
+      }, 2000); // Poll every 2 seconds
+    }
+    
+    return () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+    };
+  }, [isGenerating, generationStatus?.status]);
+
+  // Update UI steps based on generation progress
   useEffect(() => {
     if (isGenerating && generationStep < generationSteps.length) {
       const timer = setTimeout(() => {
         setGenerationStep(prev => prev + 1);
       }, 2000);
       return () => clearTimeout(timer);
-    } else if (generationStep >= generationSteps.length) {
+    } else if (generationStep >= generationSteps.length && generationStatus?.status === 'completed') {
       setGenerationComplete(true);
       setIsGenerating(false);
     }
-  }, [isGenerating, generationStep]);
+  }, [isGenerating, generationStep, generationStatus?.status]);
 
-  const startGeneration = () => {
-    setIsGenerating(true);
-    setGenerationStep(0);
-    // TODO: Replace with actual API call to generate profile
-    // await generateProfileFromResponses(userId);
+  const checkExistingGeneration = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/profile/${userId}/status`);
+      if (response.ok) {
+        const status = await response.json();
+        if (status) {
+          setGenerationStatus(status);
+          if (status.status === 'generating') {
+            setIsGenerating(true);
+            setGenerationStep(1);
+          } else if (status.status === 'completed') {
+            setGenerationComplete(true);
+            setGenerationStep(generationSteps.length);
+          } else if (status.status === 'failed') {
+            setError(status.error || 'Profile generation failed');
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to check existing generation:', err);
+    }
+  };
+
+  const checkGenerationStatus = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/profile/${userId}/status`);
+      if (response.ok) {
+        const status = await response.json();
+        setGenerationStatus(status);
+        
+        if (status.status === 'completed') {
+          setGenerationComplete(true);
+          setIsGenerating(false);
+          setGenerationStep(generationSteps.length);
+        } else if (status.status === 'failed') {
+          setError(status.error || 'Profile generation failed');
+          setIsGenerating(false);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to check generation status:', err);
+      setError('Failed to check generation status');
+      setIsGenerating(false);
+    }
+  };
+
+  const startGeneration = async () => {
+    try {
+      setError(null);
+      setIsGenerating(true);
+      setGenerationStep(0);
+      setGenerationComplete(false);
+      
+      // Start profile generation with user_id as query parameter
+      const response = await fetch(`http://127.0.0.1:8000/profile?user_id=${userId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        setGenerationStatus(result);
+        console.log('Profile generation started:', result);
+      } else {
+        throw new Error('Failed to start profile generation');
+      }
+    } catch (err) {
+      console.error('Failed to start generation:', err);
+      setError('Failed to start profile generation');
+      setIsGenerating(false);
+    }
   };
 
   const viewProfile = () => {
-    setLocation('/profile-view');
+    setLocation('/student-profile-view');
   };
 
   const progress = ((generationStep) / generationSteps.length) * 100;
@@ -58,6 +159,27 @@ export function ProfileGeneration({ userId }: ProfileGenerationProps) {
             Your responses are ready to be transformed into a comprehensive college readiness profile.
           </p>
         </div>
+
+        {error && (
+          <Card className="mb-8 border-red-200 bg-red-50">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3 text-red-700">
+                <AlertCircle className="h-5 w-5" />
+                <div>
+                  <h3 className="font-semibold">Generation Error</h3>
+                  <p className="text-sm">{error}</p>
+                </div>
+              </div>
+              <Button 
+                onClick={startGeneration} 
+                className="mt-4 bg-red-600 hover:bg-red-700"
+                disabled={isGenerating}
+              >
+                Try Again
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="mb-8">
           <CardHeader>
@@ -82,7 +204,7 @@ export function ProfileGeneration({ userId }: ProfileGenerationProps) {
               </div>
             </div>
             
-            {!isGenerating && !generationComplete && (
+            {!isGenerating && !generationComplete && !error && (
               <div className="text-center">
                 <p className="text-gray-600 mb-4">
                   Ready to generate your personalized profile using AI analysis of your responses.
@@ -96,12 +218,17 @@ export function ProfileGeneration({ userId }: ProfileGenerationProps) {
           </CardContent>
         </Card>
 
-        {(isGenerating || generationComplete) && (
+        {(isGenerating || generationComplete) && !error && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <Brain className="h-6 w-6 text-blue-500" />
                 AI Profile Generation
+                {generationStatus && (
+                  <span className="text-sm font-normal text-gray-500">
+                    Status: {generationStatus.status}
+                  </span>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -182,7 +309,7 @@ export function ProfileGeneration({ userId }: ProfileGenerationProps) {
           </Card>
         )}
 
-        {!isGenerating && !generationComplete && (
+        {!isGenerating && !generationComplete && !error && (
           <div className="mt-8 text-center">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
               <h3 className="font-semibold text-blue-900 mb-2">What happens next?</h3>

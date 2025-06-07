@@ -110,3 +110,34 @@ class ChatRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: str
     password: Optional[str] = None
+
+# College recommendation models
+class DistinctiveOpportunity(BaseModel):
+    title: str
+    description: str
+    url: Optional[str] = None
+    search_query: Optional[str] = None
+
+class SchoolFit(BaseModel):
+    academic: str
+    social_cultural: str
+    financial: str
+
+class CollegeRecommendationItem(BaseModel):
+    type: str  # "Reach", "Match", or "Safety"
+    name: str
+    location: str
+    fit_score: str
+    fit: SchoolFit
+    overall_fit_rationale: List[str]
+    distinctive_opportunities: List[DistinctiveOpportunity]
+    potential_challenges: List[str]
+    why_school_essay_points: List[str]
+    how_to_stand_out: List[str]
+
+class CollegeRecommendations(BaseModel):
+    user_id: str
+    recommendations: List[CollegeRecommendationItem]
+    generated_at: datetime = Field(default_factory=datetime.now)
+    context_used: Optional[str] = None
+    generation_metadata: Optional[dict] = None
