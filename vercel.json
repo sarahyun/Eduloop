@@ -1,13 +1,14 @@
 {
   "framework": "vite",
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "outputDirectory": "dist/public",
   "installCommand": "npm install",
   "devCommand": "vite",
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://your-railway-backend-url.up.railway.app/api/$1"
+      "destination": "https://web-production-bb19.up.railway.app/$1"
+      
     },
     {
       "source": "/(.*)",
@@ -15,6 +16,6 @@
     }
   ],
   "env": {
-    "VITE_API_URL": "https://your-railway-backend-url.up.railway.app"
+    "VITE_API_URL": "https://web-production-bb19.up.railway.app"
   }
 }
