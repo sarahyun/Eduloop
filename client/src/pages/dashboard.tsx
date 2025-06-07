@@ -20,9 +20,46 @@ interface FormResponse {
   }>;
 }
 
+interface CollegeRecommendation {
+  type: string;
+  name: string;
+  location: string;
+  fit_score: string;
+}
+
 export default function Dashboard() {
   const { user, loading } = useAuth();
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
+  const [recommendations, setRecommendations] = useState<CollegeRecommendation[]>([]);
+
+  // Calculate completion percentage
+  const completedSectionsCount = completedSections.size;
+  const totalSections = Object.keys(questionsData).length;
+  const profileCompletion = Math.round((completedSectionsCount / totalSections) * 100);
+
+  // Load recommendations when profile is complete
+  useEffect(() => {
+    const loadRecommendations = async () => {
+      if (!user?.uid || profileCompletion < 100) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/recommendations/user/${user.uid}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.recommendations) {
+            // Take first 3 recommendations for preview
+            setRecommendations(data.recommendations.slice(0, 3));
+          }
+        }
+      } catch (error) {
+        console.error('Error loading recommendations:', error);
+      }
+    };
+
+    loadRecommendations();
+  }, [user?.uid, profileCompletion]);
 
   // Load completion status for all sections
   useEffect(() => {
@@ -69,11 +106,6 @@ export default function Dashboard() {
 
     loadCompletionStatus();
   }, [user?.uid]);
-
-  // Calculate completion percentage
-  const completedSectionsCount = completedSections.size;
-  const totalSections = Object.keys(questionsData).length;
-  const profileCompletion = Math.round((completedSectionsCount / totalSections) * 100);
 
   if (loading) {
     return (
@@ -222,15 +254,44 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             {profileCompletion >= 100 ? (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Star className="w-8 h-8 text-green-600" />
+              recommendations.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {recommendations.map((school, index) => (
+                      <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-start justify-between mb-2">
+                          <h4 className="font-semibold text-gray-900 text-sm">{school.name}</h4>
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            school.type === 'Reach' ? 'bg-red-100 text-red-700' :
+                            school.type === 'Match' ? 'bg-blue-100 text-blue-700' :
+                            'bg-green-100 text-green-700'
+                          }`}>
+                            {school.type}
+                          </span>
+                        </div>
+                        <p className="text-gray-600 text-xs mb-2">{school.location}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-500">Fit Score</span>
+                          <span className="text-sm font-medium text-blue-600">{school.fit_score}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-center pt-4 border-t">
+                    <p className="text-sm text-gray-600 mb-2">Showing 3 of your top matches</p>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready for Recommendations!</h3>
-                <p className="text-gray-600 mb-4">
-                  Your profile is complete. Click "View All" above to see your personalized college matches.
-                </p>
-              </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Star className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Generating Your Matches</h3>
+                  <p className="text-gray-600 mb-4">
+                    Your profile is complete. We're preparing your personalized college recommendations.
+                  </p>
+                </div>
+              )
             ) : (
               <div className="text-center py-8">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
