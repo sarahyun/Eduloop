@@ -207,9 +207,8 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Profile Insights */}
-          <Card className={`hover:shadow-lg transition-shadow ${profileCompletion >= 50 ? 'cursor-pointer' : 'opacity-60'}`} 
-                onClick={() => profileCompletion >= 50 && (window.location.href = '/profile-view')}>
+          {/* Profile Insights - Only show when data exists */}
+          <Card className="opacity-60">
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
@@ -218,7 +217,7 @@ export default function Dashboard() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Profile Insights</h3>
                   <p className="text-gray-600 text-sm">
-                    {profileCompletion >= 50 ? 'View your analysis' : '50% profile needed'}
+                    Generate profile to view insights
                   </p>
                 </div>
               </div>

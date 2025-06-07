@@ -1,4 +1,4 @@
-import { mockSchoolRecsData } from '@/data/mockSchoolRecsData';
+
 
 export interface SchoolOpportunity {
   title: string;
@@ -54,16 +54,13 @@ export class SchoolRecommendationsService {
 
   // Get school recommendations for a user
   static async getSchoolRecommendations(userId?: string): Promise<SchoolRecommendationsData> {
-    // If no userId provided, return mock data
     if (!userId) {
-      console.log('No user ID provided, using mock data');
-      return mockSchoolRecsData as SchoolRecommendationsData;
+      throw new Error('User ID is required to fetch recommendations');
     }
 
     try {
       console.log(`Fetching recommendations for user: ${userId}`);
       
-      // First check if recommendations exist for this user
       const response = await fetch(`${this.API_BASE_URL}/recommendations/${userId}`, {
         method: 'GET',
         headers: {
@@ -74,10 +71,8 @@ export class SchoolRecommendationsService {
       if (response.ok) {
         const data = await response.json();
         
-        // If the API returns null (no recommendations), fall back to mock data
         if (!data || !data.recommendations || data.recommendations.length === 0) {
-          console.log('No recommendations found for user, using mock data');
-          return mockSchoolRecsData as SchoolRecommendationsData;
+          throw new Error('No recommendations found for this user');
         }
 
         console.log(`Successfully loaded ${data.recommendations.length} recommendations from API`);
@@ -100,17 +95,14 @@ export class SchoolRecommendationsService {
           }))
         };
       } else if (response.status === 404) {
-        console.log('No recommendations found for user, using mock data');
-        return mockSchoolRecsData as SchoolRecommendationsData;
+        throw new Error('No recommendations found for this user');
       } else {
         console.error(`API returned error: ${response.status} ${response.statusText}`);
         throw new Error(`API returned ${response.status}`);
       }
     } catch (error) {
       console.error('Error fetching recommendations from API:', error);
-      console.log('Falling back to mock data');
-      // Fallback to mock data if API is unavailable
-      return mockSchoolRecsData as SchoolRecommendationsData;
+      throw error;
     }
   }
 

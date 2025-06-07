@@ -1,4 +1,4 @@
-import mockStudentProfileData from '@/data/mockStudentProfileData';
+
 
 export interface ProfileSectionData {
   section_id: string;
@@ -11,13 +11,39 @@ export interface StudentProfileData {
   student_profile: ProfileSectionData[];
 }
 
-// Service for handling profile data - easy to replace with API calls later
+// Service for handling profile data
 export class ProfileDataService {
-  // For now, return mock data. Replace this method with API call when ready
+  private static readonly API_BASE_URL = 'http://127.0.0.1:8000';
+
   static async getStudentProfile(userId?: string): Promise<StudentProfileData> {
-    // TODO: Replace with actual API call
-    // return await fetch(`/api/profiles/${userId}`).then(res => res.json());
-    return mockStudentProfileData as StudentProfileData;
+    if (!userId) {
+      throw new Error('User ID is required to fetch profile data');
+    }
+
+    try {
+      const response = await fetch(`${this.API_BASE_URL}/profiles/${userId}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (!data || !data.student_profile) {
+          throw new Error('No profile data found for this user');
+        }
+        return data as StudentProfileData;
+      } else if (response.status === 404) {
+        throw new Error('Profile not found for this user');
+      } else {
+        console.error(`API returned error: ${response.status} ${response.statusText}`);
+        throw new Error(`API returned ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error fetching profile data from API:', error);
+      throw error;
+    }
   }
 
   // Categorize sections for tab organization
@@ -38,9 +64,24 @@ export class ProfileDataService {
     };
   }
 
-  // Get profile completion percentage (replace with real calculation later)
+  // Get profile completion percentage based on actual data
   static calculateProfileCompletion(profileData: ProfileSectionData[]): number {
-    // TODO: Replace with actual completion calculation based on filled fields
-    return 95;
+    if (!profileData || profileData.length === 0) {
+      return 0;
+    }
+
+    const totalSections = profileData.length;
+    const completedSections = profileData.filter(section => {
+      if (typeof section.content === 'string') {
+        return section.content.trim().length > 0;
+      } else if (Array.isArray(section.content)) {
+        return section.content.length > 0;
+      } else if (typeof section.content === 'object') {
+        return Object.keys(section.content).length > 0;
+      }
+      return false;
+    }).length;
+
+    return Math.round((completedSections / totalSections) * 100);
   }
 }
