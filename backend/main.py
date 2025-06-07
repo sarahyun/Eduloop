@@ -11,6 +11,11 @@ from routes.auth import router as auth_router
 from routes.recommendations import router as recommendations_router
 from datetime import datetime
 import time
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = FastAPI(title="College Counseling API", version="1.0.0")
 
@@ -290,9 +295,8 @@ async def calendar_health_check(range: str = None, access_token: str = None):
 
 if __name__ == "__main__":
     import uvicorn
-    import os
     port = int(os.environ.get("PORT", 8000))
     host = os.environ.get("HOST", "0.0.0.0")
-    workers = int(os.environ.get("WORKERS", 1))  # Default to 1 worker for Railway
+    workers = int(os.environ.get("WORKERS", 8))  # Default to 1 worker for Railway
     print(f"🚀 Starting FastAPI server on {host}:{port} with {workers} worker(s)")
     uvicorn.run(app, host=host, port=port, workers=workers)
