@@ -102,25 +102,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    
     try {
-      // Update last login in backend
-      await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email
-        })
-      });
-    } catch (error) {
-      console.error('Error updating login in backend:', error);
-      // Don't throw error here as Firebase login was successful
+      console.log('Attempting to sign in with email:', email);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log('Firebase sign-in successful:', userCredential.user.uid);
+      
+      try {
+        // Update last login in backend
+        await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email
+          })
+        });
+      } catch (error) {
+        console.error('Error updating login in backend:', error);
+        // Don't throw error here as Firebase login was successful
+      }
+      
+      return userCredential;
+    } catch (error: any) {
+      console.error('Firebase authentication error:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      
+      // Provide more specific error messages
+      if (error.code === 'auth/user-not-found') {
+        throw new Error('No account found with this email address.');
+      } else if (error.code === 'auth/wrong-password') {
+        throw new Error('Incorrect password. Please try again.');
+      } else if (error.code === 'auth/invalid-email') {
+        throw new Error('Invalid email address format.');
+      } else if (error.code === 'auth/user-disabled') {
+        throw new Error('This account has been disabled.');
+      } else if (error.code === 'auth/too-many-requests') {
+        throw new Error('Too many failed attempts. Please try again later.');
+      } else if (error.code === 'auth/invalid-credential') {
+        throw new Error('Invalid email or password. Please check your credentials.');
+      } else {
+        throw new Error(error.message || 'Authentication failed. Please try again.');
+      }
     }
-    
-    return userCredential;
   };
 
   const logout = () => {

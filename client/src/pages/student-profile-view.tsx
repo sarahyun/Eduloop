@@ -54,7 +54,7 @@ interface StudentProfileViewProps {
   userId?: string;
 }
 
-export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: StudentProfileViewProps) {
+export function StudentProfileView(userId: string) {
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

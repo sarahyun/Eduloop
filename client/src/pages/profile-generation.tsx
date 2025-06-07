@@ -17,7 +17,7 @@ interface GenerationStatus {
   generation_id: string;
 }
 
-export function ProfileGeneration({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: ProfileGenerationProps) {
+export function ProfileGeneration(userId: string) {
   const [, setLocation] = useLocation();
   const [generationStep, setGenerationStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);

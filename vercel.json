@@ -1,7 +1,7 @@
 {
   "framework": "vite",
   "buildCommand": "cd client && npm run build",
-  "outputDirectory": "client/dist/public",
+  "outputDirectory": "client/dist",
   "installCommand": "cd client && npm install",
   "devCommand": "cd client && vite",
   "rewrites": [
