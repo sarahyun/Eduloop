@@ -292,7 +292,7 @@ export default function Dashboard() {
                               {recommendations
                                 .slice(pageIndex * schoolsPerPage, (pageIndex + 1) * schoolsPerPage)
                                 .map((school, schoolIndex) => (
-                                <div key={schoolIndex} className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800 hover:shadow-lg transition-shadow">
+                                <div key={schoolIndex} className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
                                   {/* School Header */}
                                   <div className="flex items-start justify-between mb-4">
                                     <div className="flex-1">
@@ -363,7 +363,7 @@ export default function Dashboard() {
                                   </div>
 
                                   {/* Quick Summary */}
-                                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-3">
+                                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
                                     <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-2">
                                       {school.overall_fit_rationale[0]}
                                     </p>
