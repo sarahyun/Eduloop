@@ -59,6 +59,7 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState<string>('');
   const [activeTab, setActiveTab] = useState('overview');
   const [, navigate] = useLocation();
   const { user, loading: authLoading } = useAuth();
@@ -99,6 +100,7 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
     try {
       setIsRegenerating(true);
       setError(null);
+      setGenerationProgress('Starting profile generation...');
       
       // Call the profile generation API endpoint
       const response = await fetch(`http://127.0.0.1:8000/profile/${userId}`, {
@@ -112,17 +114,56 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
         const result = await response.json();
         console.log('Profile regeneration started:', result);
         
-        // Show success message and navigate to generation page
-        window.location.href = '/profile-generation';
+        // Start polling for completion
+        pollForCompletion();
       } else {
         throw new Error('Failed to start profile regeneration');
       }
     } catch (err) {
       console.error('Failed to regenerate profile:', err);
       setError('Failed to start profile regeneration. Please try again.');
-    } finally {
       setIsRegenerating(false);
+      setGenerationProgress('');
     }
+  };
+
+  const pollForCompletion = async () => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/profile/${userId}/status`);
+        if (response.ok) {
+          const status = await response.json();
+          
+          if (status.status === 'generating') {
+            setGenerationProgress('Generating your profile...');
+          } else if (status.status === 'completed') {
+            clearInterval(pollInterval);
+            setGenerationProgress('Profile generated successfully!');
+            // Refresh the profile data
+            await fetchProfileData();
+            setIsRegenerating(false);
+            setGenerationProgress('');
+          } else if (status.status === 'failed') {
+            clearInterval(pollInterval);
+            setError(status.error || 'Profile generation failed');
+            setIsRegenerating(false);
+            setGenerationProgress('');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check generation status:', error);
+      }
+    }, 3000); // Poll every 3 seconds
+
+    // Stop polling after 5 minutes
+    setTimeout(() => {
+      clearInterval(pollInterval);
+      if (isRegenerating) {
+        setError('Profile generation timed out. Please try again.');
+        setIsRegenerating(false);
+        setGenerationProgress('');
+      }
+    }, 300000);
   };
 
   // Show loading state while auth is loading
@@ -356,6 +397,20 @@ export function StudentProfileView({ userId = "FPoYbarotyf6QG1OHeZ3MqKlwSE3" }: 
               )}
             </Button>
           </div>
+
+          {/* Generation Progress */}
+          {generationProgress && (
+            <div className="max-w-md mx-auto">
+              <Card className="border-2 border-blue-200 bg-blue-50">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <RefreshCw className="h-5 w-5 text-blue-600 animate-spin" />
+                    <span className="text-blue-800 font-medium">{generationProgress}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
 
         {/* Profile Sections */}
