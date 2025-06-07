@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
-import { User, Star, ArrowRight, CheckCircle, Clock, Sparkles, MessageCircle, GraduationCap } from "lucide-react";
+import { User, Star, ArrowRight, Clock, Sparkles, MessageCircle, GraduationCap } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { questionsData, type Question } from '@/data/questionsData';
 
@@ -116,187 +116,74 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Three Main Action Cards */}
-        <div className="space-y-6">
-          
-          {/* Step 1: Complete Profile */}
-          <Card className="relative overflow-hidden border-2 hover:border-blue-300 transition-all duration-200 hover:shadow-lg">
-            <CardContent className="p-8">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-6">
-                  <div className="relative">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                      {profileCompletion >= 100 ? (
-                        <CheckCircle className="w-8 h-8 text-green-600" />
-                      ) : (
-                        <User className="w-8 h-8 text-blue-600" />
-                      )}
-                    </div>
-                    <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-                      Step 1
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      {profileCompletion >= 100 ? 'Profile Complete!' : 'Complete Your Profile'}
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      {profileCompletion >= 100 
-                        ? 'Your profile is ready for college matching'
-                        : 'Tell us about yourself, your interests, and goals'
-                      }
-                    </p>
-                    {profileCompletion < 100 && (
-                      <div className="flex items-center space-x-4">
-                        <Progress value={profileCompletion} className="flex-1 max-w-sm" />
-                        <span className="text-sm font-medium text-gray-600">
-                          {profileCompletion}% complete
-                        </span>
-                      </div>
-                    )}
-                  </div>
+        {/* Main Dashboard Cards */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Profile Building */}
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/profile'}>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <User className="w-6 h-6 text-blue-600" />
                 </div>
-                <div className="flex flex-col space-y-3">
-                  {profileCompletion >= 100 ? (
-                    <Button 
-                      onClick={() => window.location.href = '/profile-view'}
-                      variant="outline"
-                      className="flex items-center space-x-2"
-                    >
-                      <span>View Profile</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
-                  ) : (
-                    <Button 
-                      onClick={() => window.location.href = '/profile'}
-                      className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2"
-                    >
-                      <span>Continue Profile</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
-                  )}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Build Profile</h3>
+                  <p className="text-gray-600 text-sm">Complete your student profile</p>
+                  <p className="text-blue-600 text-sm font-medium">{profileCompletion}% complete</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Step 2: View Profile Insights */}
-          <Card className={`relative overflow-hidden border-2 transition-all duration-200 ${
-            profileCompletion >= 50 
-              ? 'hover:border-purple-300 hover:shadow-lg cursor-pointer' 
-              : 'opacity-60 cursor-not-allowed'
-          }`}>
-            <CardContent className="p-8">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-6">
-                  <div className="relative">
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-                      profileCompletion >= 50 ? 'bg-purple-100' : 'bg-gray-100'
-                    }`}>
-                      <Sparkles className={`w-8 h-8 ${
-                        profileCompletion >= 50 ? 'text-purple-600' : 'text-gray-400'
-                      }`} />
-                    </div>
-                    <div className="absolute -top-2 -right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-                      Step 2
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      View Your Profile Insights
-                    </h3>
-                    <p className="text-gray-600">
-                      {profileCompletion >= 50 
-                        ? 'See your personalized student profile and strengths analysis'
-                        : 'Complete at least 50% of your profile to unlock insights'
-                      }
-                    </p>
-                  </div>
+          {/* AI Mentor Chat */}
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => {
+            const firstIncompleteSection = Object.keys(questionsData).find(sectionId => !completedSections.has(sectionId));
+            const sectionParam = firstIncompleteSection || 'Introduction';
+            window.location.href = `/chat-onboarding?section=${encodeURIComponent(sectionParam)}`;
+          }}>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                  <MessageCircle className="w-6 h-6 text-purple-600" />
                 </div>
-                <div className="flex flex-col space-y-3">
-                  <Button 
-                    onClick={() => profileCompletion >= 50 && (window.location.href = '/profile-view')}
-                    disabled={profileCompletion < 50}
-                    variant={profileCompletion >= 50 ? "default" : "outline"}
-                    className={`flex items-center space-x-2 ${
-                      profileCompletion >= 50 
-                        ? 'bg-purple-600 hover:bg-purple-700 text-white' 
-                        : ''
-                    }`}
-                  >
-                    {profileCompletion >= 50 ? (
-                      <>
-                        <span>View Insights</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    ) : (
-                      <>
-                        <Clock className="w-4 h-4" />
-                        <span>Locked</span>
-                      </>
-                    )}
-                  </Button>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">AI Mentor</h3>
+                  <p className="text-gray-600 text-sm">Get personalized guidance</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Step 3: Get College Recommendations */}
-          <Card className={`relative overflow-hidden border-2 transition-all duration-200 ${
-            profileCompletion >= 100 
-              ? 'hover:border-green-300 hover:shadow-lg cursor-pointer' 
-              : 'opacity-60 cursor-not-allowed'
-          }`}>
-            <CardContent className="p-8">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-6">
-                  <div className="relative">
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-                      profileCompletion >= 100 ? 'bg-green-100' : 'bg-gray-100'
-                    }`}>
-                      <Star className={`w-8 h-8 ${
-                        profileCompletion >= 100 ? 'text-green-600' : 'text-gray-400'
-                      }`} />
-                    </div>
-                    <div className="absolute -top-2 -right-2 bg-green-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-                      Step 3
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      Get College Recommendations
-                    </h3>
-                    <p className="text-gray-600">
-                      {profileCompletion >= 100 
-                        ? 'View your personalized college matches based on your profile'
-                        : 'Complete your full profile to unlock personalized college matches'
-                      }
-                    </p>
-                  </div>
+          {/* Profile Insights */}
+          <Card className={`hover:shadow-lg transition-shadow ${profileCompletion >= 50 ? 'cursor-pointer' : 'opacity-60'}`} 
+                onClick={() => profileCompletion >= 50 && (window.location.href = '/profile-view')}>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-indigo-600" />
                 </div>
-                <div className="flex flex-col space-y-3">
-                  <Button 
-                    onClick={() => profileCompletion >= 100 && (window.location.href = '/recommendations')}
-                    disabled={profileCompletion < 100}
-                    variant={profileCompletion >= 100 ? "default" : "outline"}
-                    className={`flex items-center space-x-2 ${
-                      profileCompletion >= 100 
-                        ? 'bg-green-600 hover:bg-green-700 text-white' 
-                        : ''
-                    }`}
-                  >
-                    {profileCompletion >= 100 ? (
-                      <>
-                        <span>View Matches</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    ) : (
-                      <>
-                        <Clock className="w-4 h-4" />
-                        <span>Locked</span>
-                      </>
-                    )}
-                  </Button>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Profile Insights</h3>
+                  <p className="text-gray-600 text-sm">
+                    {profileCompletion >= 50 ? 'View your analysis' : '50% profile needed'}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* College Matches */}
+          <Card className={`hover:shadow-lg transition-shadow ${profileCompletion >= 100 ? 'cursor-pointer' : 'opacity-60'}`} 
+                onClick={() => profileCompletion >= 100 && (window.location.href = '/recommendations')}>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <Star className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">College Matches</h3>
+                  <p className="text-gray-600 text-sm">
+                    {profileCompletion >= 100 ? 'View recommendations' : 'Complete profile first'}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -371,31 +258,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Quick Access Actions */}
-        <div className="mt-8 flex justify-center gap-4">
-          <Button 
-            variant="outline"
-            onClick={() => {
-              const firstIncompleteSection = Object.keys(questionsData).find(sectionId => !completedSections.has(sectionId));
-              const sectionParam = firstIncompleteSection || 'Introduction';
-              window.location.href = `/chat-onboarding?section=${encodeURIComponent(sectionParam)}`;
-            }}
-            className="flex items-center gap-2"
-          >
-            <MessageCircle className="w-4 h-4" />
-            Chat with AI Mentor
-          </Button>
-          {profileCompletion >= 50 && (
-            <Button 
-              variant="outline"
-              onClick={() => window.location.href = '/profile-view'}
-              className="flex items-center gap-2"
-            >
-              <Sparkles className="w-4 h-4" />
-              View Profile Insights
-            </Button>
-          )}
-        </div>
+
       </div>
     </div>
   );
