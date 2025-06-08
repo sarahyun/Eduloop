@@ -8,7 +8,6 @@ export const userSchema = z.object({
   name: z.string(),
   role: z.string().default('student'),
   grade: z.string().nullable().optional(),
-  students: z.array(z.string()).nullable().optional(),
   counselorId: z.string().nullable().optional(),
   parentId: z.string().nullable().optional(),
   createdAt: z.date().default(() => new Date()),

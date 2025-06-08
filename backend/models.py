@@ -26,7 +26,6 @@ class User(BaseModel):
     created_at: datetime = Field(default_factory=datetime.now)  # Account creation timestamp
     last_login: Optional[datetime] = None  # Optional timestamp for the last login
     role: str  # Role (student/counselor/parent)
-    students: Optional[List[str]] = []  # List of student IDs (for counselors/parents)
     grade: Optional[str] = None  # Optional field for student to hold grade
     counselor_id: Optional[str] = None  # Optional field for student to hold counselor ID
     parent_id: Optional[str] = None  # Optional field for student to hold parent ID
@@ -44,7 +43,6 @@ class UserUpdate(BaseModel):
     name: Optional[str] = None
     last_login: Optional[datetime] = None
     role: Optional[str] = None
-    students: Optional[List[str]] = None
     grade: Optional[str] = None
     counselor_id: Optional[str] = None
     parent_id: Optional[str] = None
@@ -56,7 +54,6 @@ class UserResponse(BaseModel):
     created_at: datetime
     last_login: Optional[datetime] = None
     role: str
-    students: Optional[List[str]] = []
     grade: Optional[str] = None
     counselor_id: Optional[str] = None
     parent_id: Optional[str] = None

@@ -117,6 +117,8 @@
     font-weight: 600;
     letter-spacing: -0.015em;
     line-height: 1.2;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   /* Custom Button Styles */
@@ -250,6 +252,12 @@
     .mobile-text {
       @apply text-sm;
     }
+  }
+
+  /* Ensure large text displays properly */
+  .hero-heading {
+    min-height: fit-content;
+    overflow: visible;
   }
 }
 

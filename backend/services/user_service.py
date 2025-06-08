@@ -19,7 +19,6 @@ class UserService(BaseService):
         check_existing = {"user_id": user_data["user_id"]}
         
         # Initialize default fields
-        user_data["students"] = user_data.get("students", [])
         user_data["last_login"] = None
         
         return await self.create(user_data, check_existing)
@@ -73,25 +72,6 @@ class UserService(BaseService):
     async def get_users_by_role(self, role: str) -> List[Dict[str, Any]]:
         """Get all users by role."""
         return await self.get_many({"role": role})
-    
-    async def assign_student_to_counselor(self, counselor_id: str, student_id: str) -> bool:
-        """Assign a student to a counselor."""
-        # Update counselor's students list
-        await self.repository.collection.update_one(
-            {"user_id": counselor_id, "role": "counselor"},
-            {"$addToSet": {"students": student_id}}
-        )
-        
-        # Update student's counselor_id
-        success = await self.repository.update_one(
-            {"user_id": student_id, "role": "student"},
-            {"counselor_id": counselor_id}
-        )
-        
-        if not success:
-            raise NotFoundError("Student", student_id)
-        
-        return True
 
 
 # Global service instance

@@ -17,10 +17,17 @@ async def create_user(user: UserCreate):
         if existing_user:
             raise HTTPException(status_code=400, detail="User already exists")
         
-        user_data = user.dict()
-        user_data["created_at"] = datetime.now()
-        user_data["last_login"] = None
-        user_data["students"] = []  # Initialize empty list
+        user_data = {
+            "user_id": user.user_id,
+            "email": user.email,
+            "name": user.name,
+            "role": user.role,
+            "grade": user.grade,
+            "counselor_id": user.counselor_id,
+            "parent_id": user.parent_id,
+            "created_at": datetime.now(),
+            "last_login": None
+        }
         
         result = await db.users.insert_one(user_data)
         user_data["_id"] = str(result.inserted_id)
@@ -109,28 +116,3 @@ async def get_users_by_role(role: str):
         return [serialize_doc(user) for user in users]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get users by role: {str(e)}")
-
-@router.post("/{counselor_id}/students/{student_id}")
-async def assign_student_to_counselor(counselor_id: str, student_id: str):
-    """Assign a student to a counselor"""
-    try:
-        # Update counselor's students list
-        await db.users.update_one(
-            {"user_id": counselor_id, "role": "counselor"},
-            {"$addToSet": {"students": student_id}}
-        )
-        
-        # Update student's counselor_id
-        result = await db.users.update_one(
-            {"user_id": student_id, "role": "student"},
-            {"$set": {"counselor_id": counselor_id}}
-        )
-        
-        if result.matched_count == 0:
-            raise HTTPException(status_code=404, detail="Student not found")
-        
-        return {"message": "Student assigned to counselor successfully"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to assign student: {str(e)}")

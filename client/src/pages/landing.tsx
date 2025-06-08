@@ -132,7 +132,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
+      <div className="relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24">
           <div className="text-center">
             <div className="flex justify-center mb-8">
@@ -142,7 +142,7 @@ export default function LandingPage() {
               </div>
             </div>
             
-            <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight">
+            <h1 className="hero-heading text-4xl sm:text-5xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight break-words">
               Get Personalized
               <span className="block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 College Matches
@@ -202,7 +202,7 @@ export default function LandingPage() {
         </div>
         
         {/* Background Elements */}
-        <div className="absolute top-0 left-0 w-full h-full -z-10">
+        <div className="absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute top-20 left-10 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
           <div className="absolute top-40 right-10 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-2000"></div>
           <div className="absolute -bottom-8 left-20 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-4000"></div>
