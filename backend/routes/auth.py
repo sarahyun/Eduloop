@@ -5,7 +5,7 @@ from core.database import db_manager
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/signup", response_model=UserResponse)
 async def signup(user: UserCreate):
     try:
         # Ensure database is connected
@@ -46,6 +46,7 @@ async def signup(user: UserCreate):
     except HTTPException:
         raise
     except Exception as e:
+        print(f"Failed to create user: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to create user: {str(e)}")
 
 @router.post("/login", response_model=UserResponse)
