@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight, CheckCircle, GraduationCap } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext';
 import { questionsData, type Question } from '@/data/questionsData';
 import { useToast } from '@/hooks/use-toast';
+import { API_BASE_URL } from '@/lib/config';
 
 interface Answer {
   question_id: string;
@@ -44,7 +45,7 @@ const OnboardingPage: React.FC = () => {
       if (!user?.uid) return;
 
       try {
-        const response = await fetch(`/api/responses/${user.uid}/${formId}`);
+        const response = await fetch(`${API_BASE_URL}/responses/${user.uid}/${formId}`);
         if (response.ok) {
           const data: FormResponse = await response.json();
           const responseMap: Record<string, string> = {};
@@ -87,7 +88,7 @@ const OnboardingPage: React.FC = () => {
         responses: answersArray
       };
 
-      const response = await fetch('/api/responses/upsert', {
+      const response = await fetch(`${API_BASE_URL}/responses/upsert`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

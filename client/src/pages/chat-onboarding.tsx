@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { questionsData } from "@/data/questionsData";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { API_BASE_URL } from '@/lib/config';
 
 export default function ChatOnboarding() {
   const { user } = useAuth();
@@ -164,7 +165,7 @@ export default function ChatOnboarding() {
       }
       
       // Use upsert endpoint to avoid 400 error
-      const response = await fetch('/api/responses/upsert', {
+      const response = await fetch(`${API_BASE_URL}/responses/upsert`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

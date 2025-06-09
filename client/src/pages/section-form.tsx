@@ -9,6 +9,7 @@ import { questionsData, type Question } from '@/data/questionsData';
 import { useToast } from '@/hooks/use-toast';
 import { AIChat } from '@/components/AIChat';
 import { sendMessage, getMessages, type Message } from '@/lib/api';
+import { API_BASE_URL } from '@/lib/config';
 
 // Type for individual questions
 interface Answer {
@@ -135,7 +136,7 @@ const SectionForm: React.FC = () => {
       setLastSaved(null);
 
       try {
-        const response = await fetch(`/api/responses/${user.uid}/${formId}`);
+        const response = await fetch(`${API_BASE_URL}/responses/${user.uid}/${formId}`);
         if (response.ok) {
           const data: FormResponse = await response.json();
           const responseMap: Record<string, string> = {};
@@ -171,7 +172,7 @@ const SectionForm: React.FC = () => {
         const sectionQuestions = questionsData[sectionId as keyof typeof questionsData] as Question[];
         
         try {
-          const response = await fetch(`/api/responses/${user.uid}/${sectionFormId}`);
+          const response = await fetch(`${API_BASE_URL}/responses/${user.uid}/${sectionFormId}`);
           if (response.ok) {
             const data: FormResponse = await response.json();
             
@@ -235,7 +236,7 @@ const SectionForm: React.FC = () => {
         responses: answersArray
       };
 
-      const response = await fetch('/api/responses/upsert', {
+      const response = await fetch(`${API_BASE_URL}/responses/upsert`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

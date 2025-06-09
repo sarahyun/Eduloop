@@ -8,6 +8,7 @@ import { User, Star, ArrowRight, Clock, Sparkles, MessageCircle, GraduationCap, 
 import { useAuth } from "@/context/AuthContext";
 import { questionsData, type Question } from '@/data/questionsData';
 import { SchoolRecommendationsService, SchoolRecommendation } from '@/services/schoolRecommendationsService';
+import { API_BASE_URL } from '@/lib/config';
 
 
 interface FormResponse {
@@ -88,7 +89,7 @@ export default function Dashboard() {
         const sectionQuestions = questionsData[sectionId as keyof typeof questionsData] as Question[];
         
         try {
-          const response = await fetch(`/api/responses/${user.uid}/${sectionFormId}`);
+          const response = await fetch(`${API_BASE_URL}/responses/${user.uid}/${sectionFormId}`);
           if (response.ok) {
             const data: FormResponse = await response.json();
             

@@ -10,6 +10,7 @@ import { MessageCircle, FileText, Sparkles, Clock, CheckCircle, Edit } from "luc
 import { api, type User } from "@/lib/api";
 import { questionsData, type Question } from '@/data/questionsData';
 import { useAuth } from "@/context/AuthContext";
+import { API_BASE_URL } from '@/lib/config';
 
 interface FormResponse {
   response_id?: string;
@@ -68,7 +69,7 @@ export default function ProfileBuilder() {
         progress[sectionId] = { answered: 0, total: sectionQuestions.length };
         
         try {
-          const response = await fetch(`/api/responses/${user.uid}/${sectionFormId}`);
+          const response = await fetch(`${API_BASE_URL}/responses/${user.uid}/${sectionFormId}`);
           if (response.ok) {
             const data: FormResponse = await response.json();
             
