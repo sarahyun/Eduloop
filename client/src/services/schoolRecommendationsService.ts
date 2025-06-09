@@ -1,4 +1,4 @@
-
+import { API_BASE_URL } from '../lib/config';
 
 export interface SchoolOpportunity {
   title: string;
@@ -50,7 +50,7 @@ export interface GenerationStatus {
 
 // Service for handling school recommendations data
 export class SchoolRecommendationsService {
-  private static readonly API_BASE_URL = 'http://127.0.0.1:8000';
+  private static readonly API_BASE_URL = API_BASE_URL;
 
   // Get school recommendations for a user
   static async getSchoolRecommendations(userId?: string): Promise<SchoolRecommendationsData> {

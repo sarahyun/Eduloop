@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../lib/config';
 
 //  testing comment here
 
@@ -14,7 +15,7 @@ export interface StudentProfileData {
 
 // Service for handling profile data
 export class ProfileDataService {
-  private static readonly API_BASE_URL = 'http://127.0.0.1:8000';
+  private static readonly API_BASE_URL = API_BASE_URL;
 
   static async getStudentProfile(userId?: string): Promise<StudentProfileData> {
     if (!userId) {
