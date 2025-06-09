@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
+import { API_BASE_URL } from '@/lib/config';
 
 function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
@@ -43,7 +44,7 @@ export function FormPage({ formData, formTitle, formId, userId: propUserId }: Fo
   useEffect(() => {
     if (userId && formId) {
       // Load existing responses from API
-      fetch(`/api/question-responses/${userId}/${formId}`)
+      fetch(`${API_BASE_URL}/question-responses/${userId}/${formId}`)
         .then(response => response.json())
         .then(data => {
           if (data && Array.isArray(data)) {
@@ -86,7 +87,7 @@ export function FormPage({ formData, formTitle, formId, userId: propUserId }: Fo
         })
       };
 
-      const response = await fetch('/api/question-responses', {
+      const response = await fetch(`${API_BASE_URL}/question-responses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(responsePayload)

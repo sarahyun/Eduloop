@@ -9,6 +9,7 @@ import {
   User as FirebaseUser
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+import { API_BASE_URL } from '../lib/config';
 
 interface User extends FirebaseUser {
   role?: string;
@@ -35,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (firebaseUser) {
         try {
           // Try to fetch the user's profile from FastAPI backend
-          const response = await fetch(`/api/auth/user/${firebaseUser.uid}`);
+          const response = await fetch(`${API_BASE_URL}/auth/user/${firebaseUser.uid}`);
           if (response.ok) {
             const userProfile = await response.json();
             
@@ -68,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     try {
       // Create the user profile in FastAPI backend
-      const response = await fetch('/api/auth/signup', {
+      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       try {
         // Update last login in backend
-        await fetch('/api/auth/login', {
+        await fetch(`${API_BASE_URL}/auth/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
