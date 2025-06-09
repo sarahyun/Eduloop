@@ -68,6 +68,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     try {
       // Create the user profile in FastAPI backend
+      const apiUrl = '/api/auth/signup';
+      console.log('🔍 SIGNUP DEBUG: Making API call to:', apiUrl);
+      console.log('🔍 SIGNUP DEBUG: Current window.location.origin:', window.location.origin);
+      console.log('🔍 SIGNUP DEBUG: Full URL will be:', window.location.origin + apiUrl);
+      
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
@@ -82,10 +87,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         })
       });
 
+      console.log('🔍 SIGNUP DEBUG: Response status:', response.status);
+      console.log('🔍 SIGNUP DEBUG: Response ok:', response.ok);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.log('🔍 SIGNUP DEBUG: Error response data:', errorData);
         throw new Error(errorData.detail || 'Failed to create user profile');
       }
+
+      const responseData = await response.json();
+      console.log('🔍 SIGNUP DEBUG: Success response data:', responseData);
 
       // Set the user state with the role immediately
       setUser({
@@ -94,6 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         grade
       } as User);
     } catch (error) {
+      console.log('🔍 SIGNUP DEBUG: Caught error:', error);
       await userCredential.user.delete();
       throw new Error('Failed to create user profile');
     }
@@ -109,6 +122,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       try {
         // Update last login in backend
+        const apiUrl = '/api/auth/login';
+        console.log('🔍 LOGIN DEBUG: Making API call to:', apiUrl);
+        console.log('🔍 LOGIN DEBUG: Full URL will be:', window.location.origin + apiUrl);
+        
         await fetch('/api/auth/login', {
           method: 'POST',
           headers: {
