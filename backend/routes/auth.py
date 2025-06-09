@@ -5,7 +5,7 @@ from core.database import db_manager
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
-@router.post("/signup", response_model=UserResponse)
+@router.post("/register", response_model=UserResponse)
 async def signup(user: UserCreate):
     try:
         # Ensure database is connected

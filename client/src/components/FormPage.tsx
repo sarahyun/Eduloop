@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { API_BASE_URL } from '@/lib/config';
@@ -30,12 +30,12 @@ interface FormPageProps {
   formData: Section[];
   formTitle: string;
   formId: string;
-  userId?: number;
+  userId?: string;
 }
 
 export function FormPage({ formData, formTitle, formId, userId: propUserId }: FormPageProps) {
   const { user } = useAuth();
-  const userId = propUserId || user?.id;
+  const userId = propUserId || user?.uid;
   const [formResponses, setFormResponses] = useState<{ [key: string]: string }>({});
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
