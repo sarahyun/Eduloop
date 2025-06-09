@@ -4,7 +4,7 @@ const config = {
     apiUrl: 'http://localhost:5001/api'  // Vite proxy handles this
   },
   production: {
-    apiUrl: '/backend'  // Vercel will rewrite /backend/* to Railway
+    apiUrl: '/api'  // Vercel will rewrite /api/* to Railway
   }
 };
 
