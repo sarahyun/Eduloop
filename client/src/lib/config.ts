@@ -4,7 +4,7 @@ const config = {
     apiUrl: 'http://localhost:5001/api'  // Vite proxy handles this
   },
   production: {
-    apiUrl: '/api'  // Vercel will rewrite /api/* to Railway
+    apiUrl: 'https://web-production-bb19.up.railway.app'  // Direct Railway URL
   }
 };
 
