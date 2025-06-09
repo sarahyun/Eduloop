@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, Brain, Sparkles, User, FileText, ArrowRight, AlertCircle } from 'lucide-react';
+import { API_BASE_URL } from '@/lib/config';
 
 interface ProfileGenerationProps {
   userId?: string;
@@ -17,7 +19,9 @@ interface GenerationStatus {
   generation_id: string;
 }
 
-export function ProfileGeneration(userId: string) {
+export function ProfileGeneration({ userId: propUserId }: ProfileGenerationProps = {}) {
+  const { user } = useAuth();
+  const userId = propUserId || user?.uid;
   const [, setLocation] = useLocation();
   const [generationStep, setGenerationStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -68,8 +72,11 @@ export function ProfileGeneration(userId: string) {
   }, [isGenerating, generationStep, generationStatus?.status]);
 
   const checkExistingGeneration = async () => {
+    if (!userId) return;
+    
     try {
-      const response = await fetch(`http://127.0.0.1:8000/profile/${userId}/status`);
+      console.log('🔍 Checking generation for userId:', userId);
+      const response = await fetch(`${API_BASE_URL}/profile/${userId}/status`);
       if (response.ok) {
         const status = await response.json();
         if (status) {
@@ -91,8 +98,11 @@ export function ProfileGeneration(userId: string) {
   };
 
   const checkGenerationStatus = async () => {
+    if (!userId) return;
+    
     try {
-      const response = await fetch(`http://127.0.0.1:8000/profile/${userId}/status`);
+      console.log('🔍 Checking status for userId:', userId);
+      const response = await fetch(`${API_BASE_URL}/profile/${userId}/status`);
       if (response.ok) {
         const status = await response.json();
         setGenerationStatus(status);
@@ -114,14 +124,19 @@ export function ProfileGeneration(userId: string) {
   };
 
   const startGeneration = async () => {
+    if (!userId) {
+      setError('User ID is required');
+      return;
+    }
+    
     try {
       setError(null);
       setIsGenerating(true);
       setGenerationStep(0);
       setGenerationComplete(false);
-      
-      // Start profile generation with user_id as query parameter
-      const response = await fetch(`http://127.0.0.1:8000/profile?user_id=${userId}`, {
+
+      console.log('🔍 Starting generation for userId:', userId);
+      const response = await fetch(`${API_BASE_URL}/profile/${userId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

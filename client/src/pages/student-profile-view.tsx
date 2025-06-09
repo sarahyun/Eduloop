@@ -32,6 +32,7 @@ import {
   School
 } from 'lucide-react';
 import { Navigation } from '@/components/Navigation';
+import { API_BASE_URL } from '@/lib/config';
 
 interface ProfileSection {
   section_id: string;
@@ -54,7 +55,9 @@ interface StudentProfileViewProps {
   userId?: string;
 }
 
-export function StudentProfileView(userId: string) {
+export function StudentProfileView({ userId: propUserId }: StudentProfileViewProps = {}) {
+  const { user, loading: authLoading } = useAuth();
+  const userId = propUserId || user?.uid;
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,19 +65,26 @@ export function StudentProfileView(userId: string) {
   const [generationProgress, setGenerationProgress] = useState<string>('');
   const [activeTab, setActiveTab] = useState('overview');
   const [, navigate] = useLocation();
-  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    fetchProfileData();
+    if (userId) {
+      fetchProfileData();
+    }
   }, [userId]);
 
   const fetchProfileData = async () => {
+    if (!userId) {
+      setError('User ID is required');
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       setError(null);
       
-      // Get the latest completed profile generation
-      const response = await fetch(`http://127.0.0.1:8000/profile/${userId}`);
+      console.log('🔍 Fetching profile for userId:', userId);
+      const response = await fetch(`${API_BASE_URL}/profile/${userId}`);
       
       if (response.ok) {
         const data = await response.json();
@@ -97,13 +107,18 @@ export function StudentProfileView(userId: string) {
   };
 
   const regenerateProfile = async () => {
+    if (!userId) {
+      setError('User ID is required');
+      return;
+    }
+    
     try {
       setIsRegenerating(true);
       setError(null);
       setGenerationProgress('Starting profile generation...');
       
-      // Call the profile generation API endpoint
-      const response = await fetch(`http://127.0.0.1:8000/profile/${userId}`, {
+      console.log('🔍 Regenerating profile for userId:', userId);
+      const response = await fetch(`${API_BASE_URL}/profile/${userId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -128,9 +143,12 @@ export function StudentProfileView(userId: string) {
   };
 
   const pollForCompletion = async () => {
+    if (!userId) return;
+    
     const pollInterval = setInterval(async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/profile/${userId}/status`);
+        console.log('🔍 Polling status for userId:', userId);
+        const response = await fetch(`${API_BASE_URL}/profile/${userId}/status`);
         if (response.ok) {
           const status = await response.json();
           
@@ -165,6 +183,18 @@ export function StudentProfileView(userId: string) {
       }
     }, 300000);
   };
+
+  // Add early return if no userId
+  if (!userId && !authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">User ID Required</h2>
+          <Button onClick={() => window.location.href = '/dashboard'}>Go to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
 
   // Show loading state while auth is loading
   if (authLoading) {

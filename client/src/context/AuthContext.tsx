@@ -35,19 +35,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          // Try to fetch the user's profile from FastAPI backend
+          console.log('🔍 Fetching user profile from:', `${API_BASE_URL}/auth/user/${firebaseUser.uid}`);
           const response = await fetch(`${API_BASE_URL}/auth/user/${firebaseUser.uid}`);
           if (response.ok) {
             const userProfile = await response.json();
             
-            // Combine Firebase user data with backend profile data
             setUser({
               ...firebaseUser,
               role: userProfile.role,
               grade: userProfile.grade,
             } as User);
           } else {
-            // If user doesn't exist in backend, use Firebase data only
             setUser(firebaseUser as User);
           }
         } catch (error) {
@@ -68,7 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await updateProfile(userCredential.user, { displayName: name });
     
     try {
-      // Create the user profile in FastAPI backend
+      console.log('🔍 SIGNUP DEBUG: Making API call to:', `${API_BASE_URL}/auth/signup`);
+      console.log('🔍 SIGNUP DEBUG: Current window.location.origin:', window.location.origin);
+      console.log('🔍 SIGNUP DEBUG: Full URL will be:', `${window.location.origin}${API_BASE_URL}/auth/signup`);
+      
       const response = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: {
@@ -83,18 +84,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         })
       });
 
+      console.log('🔍 SIGNUP DEBUG: Response status:', response.status);
+      console.log('🔍 SIGNUP DEBUG: Response ok:', response.ok);
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail || 'Failed to create user profile');
       }
 
-      // Set the user state with the role immediately
       setUser({
         ...userCredential.user,
         role,
         grade
       } as User);
     } catch (error) {
+      console.log('🔍 SIGNUP DEBUG: Caught error:', error);
       await userCredential.user.delete();
       throw new Error('Failed to create user profile');
     }
@@ -109,7 +113,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('Firebase sign-in successful:', userCredential.user.uid);
       
       try {
-        // Update last login in backend
         await fetch(`${API_BASE_URL}/auth/login`, {
           method: 'POST',
           headers: {
