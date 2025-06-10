@@ -153,7 +153,7 @@ Output format:
         "List 3-5 highly specific, detailed, essay-friendly bullets showing authentic fit with this school’s academic offerings, culture, or mission."
       ],
       "how_to_stand_out": [
-        "Describe in 5-10 sentences how this student can best position themselves for this school. First, explictly explain what particular traits this school likes in applicants. What traits or experiences should the student emphasize? What does this school value that this student exemplifies?"
+        "Describe in 5-10 sentences in paragraph format how this student can best position themselves for this school. First, explictly explain what particular traits this school likes in applicants. What traits or experiences should the student emphasize? What does this school value that this student exemplifies?"
       ]
     }
   ]

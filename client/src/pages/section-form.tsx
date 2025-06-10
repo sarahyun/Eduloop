@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { questionsData, type Question } from '@/data/questionsData';
+import { questionsData, type Question, getSectionConfig } from '@/data/questionsData';
 import { useToast } from '@/hooks/use-toast';
 import { AIChat } from '@/components/AIChat';
 import { sendMessage, getMessages, type Message } from '@/lib/api';
@@ -170,13 +170,14 @@ const SectionForm: React.FC = () => {
       for (const sectionId of Object.keys(questionsData)) {
         const sectionFormId = sectionId.toLowerCase().replace(/\s+/g, '_');
         const sectionQuestions = questionsData[sectionId as keyof typeof questionsData] as Question[];
+        const sectionConfig = getSectionConfig(sectionId);
         
         try {
           const response = await fetch(`${API_BASE_URL}/responses/${user.uid}/${sectionFormId}`);
           if (response.ok) {
             const data: FormResponse = await response.json();
             
-            // Check if at least 50% of questions in the section have been answered
+            // Check completion based on section configuration
             if (data.responses && data.responses.length > 0) {
               const answeredQuestionIds = new Set(data.responses.map(r => r.question_id));
               const allQuestionIds = sectionQuestions.map(q => q.id.toString());
@@ -187,12 +188,16 @@ const SectionForm: React.FC = () => {
                 return response && response.answer.trim().length > 0;
               }).length;
               
-              // Section is complete if at least 50% of questions are answered
-              const completionThreshold = Math.ceil(allQuestionIds.length * 0.5);
+              // Use section-specific completion threshold
+              const completionThreshold = Math.ceil(allQuestionIds.length * sectionConfig.completionThreshold);
               if (answeredCount >= completionThreshold) {
                 completed.add(sectionId);
               }
             }
+          } else if (sectionConfig.isOptional) {
+            // Optional sections are considered complete even if no responses exist
+            // This allows users to skip them entirely
+            // Note: We don't auto-mark them as complete here to maintain user choice
           }
         } catch (error) {
           console.error(`Error loading completion status for ${sectionId}:`, error);
@@ -248,27 +253,28 @@ const SectionForm: React.FC = () => {
         setHasChanges(false);
         setLastSaved(new Date());
         
-        // Update completion status based on 50% threshold
-        if (section) {
-          const totalQuestions = sectionQuestions.length;
-          const completionThreshold = Math.ceil(totalQuestions * 0.5);
-          
-          if (answersArray.length >= completionThreshold) {
-            setCompletedSections(prev => new Set([...prev, section]));
-          } else {
-            // Remove from completed if it falls below threshold
-            setCompletedSections(prev => {
-              const newSet = new Set(prev);
-              newSet.delete(section);
-              return newSet;
-            });
-          }
-        }
+        // Update completion status based on section-specific threshold
+        const totalQuestions = sectionQuestions.length;
+        const sectionConfig = getSectionConfig(section || '');
+        const completionThreshold = Math.ceil(totalQuestions * sectionConfig.completionThreshold);
+        const isNowComplete = answersArray.length >= completionThreshold;
         
+        if (isNowComplete) {
+          setCompletedSections(prev => new Set([...prev, section || '']));
+        } else {
+          setCompletedSections(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(section || '');
+            return newSet;
+          });
+        }
+
         if (!isAutosave) {
           toast({
             title: "Success",
-            description: "Your responses have been saved.",
+            description: sectionConfig.isOptional 
+              ? `Your responses have been saved. This section is optional and ${isNowComplete ? 'marked as complete' : 'can be completed anytime'}.`
+              : `Your responses have been saved. ${isNowComplete ? 'Section completed!' : `${completionThreshold - answersArray.length} more answers needed to complete this section.`}`,
           });
         }
       } else {

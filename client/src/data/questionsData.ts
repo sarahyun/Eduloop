@@ -7,6 +7,40 @@ export interface QuestionsData {
   [key: string]: Question[];
 }
 
+// Configuration for section requirements
+export interface SectionConfig {
+  isOptional: boolean;
+  completionThreshold: number; // Percentage (0-1) of questions needed to mark as complete
+}
+
+export const sectionConfigs: Record<string, SectionConfig> = {
+  "Introduction": {
+    isOptional: true,
+    completionThreshold: 0.0 // 0% - any answered question marks it complete since it's optional
+  },
+  "Academic Information": {
+    isOptional: false,
+    completionThreshold: 0.5 // 50% - default threshold
+  },
+  "Extracurriculars and Interests": {
+    isOptional: false,
+    completionThreshold: 0.5 // 50% - default threshold
+  },
+  "Personal Reflections": {
+    isOptional: false,
+    completionThreshold: 0.5 // 50% - default threshold
+  },
+  "College Preferences": {
+    isOptional: false,
+    completionThreshold: 0.5 // 50% - default threshold
+  }
+};
+
+// Helper function to get section configuration
+export const getSectionConfig = (sectionId: string): SectionConfig => {
+  return sectionConfigs[sectionId] || { isOptional: false, completionThreshold: 0.5 };
+};
+
 export const questionsData: QuestionsData = {
   "Introduction": [
     { id: 1, question: "Do you have a career or major in mind? No worries if not." },

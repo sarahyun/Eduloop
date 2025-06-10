@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { MessageCircle, ArrowLeft, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { questionsData } from "@/data/questionsData";
+import { questionsData, type Question, getSectionConfig } from "@/data/questionsData";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { API_BASE_URL } from '@/lib/config';
@@ -53,7 +53,8 @@ export default function ChatOnboarding() {
       // Find the first unanswered question
       const firstUnanswered = sectionQuestions.find((q: any) => !responses[q.id]);
       const answeredCount = Object.keys(responses).length;
-      const completionThreshold = Math.ceil(sectionQuestions.length * 0.5);
+      const sectionConfig = getSectionConfig(section);
+      const completionThreshold = Math.ceil(sectionQuestions.length * sectionConfig.completionThreshold);
       const isComplete = answeredCount >= completionThreshold;
       
       console.log("firstUnanswered", firstUnanswered);
@@ -61,13 +62,19 @@ export default function ChatOnboarding() {
       
       let initialMessage = "";
       if (isComplete && !firstUnanswered) {
-        initialMessage = "Excellent! You've completed this section. All questions have been answered. Feel free to review or update any of your responses.";
+        initialMessage = sectionConfig.isOptional 
+          ? "Excellent! You've completed this optional section. All questions have been answered. Feel free to review or update any of your responses."
+          : "Excellent! You've completed this section. All questions have been answered. Feel free to review or update any of your responses.";
       } else if (isComplete) {
-        initialMessage = `Great progress! This section is already marked as complete since you've answered ${answeredCount} out of ${sectionQuestions.length} questions. Would you like to continue with the remaining questions or review your existing answers?`;
+        initialMessage = sectionConfig.isOptional
+          ? `Great! This optional section is already marked as complete since you've answered ${answeredCount} out of ${sectionQuestions.length} questions. Would you like to continue with the remaining questions or review your existing answers?`
+          : `Great progress! This section is already marked as complete since you've answered ${answeredCount} out of ${sectionQuestions.length} questions. Would you like to continue with the remaining questions or review your existing answers?`;
       } else if (firstUnanswered) {
         initialMessage = firstUnanswered.question;
       } else {
-        initialMessage = "Let's work on completing this section together!";
+        initialMessage = sectionConfig.isOptional
+          ? "Let's work on this optional section together! You can answer as many or as few questions as you'd like."
+          : "Let's work on completing this section together!";
       }
       
       setMessages([
@@ -82,13 +89,61 @@ export default function ChatOnboarding() {
     }
   }, [section, sectionQuestions, initialized, responses, responsesLoaded]);
 
+  // Build context for AI
+  const buildContext = () => {
+    if (!section || !sectionQuestions.length) return "";
+    
+    const answeredCount = Object.keys(responses).length;
+    const sectionConfig = getSectionConfig(section);
+    const completionThreshold = Math.ceil(sectionQuestions.length * sectionConfig.completionThreshold);
+    const isComplete = answeredCount >= completionThreshold;
+    
+    let context = `CURRENT SECTION: ${section}\n`;
+    context += `SECTION STATUS: ${isComplete ? `✅ COMPLETE (${answeredCount}/${sectionQuestions.length} answered, ${completionThreshold} needed)` : `⏳ IN PROGRESS (${answeredCount}/${sectionQuestions.length} answered, ${completionThreshold - answeredCount} more needed to complete)`}\n\n`;
+    
+    if (sectionConfig.isOptional) {
+      context += `NOTE: This is an OPTIONAL section. The user can answer as many or as few questions as they want.\n\n`;
+    }
+    
+    context += "SECTION QUESTIONS:\n";
+    sectionQuestions.forEach((q: any, index: number) => {
+      const isAnswered = responses[q.id];
+      const status = isAnswered ? "✅ ANSWERED" : "❌ NOT ANSWERED";
+      context += `${index + 1}. ${q.question} [${status}]\n`;
+      if (isAnswered) {
+        context += `   Current answer: "${responses[q.id]}"\n`;
+      }
+    });
+    
+    context += `\nINSTRUCTIONS:\n`;
+    if (sectionConfig.isOptional) {
+      context += `- This section is OPTIONAL - remind the user they can skip questions or complete as many as they want\n`;
+      context += `- Any answered question marks this section as complete\n`;
+    } else {
+      context += `- This section is considered complete when at least ${completionThreshold} questions (${Math.round(sectionConfig.completionThreshold * 100)}%) are answered\n`;
+    }
+    context += `- Ask ONE question at a time\n`;
+    context += `- Be conversational and encouraging\n`;
+    context += `- If user wants to skip a question, that's okay\n`;
+    context += `- Help them think through their answers\n`;
+    context += `- Save their response when they provide an answer\n`;
+    
+    return context;
+  };
+
   // Helper to build OpenAI context prompt with function calling
   function buildContextPrompt(userMessage: string) {
     const answeredCount = Object.keys(responses).length;
-    const completionThreshold = Math.ceil(sectionQuestions.length * 0.5);
+    const sectionConfig = getSectionConfig(section || '');
+    const completionThreshold = Math.ceil(sectionQuestions.length * sectionConfig.completionThreshold);
     const isComplete = answeredCount >= completionThreshold;
     
     let context = `CONTEXT: You are a helpful college counselor helping a student complete their "${section}" profile section.\n\n`;
+    
+    if (sectionConfig.isOptional) {
+      context += `NOTE: This is an OPTIONAL section. The student can answer as many or as few questions as they want.\n\n`;
+    }
+    
     context += `SECTION STATUS: ${isComplete ? `✅ COMPLETE (${answeredCount}/${sectionQuestions.length} answered, ${completionThreshold} needed)` : `⏳ IN PROGRESS (${answeredCount}/${sectionQuestions.length} answered, ${completionThreshold - answeredCount} more needed to complete)`}\n\n`;
     context += `SECTION QUESTIONS (with exact IDs to use):\n`;
     sectionQuestions.forEach((q: any) => {
@@ -100,7 +155,12 @@ export default function ChatOnboarding() {
       }
     });
     context += `\nINSTRUCTIONS:\n`;
-    context += `- This section is considered complete when at least ${completionThreshold} questions (50%) are answered\n`;
+    if (sectionConfig.isOptional) {
+      context += `- This section is OPTIONAL - remind the student they can skip questions or complete as many as they want\n`;
+      context += `- Any answered question marks this section as complete\n`;
+    } else {
+      context += `- This section is considered complete when at least ${completionThreshold} questions (${Math.round(sectionConfig.completionThreshold * 100)}%) are answered\n`;
+    }
     context += `- Ask questions one at a time in a conversational way\n`;
     context += `- Focus on unanswered questions first\n`;
     context += `- You may ask ONE thoughtful follow-up question if relevant\n`;
@@ -252,13 +312,14 @@ export default function ChatOnboarding() {
     }
   };
 
-  // Calculate progress
-  const answeredCount = Object.keys(responses).length;
+  // Calculate progress and completion status
   const totalQuestions = sectionQuestions.length;
+  const answeredCount = Object.keys(responses).length;
   const progressPercentage = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
-  const completionThreshold = Math.ceil(totalQuestions * 0.5);
+  const sectionConfig = getSectionConfig(section || '');
+  const completionThreshold = Math.ceil(totalQuestions * sectionConfig.completionThreshold);
   const isComplete = answeredCount >= completionThreshold;
-  
+
   // Get section description
   const getSectionDescription = (sectionName: string) => {
     const descriptions: Record<string, string> = {
@@ -326,21 +387,27 @@ export default function ChatOnboarding() {
                   </span>
                 </div>
                 <Progress value={progressPercentage} className="mb-2" />
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>
-                    {isComplete ? 
-                      "✅ Section complete!" : 
-                      `${completionThreshold - answeredCount} more answers needed to complete`
-                    }
-                  </span>
-                  <span>{Math.round(progressPercentage)}%</span>
+                <div className="text-sm text-gray-600 mb-2">
+                  {isComplete ? (
+                    <span className="text-green-600 font-medium">
+                      ✅ Section Complete! ({answeredCount}/{totalQuestions} questions answered)
+                      {sectionConfig.isOptional && " - Optional section"}
+                    </span>
+                  ) : (
+                    <span>
+                      {sectionConfig.isOptional 
+                        ? `Optional section: ${answeredCount}/${totalQuestions} questions answered`
+                        : `${completionThreshold - answeredCount} more answers needed to complete`
+                      }
+                    </span>
+                  )}
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  {isComplete ? 
-                    "Great job! This section is marked as complete. You can continue adding more details or move to other sections." : 
-                    `Answer at least ${completionThreshold} questions (50%) to mark this section as complete.`
+                <div className="text-xs text-gray-500">
+                  {sectionConfig.isOptional 
+                    ? 'This section is optional - answer as many questions as you want!'
+                    : `Answer at least ${completionThreshold} questions (${Math.round(sectionConfig.completionThreshold * 100)}%) to mark this section as complete.`
                   }
-                </p>
+                </div>
               </CardContent>
             </Card>
 

@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, FileText, Sparkles, Clock, CheckCircle, Edit } from "lucide-react";
 import { api, type User } from "@/lib/api";
-import { questionsData, type Question } from '@/data/questionsData';
+import { questionsData, type Question, getSectionConfig } from '@/data/questionsData';
 import { useAuth } from "@/context/AuthContext";
 import { API_BASE_URL } from '@/lib/config';
 
@@ -65,6 +65,7 @@ export default function ProfileBuilder() {
       for (const sectionId of Object.keys(questionsData)) {
         const sectionFormId = sectionId.toLowerCase().replace(/\s+/g, '_');
         const sectionQuestions = questionsData[sectionId as keyof typeof questionsData] as Question[];
+        const sectionConfig = getSectionConfig(sectionId);
         
         progress[sectionId] = { answered: 0, total: sectionQuestions.length };
         
@@ -73,7 +74,7 @@ export default function ProfileBuilder() {
           if (response.ok) {
             const data: FormResponse = await response.json();
             
-            // Check if at least 50% of questions in the section have been answered
+            // Check completion based on section configuration
             if (data.responses && data.responses.length > 0) {
               const answeredQuestionIds = new Set(data.responses.map(r => r.question_id));
               const allQuestionIds = sectionQuestions.map(q => q.id.toString());
@@ -86,12 +87,15 @@ export default function ProfileBuilder() {
               
               progress[sectionId].answered = answeredCount;
               
-              // Section is complete if at least 50% of questions are answered
-              const completionThreshold = Math.ceil(allQuestionIds.length * 0.5);
+              // Use section-specific completion threshold
+              const completionThreshold = Math.ceil(allQuestionIds.length * sectionConfig.completionThreshold);
               if (answeredCount >= completionThreshold) {
                 completed.add(sectionId);
               }
             }
+          } else if (sectionConfig.isOptional) {
+            // Optional sections can be marked as complete even without responses
+            // But we don't auto-complete them to preserve user choice
           }
         } catch (error) {
           console.error(`Error loading completion status for ${sectionId}:`, error);
@@ -151,10 +155,12 @@ export default function ProfileBuilder() {
     }
   };
 
-  // Calculate completion percentage based on actual completed sections
-  const completedSectionsCount = completedSections.size;
-  const totalSections = Object.keys(questionsData).length;
-  const profileCompletion = Math.round((completedSectionsCount / totalSections) * 100);
+  // Calculate completion percentage based on required sections only
+  const requiredSections = Object.keys(questionsData).filter(sectionId => !getSectionConfig(sectionId).isOptional);
+  const completedRequiredSections = requiredSections.filter(sectionId => completedSections.has(sectionId));
+  const profileCompletion = requiredSections.length > 0 
+    ? Math.round((completedRequiredSections.length / requiredSections.length) * 100)
+    : 100;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -180,12 +186,12 @@ export default function ProfileBuilder() {
             <Progress value={isLoadingCompletion ? 0 : profileCompletion} className="mb-4" />
             <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
               <span>
-                {isLoadingCompletion ? 'Checking completion...' : `${completedSectionsCount} of ${totalSections} sections completed`}
+                {isLoadingCompletion ? 'Checking completion...' : `${completedRequiredSections.length} of ${requiredSections.length} required sections completed`}
               </span>
-              <span>Sections complete at 50% answered</span>
+              <span>Required sections complete at 50% answered</span>
             </div>
             <p className="text-sm text-gray-600">
-              Each section is marked complete when you answer at least half of its questions. You can always add more details later.
+              Required sections are marked complete when you answer at least half of their questions. Optional sections can be completed anytime.
             </p>
           </div>
         </div>
@@ -295,111 +301,92 @@ export default function ProfileBuilder() {
           
           {sections.map((section) => {
             const progress = sectionProgress[section.id] || { answered: 0, total: section.questions.length };
-            const completionThreshold = Math.ceil(progress.total * 0.5);
-            const progressPercentage = progress.total > 0 ? (progress.answered / progress.total) * 100 : 0;
+            const sectionConfig = getSectionConfig(section.id);
+            const completionThreshold = Math.ceil(progress.total * sectionConfig.completionThreshold);
             
             return (
-            <Card key={section.id} className={`${section.completed ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}`}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center flex-1">
-                    <div className={`p-2 rounded-lg mr-4 ${section.completed ? 'bg-green-100' : 'bg-gray-100'}`}>
-                      {section.completed ? (
-                        <CheckCircle className="w-5 h-5 text-green-600" />
-                      ) : (
-                        <div className="w-5 h-5 border-2 border-gray-300 rounded-full" />
-                      )}
-                    </div>
+              <Card key={section.id} className="border hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className={`font-medium ${section.completed ? 'text-green-900' : 'text-gray-900'}`}>
-                          {section.title}
-                        </h3>
-                        <span className="text-xs text-gray-500">
-                          {progress.answered}/{progress.total} answered
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-500 mb-2">{section.description}</p>
-                      
-                      {/* Progress bar */}
-                      <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1">
-                        <div 
-                          className={`h-1.5 rounded-full transition-all duration-300 ${
-                            section.completed ? 'bg-green-500' : 'bg-blue-500'
-                          }`}
-                          style={{ width: `${progressPercentage}%` }}
-                        />
-                      </div>
-                      
-                      <div className="text-xs text-gray-500">
-                        {section.completed ? (
-                          <span className="text-green-600 font-medium">✓ Complete (50%+ answered)</span>
-                        ) : (
-                          <span>
-                            {completionThreshold - progress.answered > 0 
-                              ? `${completionThreshold - progress.answered} more needed to complete`
-                              : 'Ready to mark complete'
-                            }
-                          </span>
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-semibold text-gray-900">{section.title}</h3>
+                        {sectionConfig.isOptional && (
+                          <Badge variant="secondary" className="text-xs">Optional</Badge>
                         )}
+                        {section.completed && (
+                          <Badge variant="default" className="bg-green-100 text-green-800 text-xs">
+                            ✓ Complete
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">{section.description}</p>
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">
+                            {progress.answered} of {progress.total} questions answered
+                          </span>
+                          {section.completed ? (
+                            <span className="text-green-600 font-medium">
+                              ✓ Complete {sectionConfig.isOptional ? '(Optional)' : `(${Math.round(sectionConfig.completionThreshold * 100)}%+ answered)`}
+                            </span>
+                          ) : (
+                            <span>
+                              {sectionConfig.isOptional 
+                                ? 'Optional - complete anytime'
+                                : completionThreshold - progress.answered > 0
+                                  ? `${completionThreshold - progress.answered} more needed to complete`
+                                  : 'Ready to mark complete'
+                              }
+                            </span>
+                          )}
+                        </div>
+                        <Progress 
+                          value={progress.total > 0 ? (progress.answered / progress.total) * 100 : 0} 
+                          className="h-2"
+                        />
                       </div>
                     </div>
                   </div>
                   
                   <div className="flex gap-2 ml-4">
-                    {/* Actions for incomplete sections */}
                     {!section.completed && (
                       <>
-                        <Button 
-                          size="sm" 
+                        <Button
                           variant="outline"
-                          onClick={() => {
-                            window.location.href = `/chat-onboarding?section=${encodeURIComponent(section.id)}`;
-                          }}
+                          size="sm"
+                          onClick={() => handleMethodSelection('chat', section.id)}
+                          className="flex items-center gap-2"
                         >
-                          <MessageCircle className="w-4 h-4 mr-1" />
-                          Chat
+                          <MessageCircle className="w-4 h-4" />
+                          Chat Mode
                         </Button>
-                        <Button 
-                          size="sm" 
+                        <Button
                           variant="outline"
+                          size="sm"
                           onClick={() => handleMethodSelection('form', section.id)}
+                          className="flex items-center gap-2"
                         >
-                          <FileText className="w-4 h-4 mr-1" />
-                          Form
+                          <FileText className="w-4 h-4" />
+                          Form Mode
                         </Button>
                       </>
                     )}
-                    
-                    {/* Actions for completed sections - allow updates */}
                     {section.completed && (
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-gray-600 hover:text-blue-600"
-                          onClick={() => {
-                            window.location.href = `/chat-onboarding?section=${encodeURIComponent(section.id)}`;
-                          }}
-                        >
-                          <MessageCircle className="w-3 h-3 mr-1" />
-                          Chat
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-gray-600 hover:text-blue-600"
-                          onClick={() => handleMethodSelection('form', section.id)}
-                        >
-                          <Edit className="w-3 h-3 mr-1" />
-                          Form
-                        </Button>
-                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleMethodSelection('form', section.id)}
+                        className="flex items-center gap-2 text-gray-600"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Edit Responses
+                      </Button>
                     )}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             );
           })}
         </div>

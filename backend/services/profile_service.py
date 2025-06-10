@@ -54,7 +54,7 @@ class ProfileService:
                     {"role": "user", "content": context}
                 ],
                 response_format={"type": "json_object"},
-                max_tokens=8000,
+                max_tokens=10000,
                 temperature=0.7
             )
             raw_content = response.choices[0].message.content

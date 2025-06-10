@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import { User, Star, ArrowRight, Clock, Sparkles, MessageCircle, GraduationCap, ChevronLeft, ChevronRight, MapPin, TrendingUp } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { questionsData, type Question } from '@/data/questionsData';
+import { questionsData, type Question, getSectionConfig } from '@/data/questionsData';
 import { SchoolRecommendationsService, SchoolRecommendation } from '@/services/schoolRecommendationsService';
 import { API_BASE_URL } from '@/lib/config';
 
@@ -33,10 +33,13 @@ export default function Dashboard() {
   const [hasProfileData, setHasProfileData] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Calculate completion percentage
-  const completedSectionsCount = completedSections.size;
-  const totalSections = Object.keys(questionsData).length;
-  const profileCompletion = Math.round((completedSectionsCount / totalSections) * 100);
+  // Calculate profile completion based on required sections only
+  const allSections = Object.keys(questionsData);
+  const requiredSections = allSections.filter(sectionId => !getSectionConfig(sectionId).isOptional);
+  const completedRequiredSections = requiredSections.filter(sectionId => completedSections.has(sectionId));
+  const profileCompletion = requiredSections.length > 0 
+    ? Math.round((completedRequiredSections.length / requiredSections.length) * 100)
+    : 100;
 
   // Load recommendations when profile is complete
   useEffect(() => {
@@ -78,23 +81,23 @@ export default function Dashboard() {
   // Load completion status for all sections
   useEffect(() => {
     const loadCompletionStatus = async () => {
-      if (!user?.uid) {
-        return;
-      }
+      if (!user?.uid) return;
 
       const completed = new Set<string>();
       
       for (const sectionId of Object.keys(questionsData)) {
         const sectionFormId = sectionId.toLowerCase().replace(/\s+/g, '_');
         const sectionQuestions = questionsData[sectionId as keyof typeof questionsData] as Question[];
+        const sectionConfig = getSectionConfig(sectionId);
         
         try {
           const response = await fetch(`${API_BASE_URL}/responses/${user.uid}/${sectionFormId}`);
           if (response.ok) {
             const data: FormResponse = await response.json();
             
-            // Check if at least 50% of questions in the section have been answered
+            // Check completion based on section configuration
             if (data.responses && data.responses.length > 0) {
+              const answeredQuestionIds = new Set(data.responses.map(r => r.question_id));
               const allQuestionIds = sectionQuestions.map(q => q.id.toString());
               
               // Count questions with non-empty answers
@@ -103,8 +106,8 @@ export default function Dashboard() {
                 return response && response.answer.trim().length > 0;
               }).length;
               
-              // Section is complete if at least 50% of questions are answered
-              const completionThreshold = Math.ceil(allQuestionIds.length * 0.5);
+              // Use section-specific completion threshold
+              const completionThreshold = Math.ceil(allQuestionIds.length * sectionConfig.completionThreshold);
               if (answeredCount >= completionThreshold) {
                 completed.add(sectionId);
               }

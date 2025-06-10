@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock } from 'lucide-react';
+import { CheckCircle, Clock, Info } from 'lucide-react';
 
 interface ProfileCompletionBannerProps {
   completionPercentage: number;
@@ -34,7 +34,7 @@ export function ProfileCompletionBanner({
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-gray-900">
-                  {isFullyComplete ? 'Profile Builder Complete!' : 'Almost Ready!'}
+                  {isFullyComplete ? 'Required Sections Complete!' : 'Almost Ready!'}
                 </h3>
                 <Badge variant={isFullyComplete ? 'default' : 'secondary'} className={
                   isFullyComplete ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
@@ -44,16 +44,22 @@ export function ProfileCompletionBanner({
               </div>
               <p className="text-gray-600 text-sm">
                 {isFullyComplete 
-                  ? 'Your profile is ready to generate insights and college recommendations.'
-                  : `Complete ${100 - completionPercentage}% more to unlock profile insights and recommendations.`
+                  ? 'All required sections are complete. Your profile is ready to generate insights and college recommendations.'
+                  : `Complete ${100 - completionPercentage}% more of the required sections to unlock profile insights and recommendations.`
                 }
               </p>
+              {isFullyComplete && (
+                <div className="flex items-center gap-1 mt-2 text-xs text-gray-500">
+                  <Info className="h-3 w-3" />
+                  <span>Optional sections can be completed anytime to enhance your profile</span>
+                </div>
+              )}
             </div>
           </div>
           
           {isFullyComplete && (
             <div className="text-right">
-              <div className="text-sm font-medium text-green-700 mb-1">Profile Complete!</div>
+              <div className="text-sm font-medium text-green-700 mb-1">Required Sections Complete!</div>
               <div className="text-xs text-green-600">Ready for insights & recommendations</div>
             </div>
           )}
