@@ -31,33 +31,221 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          console.log('🔍 Fetching user profile from:', `${API_BASE_URL}/auth/user/${firebaseUser.uid}`);
-          const response = await fetch(`${API_BASE_URL}/auth/user/${firebaseUser.uid}`);
-          if (response.ok) {
-            const userProfile = await response.json();
-            
-            setUser({
-              ...firebaseUser,
-              role: userProfile.role,
-              grade: userProfile.grade,
-            } as User);
-          } else {
-            setUser(firebaseUser as User);
-          }
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
-          setUser(firebaseUser as User); // Fallback to basic Firebase user data
-        }
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
+  // Test user override - set these values for testing
+  const USE_TEST_USER = false; // Set to false to use normal Firebase auth
+  const TEST_USER_ID = 'B3i7MI8iCYcFGxpIkudvc8nrguj1'; // Replace with your test user ID
+
+  // Enhanced environment checks for test user
+  const isLocalDevelopment = () => {
+    // Multiple checks to ensure we're in local development
+    const isDev = import.meta.env.DEV;
+    const isLocalhost = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1' ||
+                       window.location.hostname.includes('replit.dev');
+    const isNotProd = import.meta.env.MODE !== 'production';
+    
+    console.log('🔍 Environment checks:', {
+      isDev,
+      isLocalhost,
+      isNotProd,
+      hostname: window.location.hostname,
+      mode: import.meta.env.MODE
     });
-    return unsubscribe;
+    
+    return isDev && isLocalhost && isNotProd;
+  };
+
+  // Test user override - inject test user when enabled
+  const createTestUser = async (): Promise<User | null> => {
+    // Safety warning for non-local environments
+    if (USE_TEST_USER && !isLocalDevelopment()) {
+      console.error('🚨 SECURITY WARNING: Test user is enabled but not in local development environment!');
+      console.error('🚨 Test user functionality is disabled for security reasons.');
+      return null;
+    }
+    
+    // Enhanced safety checks
+    if (USE_TEST_USER && isLocalDevelopment() && TEST_USER_ID) {
+      console.log('🧪 Using test user override, fetching data for:', TEST_USER_ID);
+      console.log('🧪 Environment verified as local development');
+      
+      try {
+        // Fetch actual user data from backend
+        const response = await fetch(`${API_BASE_URL}/users/${TEST_USER_ID}`);
+        if (response.ok) {
+          const userProfile = await response.json();
+          console.log('🧪 Fetched test user profile:', userProfile);
+          
+          return {
+            uid: TEST_USER_ID,
+            email: userProfile.email || 'test@example.com',
+            displayName: userProfile.name || 'Test User',
+            photoURL: null,
+            emailVerified: true,
+            phoneNumber: null,
+            providerId: 'firebase',
+            role: userProfile.role || 'student',
+            grade: userProfile.grade || '12',
+            // Mock Firebase User properties
+            isAnonymous: false,
+            metadata: {
+              creationTime: new Date().toISOString(),
+              lastSignInTime: new Date().toISOString(),
+            },
+            providerData: [],
+            refreshToken: 'test-refresh-token',
+            tenantId: null,
+            delete: async () => {},
+            getIdToken: async () => 'test-id-token',
+            getIdTokenResult: async () => ({
+              token: 'test-id-token',
+              expirationTime: new Date(Date.now() + 3600000).toISOString(),
+              authTime: new Date().toISOString(),
+              issuedAtTime: new Date().toISOString(),
+              signInProvider: 'custom',
+              signInSecondFactor: null,
+              claims: { uid: TEST_USER_ID, email: userProfile.email || 'test@example.com' }
+            }),
+            reload: async () => {},
+            toJSON: () => ({}),
+          } as User;
+        } else {
+          console.warn('🧪 Failed to fetch test user data, falling back to mock data');
+          // Fallback to basic mock user if API call fails
+          return {
+            uid: TEST_USER_ID,
+            email: 'test@example.com',
+            displayName: 'Test User (Mock)',
+            photoURL: null,
+            emailVerified: true,
+            phoneNumber: null,
+            providerId: 'firebase',
+            role: 'student',
+            grade: '12',
+            // Mock Firebase User properties
+            isAnonymous: false,
+            metadata: {
+              creationTime: new Date().toISOString(),
+              lastSignInTime: new Date().toISOString(),
+            },
+            providerData: [],
+            refreshToken: 'test-refresh-token',
+            tenantId: null,
+            delete: async () => {},
+            getIdToken: async () => 'test-id-token',
+            getIdTokenResult: async () => ({
+              token: 'test-id-token',
+              expirationTime: new Date(Date.now() + 3600000).toISOString(),
+              authTime: new Date().toISOString(),
+              issuedAtTime: new Date().toISOString(),
+              signInProvider: 'custom',
+              signInSecondFactor: null,
+              claims: { uid: TEST_USER_ID, email: 'test@example.com' }
+            }),
+            reload: async () => {},
+            toJSON: () => ({}),
+          } as User;
+        }
+      } catch (error) {
+        console.error('🧪 Error fetching test user data:', error);
+        // Fallback to basic mock user if there's an error
+        return {
+          uid: TEST_USER_ID,
+          email: 'test@example.com',
+          displayName: 'Test User (Error Fallback)',
+          photoURL: null,
+          emailVerified: true,
+          phoneNumber: null,
+          providerId: 'firebase',
+          role: 'student',
+          grade: '12',
+          // Mock Firebase User properties
+          isAnonymous: false,
+          metadata: {
+            creationTime: new Date().toISOString(),
+            lastSignInTime: new Date().toISOString(),
+          },
+          providerData: [],
+          refreshToken: 'test-refresh-token',
+          tenantId: null,
+          delete: async () => {},
+          getIdToken: async () => 'test-id-token',
+          getIdTokenResult: async () => ({
+            token: 'test-id-token',
+            expirationTime: new Date(Date.now() + 3600000).toISOString(),
+            authTime: new Date().toISOString(),
+            issuedAtTime: new Date().toISOString(),
+            signInProvider: 'custom',
+            signInSecondFactor: null,
+            claims: { uid: TEST_USER_ID, email: 'test@example.com' }
+          }),
+          reload: async () => {},
+          toJSON: () => ({}),
+        } as User;
+      }
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    // Check for test user override first
+    const handleTestUser = async () => {
+      const testUser = await createTestUser();
+      if (testUser) {
+        setUser(testUser);
+        setLoading(false);
+        return true; // Return true to indicate test user was used
+      }
+      return false; // Return false to proceed with Firebase auth
+    };
+
+    // Handle both test user and Firebase auth
+    const initializeAuth = async () => {
+      const usedTestUser = await handleTestUser();
+      if (usedTestUser) {
+        return; // Exit early if test user was used
+      }
+
+      // Otherwise use Firebase auth
+      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          try {
+            console.log('🔍 Fetching user profile from:', `${API_BASE_URL}/auth/user/${firebaseUser.uid}`);
+            const response = await fetch(`${API_BASE_URL}/auth/user/${firebaseUser.uid}`);
+            if (response.ok) {
+              const userProfile = await response.json();
+              
+              setUser({
+                ...firebaseUser,
+                role: userProfile.role,
+                grade: userProfile.grade,
+              } as User);
+            } else {
+              setUser(firebaseUser as User);
+            }
+          } catch (error) {
+            console.error('Error fetching user profile:', error);
+            setUser(firebaseUser as User); // Fallback to basic Firebase user data
+          }
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      });
+      return unsubscribe;
+    };
+
+    let unsubscribe: (() => void) | undefined;
+    
+    initializeAuth().then((unsub) => {
+      unsubscribe = unsub;
+    });
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   const signup = async (email: string, password: string, name: string, role = 'student', grade = '12th') => {

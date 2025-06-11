@@ -13,6 +13,8 @@ export interface SectionConfig {
   completionThreshold: number; // Percentage (0-1) of questions needed to mark as complete
 }
 
+
+
 export const sectionConfigs: Record<string, SectionConfig> = {
   "Introduction": {
     isOptional: true,
