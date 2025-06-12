@@ -30,6 +30,8 @@ export default function CollegeRecommendations() {
   const [generationStatus, setGenerationStatus] = useState<GenerationStatus | null>(null);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string>('');
+  const [hasProfileData, setHasProfileData] = useState(false);
+  const [hasRealRecommendations, setHasRealRecommendations] = useState(false);
   
   // Use ref to track generation state for setTimeout closure
   const isGeneratingRef = useRef(false);
@@ -69,6 +71,33 @@ export default function CollegeRecommendations() {
       // Initialize page state properly on load/refresh
       initializePage();
     }
+  }, [user?.uid]);
+
+  // Check for profile data and recommendations availability
+  useEffect(() => {
+    const checkDataAvailability = async () => {
+      if (!user?.uid) return;
+
+      try {
+        // Check for profile data
+        const profileResponse = await fetch(`https://web-production-bb19.up.railway.app/profiles/status/${user.uid}`);
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          setHasProfileData(profileData.status === 'completed');
+        }
+
+        // Check for recommendations
+        const recResponse = await fetch(`https://web-production-bb19.up.railway.app/recommendations/status/${user.uid}`);
+        if (recResponse.ok) {
+          const recData = await recResponse.json();
+          setHasRealRecommendations(recData.status === 'completed' && recData.recommendation_count > 0);
+        }
+      } catch (error) {
+        console.error('Error checking data availability:', error);
+      }
+    };
+
+    checkDataAvailability();
   }, [user?.uid]);
 
   const initializePage = async () => {
@@ -310,8 +339,8 @@ export default function CollegeRecommendations() {
     <div className="min-h-screen bg-gray-50">
       <Navigation 
         user={{ name: user.displayName || user.email || '', email: user.email || '' }}
-        hasProfileData={true}
-        hasRealRecommendations={true}
+        hasProfileData={hasProfileData}
+        hasRealRecommendations={hasRealRecommendations}
       />
       
       <div className="max-w-7xl mx-auto px-4 py-8">

@@ -28,6 +28,8 @@ export default function ExplorePage() {
   const [showFilters, setShowFilters] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [hasProfileData, setHasProfileData] = useState(false);
+  const [hasRealRecommendations, setHasRealRecommendations] = useState(false);
 
   // Show loading state while auth is loading
   if (loading) {
