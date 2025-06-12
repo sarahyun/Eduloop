@@ -231,9 +231,11 @@ export default function Dashboard() {
               currentStep={
                 !hasCompletedIntroduction() 
                   ? 'onboarding' 
-                  : profileCompletion < 80 
+                  : profileCompletion < 30 
                     ? 'profile' 
-                    : 'chat'
+                    : profileCompletion < 80 
+                      ? 'profile' 
+                      : 'recommendations'
               }
             />
           </div>

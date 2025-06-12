@@ -39,6 +39,15 @@ export function GuidanceHelper({ currentStep, className = "" }: GuidanceHelperPr
       completed: false
     },
     {
+      id: 'recommendations',
+      title: 'Get College Matches',
+      description: 'Generate AI-powered recommendations based on your profile',
+      actionText: 'View Matches',
+      actionUrl: '/college-recommendations',
+      icon: Target,
+      completed: false
+    },
+    {
       id: 'chat',
       title: 'Get Guidance',
       description: 'Chat with our AI mentor for personalized college counseling',
