@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, ArrowRight, CheckCircle, GraduationCap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, GraduationCap, Sparkles } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { questionsData, type Question } from '@/data/questionsData';
 import { useToast } from '@/hooks/use-toast';

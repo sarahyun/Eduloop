@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
+import { GuidanceHelper, ProgressTracker } from "@/components/GuidanceHelper";
 import { User, Star, ArrowRight, Clock, Sparkles, MessageCircle, GraduationCap, ChevronLeft, ChevronRight, MapPin, TrendingUp } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { questionsData, type Question, getSectionConfig } from '@/data/questionsData';
@@ -170,7 +171,7 @@ export default function Dashboard() {
         hasRealRecommendations={hasRealRecommendations}
       />
       
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* New User Onboarding Guidance */}
         {isNewUser && (
           <Card className="mb-8 border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-lg">
@@ -229,8 +230,29 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Main Dashboard Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Smart Guidance for Next Steps */}
+        {!isNewUser && profileCompletion < 100 && (
+          <div className="mb-8">
+            <GuidanceHelper 
+              currentStep={
+                completedSections.size === 0 
+                  ? 'onboarding' 
+                  : profileCompletion < 30 
+                    ? 'profile' 
+                    : profileCompletion < 80 
+                      ? 'profile' 
+                      : 'recommendations'
+              }
+            />
+          </div>
+        )}
+
+        {/* Dashboard Layout with Sidebar */}
+        <div className="flex gap-8 mb-8">
+          {/* Main Content */}
+          <div className="flex-1">
+            {/* Main Dashboard Cards */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Profile Building */}
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/profile'}>
             <CardContent className="p-6">
@@ -512,8 +534,19 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
+            </div>
+          </div>
 
-
+          {/* Progress Tracker Sidebar */}
+          {!isNewUser && (
+            <div className="w-80 flex-shrink-0">
+              <ProgressTracker 
+                completedSteps={Array.from(completedSections)}
+                className="sticky top-8"
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
