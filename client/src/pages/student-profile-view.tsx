@@ -97,26 +97,16 @@ export function StudentProfileView({ userId: propUserId }: StudentProfileViewPro
           // No profile data found - this is normal for new users
           setProfileData(null);
         }
-      } else if (response.status === 404) {
-        // Profile not found - this is normal for new users
-        console.log('🔍 Profile not found (404) - showing empty state');
-        setProfileData(null);
-      } else if (response.status >= 400 && response.status < 500) {
-        // Client errors (400-499) - treat as "no profile found"
-        console.log('🔍 Client error - showing empty state');
-        setProfileData(null);
       } else {
-        // Server errors (500+) - show actual error
-        throw new Error(`Server error: ${response.status}`);
+        // Any non-success response means no profile exists yet - show empty state
+        console.log(`🔍 No profile found (${response.status}) - showing empty state`);
+        setProfileData(null);
       }
     } catch (err) {
       console.error('🔍 Network or server error:', err);
-      // Only set error for actual network/server failures
-      if (err instanceof TypeError && err.message.includes('fetch')) {
-        setError('Unable to connect to server. Please check your connection and try again.');
-      } else {
-        setError('Server is temporarily unavailable. Please try again later.');
-      }
+      // For profile endpoint, treat any error as "no profile exists yet"
+      console.log('🔍 Network error - treating as no profile, showing empty state');
+      setProfileData(null);
     } finally {
       setLoading(false);
     }
