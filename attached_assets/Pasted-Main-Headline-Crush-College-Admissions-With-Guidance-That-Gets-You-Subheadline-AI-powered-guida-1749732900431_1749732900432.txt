@@ -1,0 +1,76 @@
+Main Headline: "Crush College Admissions—With Guidance That Gets You"
+Subheadline: "AI powered guidance to help you find your fit, tell your story, and get noticed—even in the toughest year yet."
+
+CTAs:
+
+Primary: "Find My College Match" (purple gradient button)
+Secondary: "See How It Works" (outline button)
+Problem Section - "The Challenge: Why It's So Hard"
+Three-column layout with stats:
+
+Record Competition
+
+"8.5 million+ applications last year—a 6% jump"
+"Acceptance rates at historic lows"
+It's Not Just About Grades
+
+"Colleges want the real you—your story, your fit, your vibe"
+High Stakes, High Stress
+
+"76% say this is the most decisive moment in their lives"
+Emotional Connection - "What Students Feel"
+Quote carousel with relatable student voices:
+
+"I'm overwhelmed by choices and don't know where to start"
+"I feel like just a number, not a person"
+"I want to find my people, but how do I know where I'll fit in?"
+"What if I miss out on opportunities I don't even know exist?"
+Solution - "What EduLoop Delivers"
+Four value props with icons:
+
+Someone Who Gets You
+
+"AI and real counselors who listen, learn, and remember what matters to you"
+Reassurance and Excitement
+
+"See your strengths, explore possibilities, get excited about your future"
+Independence & Authenticity
+
+"Find your own path, not just what others expect"
+Real, Not Fluff
+
+"Honest, personalized guidance built for you"
+How It Works - Process
+Four-step visual flow:
+
+Build Your Profile - Share interests, values, goals beyond academics
+Get Matched - Schools that fit your personality and vibe
+AI Mentor Chat - Questions, advice, essay brainstorming
+Stand Out in Applications - School-specific tips for authentic fit
+Dual Value Prop - Split Screen
+Left Side - "Find Your Fit":
+
+Schools that match your personality
+Programs aligned with your goals
+Campus cultures where you'll thrive
+Hidden gems with your opportunities
+Right Side - "Acceptance Advantage":
+
+Demonstrate authentic fit in applications
+Stand out with school-specific strategies
+Higher acceptance rates at right-fit schools
+Scholarship opportunities you qualify for
+The Connection Story
+Single powerful quote section:
+"When you apply to schools that truly fit you, your applications become authentic and compelling—not generic. That's what gets you noticed—and gets you in."
+
+Interactive Demo
+Show actual AI counselor conversation with realistic student scenario
+
+Social Proof
+Student success stories focused on both discovery and acceptance
+
+Final CTA
+"Ready to Crush Your College Applications?"
+With reassuring subtext about the process being supportive, not stressful.
+

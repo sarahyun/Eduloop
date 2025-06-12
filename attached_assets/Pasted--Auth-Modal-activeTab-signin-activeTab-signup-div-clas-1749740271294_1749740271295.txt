@@ -1,0 +1,125 @@
+ {/* Auth Modal */}
+      {(activeTab === "signin" || activeTab === "signup") && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-2xl">
+                  {activeTab === "signin" ? "Sign In" : "Create Account"}
+                </CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setActiveTab("")}
+                >
+                  ×
+                </Button>
+              </div>
+              <CardDescription>
+                {activeTab === "signin" 
+                  ? "Welcome back to your college journey" 
+                  : "Start your personalized college discovery journey"
+                }
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {activeTab === "signin" ? (
+                <form onSubmit={signInForm.handleSubmit(onSignIn)} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">Email</Label>
+                    <Input
+                      id="signin-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      {...signInForm.register("email")}
+                    />
+                    {signInForm.formState.errors.email && (
+                      <p className="text-sm text-red-600">{signInForm.formState.errors.email.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password">Password</Label>
+                    <Input
+                      id="signin-password"
+                      type="password"
+                      placeholder="Enter your password"
+                      {...signInForm.register("password")}
+                    />
+                    {signInForm.formState.errors.password && (
+                      <p className="text-sm text-red-600">{signInForm.formState.errors.password.message}</p>
+                    )}
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Signing In..." : "Sign In"}
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={signUpForm.handleSubmit(onSignUp)} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Input
+                      id="signup-name"
+                      type="text"
+                      placeholder="Enter your full name"
+                      {...signUpForm.register("fullName")}
+                    />
+                    {signUpForm.formState.errors.fullName && (
+                      <p className="text-sm text-red-600">{signUpForm.formState.errors.fullName.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      {...signUpForm.register("email")}
+                    />
+                    {signUpForm.formState.errors.email && (
+                      <p className="text-sm text-red-600">{signUpForm.formState.errors.email.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="Create a password"
+                      {...signUpForm.register("password")}
+                    />
+                    {signUpForm.formState.errors.password && (
+                      <p className="text-sm text-red-600">{signUpForm.formState.errors.password.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-confirm">Confirm Password</Label>
+                    <Input
+                      id="signup-confirm"
+                      type="password"
+                      placeholder="Confirm your password"
+                      {...signUpForm.register("confirmPassword")}
+                    />
+                    {signUpForm.formState.errors.confirmPassword && (
+                      <p className="text-sm text-red-600">{signUpForm.formState.errors.confirmPassword.message}</p>
+                    )}
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Creating Account..." : "Create Account"}
+                  </Button>
+                </form>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
