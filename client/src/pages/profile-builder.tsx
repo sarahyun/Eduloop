@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, FileText, Sparkles, Clock, CheckCircle, Edit } from "lucide-react";
+import { MessageCircle, FileText, Sparkles, Clock, CheckCircle, Edit, ArrowLeft } from "lucide-react";
 import { api, type User } from "@/lib/api";
 import { questionsData, type Question, getSectionConfig } from '@/data/questionsData';
 import { useAuth } from "@/context/AuthContext";
@@ -200,6 +200,18 @@ export default function ProfileBuilder() {
       />
       
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Back to Dashboard Button */}
+        <div className="mb-6">
+          <Button 
+            variant="outline" 
+            onClick={() => window.location.href = '/dashboard'}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Dashboard
+          </Button>
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Build Your Profile</h1>
