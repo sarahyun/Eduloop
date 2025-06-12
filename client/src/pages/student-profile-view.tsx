@@ -91,10 +91,12 @@ export function StudentProfileView({ userId: propUserId }: StudentProfileViewPro
         if (data && data.student_profile && data.student_profile.student_profile) {
           setProfileData(data);
         } else {
-          setError('No profile data found. Please generate your profile first.');
+          // No profile data found - this is normal for new users
+          setProfileData(null);
         }
       } else if (response.status === 404) {
-        setError('No profile found. Please generate your profile first.');
+        // Profile not found - this is normal for new users
+        setProfileData(null);
       } else {
         throw new Error('Failed to fetch profile data');
       }
