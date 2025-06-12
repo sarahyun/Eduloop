@@ -24,6 +24,7 @@ import {
   ChevronRight,
   Zap,
   UserCheck,
+  Compass,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -59,17 +60,18 @@ function LandingPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { signup, login, user, loading } = useAuth();
+  const { toast } = useToast();
 
   // Redirect authenticated users to dashboard (unless they just signed up)
   useEffect(() => {
     if (user && !loading && !isLoading) {
       // Allow a brief moment for signup redirect to onboarding to take effect
       const timer = setTimeout(() => {
-        setLocation("/dashboard");
+        window.location.href = "/dashboard";
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [user, loading, isLoading, setLocation]);
+  }, [user, loading, isLoading]);
 
   // Form setup
   const signInForm = useForm<SignInForm>({
@@ -126,11 +128,6 @@ function LandingPage() {
       toast({
         title: "Welcome back!",
         description: "You've been signed in successfully.",
-
-        title: "Account created successfully!",
-        description:
-          "Let's start with a quick introduction to personalize your experience.",
-        duration: 4000,
       });
       window.location.href = "/dashboard";
     } catch (error) {
@@ -155,7 +152,7 @@ function LandingPage() {
         title: "Account created!",
         description: "Welcome to CollegeNavigate. Let's get started!",
       });
-      window.location.href = "/dashboard";
+      window.location.href = "/onboarding";
     } catch (error) {
       toast({
         title: "Account creation failed",
@@ -570,10 +567,10 @@ function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {/* Support When You Need It - First for emotional appeal */}
             <div className="bg-white/90 backdrop-blur-sm p-10 rounded-3xl shadow-xl border border-emerald-200 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-teal-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-green-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative">
                 <div className="flex items-start space-x-6 mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-3xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg">
+                  <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-green-500 rounded-3xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg">
                     <MessageCircle className="w-10 h-10 text-white" />
                   </div>
                   <div className="flex-1">
@@ -590,7 +587,7 @@ function LandingPage() {
                   <span className="px-4 py-2 bg-emerald-500 text-white rounded-full text-sm font-semibold shadow-md">
                     Real answers
                   </span>
-                  <span className="px-4 py-2 bg-teal-500 text-white rounded-full text-sm font-semibold shadow-md">
+                  <span className="px-4 py-2 bg-green-500 text-white rounded-full text-sm font-semibold shadow-md">
                     24/7 help
                   </span>
                 </div>
@@ -1087,13 +1084,13 @@ function LandingPage() {
                               strokeLinecap="round"
                               strokeLinejoin="round"
                               strokeWidth={2}
-                              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
                             />
                           </svg>
                         ),
-                        title: "Unexpected options, just for you",
+                        title: "See real financial options",
                         description:
-                          "Get matched with schools you might not have found on your own",
+                          "Find scholarships and aid that actually fit your story",
                       },
                     ].map((benefit, index) => (
                       <div
@@ -1154,7 +1151,7 @@ function LandingPage() {
               <div className="bg-white rounded-3xl p-8 shadow-xl border border-emerald-100">
                 <div className="flex flex-col lg:flex-row items-center gap-12">
                   <div className="text-center lg:text-left lg:w-1/3">
-                    <div className="w-32 h-32 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-3xl flex items-center justify-center mx-auto lg:mx-0 mb-6 shadow-xl">
+                    <div className="w-32 h-32 bg-gradient-to-br from-emerald-500 to-green-500 rounded-3xl flex items-center justify-center mx-auto lg:mx-0 mb-6 shadow-xl">
                       <CheckCircle className="w-16 h-16 text-white" />
                     </div>
                     <div className="flex items-center justify-center lg:justify-start mb-4">
@@ -1255,10 +1252,10 @@ function LandingPage() {
                     ].map((benefit, index) => (
                       <div
                         key={index}
-                        className="group p-6 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 hover:shadow-lg transition-all duration-300"
+                        className="group p-6 rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-100 hover:shadow-lg transition-all duration-300"
                       >
                         <div className="flex items-start space-x-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center text-white flex-shrink-0 group-hover:scale-110 transition-transform">
+                          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center text-white flex-shrink-0 group-hover:scale-110 transition-transform">
                             {benefit.icon}
                           </div>
                           <div>
@@ -1323,7 +1320,7 @@ function LandingPage() {
         {/* Background elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-blue-50 to-emerald-50"></div>
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-200/30 to-blue-200/30 rounded-full blur-3xl transform translate-x-32 -translate-y-32"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-emerald-200/30 to-teal-200/30 rounded-full blur-3xl transform -translate-x-32 translate-y-32"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-emerald-200/30 to-green-200/30 rounded-full blur-3xl transform -translate-x-32 translate-y-32"></div>
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-12 md:p-16">

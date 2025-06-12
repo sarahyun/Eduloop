@@ -641,7 +641,7 @@ export function StudentProfileView({ userId: propUserId }: StudentProfileViewPro
             const getColorTheme = (sectionId: string, index: number) => {
               const themes = [
                 { bg: 'bg-gradient-to-r from-purple-50 to-pink-50', icon: 'text-purple-600', border: 'border-purple-100' },
-                { bg: 'bg-gradient-to-r from-emerald-50 to-teal-50', icon: 'text-emerald-600', border: 'border-emerald-100' },
+                { bg: 'bg-gradient-to-r from-emerald-50 to-green-50', icon: 'text-emerald-600', border: 'border-emerald-100' },
                 { bg: 'bg-gradient-to-r from-amber-50 to-orange-50', icon: 'text-amber-600', border: 'border-amber-100' },
                 { bg: 'bg-gradient-to-r from-slate-50 to-gray-50', icon: 'text-slate-600', border: 'border-slate-100' },
                 { bg: 'bg-gradient-to-r from-indigo-50 to-blue-50', icon: 'text-indigo-600', border: 'border-indigo-100' },

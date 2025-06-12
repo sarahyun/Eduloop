@@ -140,7 +140,7 @@ export function ProgressMilestone({ currentStep, totalSteps, stepTitles }: Progr
       <div className="relative">
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div 
-            className="bg-gradient-to-r from-primary to-purple-500 h-2 rounded-full transition-all duration-500 ease-out"
+            className="bg-gradient-to-r from-emerald-500 to-green-500 h-2 rounded-full transition-all duration-500 ease-out"
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
@@ -181,7 +181,7 @@ export function PersonalityInsight({ responses, currentStep }: PersonalityInsigh
       insights.push({ icon: Brain, text: "You enjoy problem-solving and technical challenges", color: "text-blue-500" });
     }
     if (responses.careerMajor.toLowerCase().includes('art') || responses.careerMajor.toLowerCase().includes('design')) {
-      insights.push({ icon: Sparkles, text: "You have a creative and expressive personality", color: "text-purple-500" });
+      insights.push({ icon: Sparkles, text: "You have a creative and expressive personality", color: "text-blue-500" });
     }
   }
 
@@ -192,7 +192,7 @@ export function PersonalityInsight({ responses, currentStep }: PersonalityInsigh
   if (insights.length === 0) return null;
 
   return (
-    <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-none">
+    <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-none">
       <CardContent className="p-4">
         <div className="flex items-center space-x-2 mb-3">
           <Sparkles className="w-5 h-5 text-primary" />

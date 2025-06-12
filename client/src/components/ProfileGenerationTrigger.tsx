@@ -121,7 +121,7 @@ export function ProfileGenerationTrigger({
             {isFullyComplete && (
               <Button 
                 onClick={handleGenerateProfile}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white"
               >
                 <Brain className="mr-2 h-4 w-4" />
                 Generate Profile

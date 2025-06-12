@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Bell, Compass, Menu, LogOut, User } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
@@ -197,16 +197,23 @@ export function Navigation({ user, hasProfileData = false, hasRealRecommendation
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuItem className="flex flex-col items-start">
+                <DropdownMenuContent className="w-56 bg-white border border-gray-200 shadow-lg" align="end" forceMount>
+                  <DropdownMenuItem className="flex flex-col items-start hover:bg-gray-50 cursor-default focus:bg-gray-50 p-3">
                     <div className="font-medium">{user.name}</div>
                     <div className="text-sm text-gray-500">{user.email}</div>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => window.location.href = '/profile'}>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={() => window.location.href = '/profile'}
+                    className="hover:bg-gray-100 cursor-pointer transition-colors focus:bg-gray-100 active:bg-gray-200 px-3 py-2"
+                  >
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout}>
+                  <DropdownMenuItem 
+                    onClick={handleLogout}
+                    className="hover:bg-gray-100 cursor-pointer transition-colors focus:bg-gray-100 active:bg-gray-200 px-3 py-2"
+                  >
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                   </DropdownMenuItem>

@@ -251,7 +251,7 @@ export function AIChat({
           <Badge
             key={index}
             variant="secondary"
-            className="cursor-pointer hover:bg-gray-200 transition-colors text-xs"
+            className="cursor-pointer hover:bg-emerald-100 bg-emerald-50 text-emerald-700 border-emerald-200 transition-colors text-xs"
             onClick={() => {
               onSendMessage(action);
             }}

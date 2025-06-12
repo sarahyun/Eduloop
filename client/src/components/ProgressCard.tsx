@@ -20,33 +20,34 @@ export function ProgressCard({
   color = 'primary',
   progressValue 
 }: ProgressCardProps) {
-  const getColorClasses = (color: string) => {
-    switch (color) {
-      case 'primary':
-        return 'from-primary/5 to-primary/10 text-primary';
-      case 'purple':
-        return 'from-purple-50 to-purple-100 text-purple-600';
-      case 'green':
-        return 'from-green-50 to-green-100 text-green-600';
-      case 'orange':
-        return 'from-orange-50 to-orange-100 text-orange-600';
-      default:
-        return 'from-primary/5 to-primary/10 text-primary';
+  const getCardStyles = (completion: number) => {
+    if (completion >= 100) {
+      return 'from-emerald-50 to-emerald-100 text-emerald-600';
+    } else {
+      return 'from-gray-50 to-gray-100 text-gray-600';
+    }
+  };
+
+  const getProgressColor = (completion: number) => {
+    if (completion >= 100) {
+      return 'text-emerald-500';
+    } else {
+      return 'text-gray-500';
     }
   };
 
   const getIconColor = (color: string) => {
     switch (color) {
       case 'primary':
-        return 'text-primary';
+        return 'text-emerald-500';
       case 'purple':
-        return 'text-purple-500';
+        return 'text-emerald-500';
       case 'green':
-        return 'text-green-500';
+        return 'text-emerald-500';
       case 'orange':
         return 'text-orange-500';
       default:
-        return 'text-primary';
+        return 'text-emerald-500';
     }
   };
 
@@ -66,10 +67,10 @@ export function ProgressCard({
   };
 
   return (
-    <div className={`bg-gradient-to-r ${getColorClasses(color)} rounded-xl p-4`}>
+    <div className={`bg-gradient-to-r ${getCardStyles(progressValue || 0)} rounded-xl p-4`}>
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-medium text-gray-900">{title}</h3>
-        <span className={`font-semibold ${getIconColor(color)}`}>{value}</span>
+        <span className={`font-semibold ${getProgressColor(progressValue || 0)}`}>{value}</span>
       </div>
       
       {type === 'progress' && typeof progressValue === 'number' && (
