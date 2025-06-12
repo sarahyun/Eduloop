@@ -31,6 +31,8 @@ export default function ProfileBuilder() {
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
   const [isLoadingCompletion, setIsLoadingCompletion] = useState(true);
   const [sectionProgress, setSectionProgress] = useState<Record<string, { answered: number; total: number }>>({});
+  const [hasProfileData, setHasProfileData] = useState(false);
+  const [hasRealRecommendations, setHasRealRecommendations] = useState(false);
   
   // Show loading state while auth is loading
   if (loading) {
@@ -109,6 +111,33 @@ export default function ProfileBuilder() {
 
     loadCompletionStatus();
   }, [user?.uid]);
+
+  // Check for profile data and recommendations availability
+  useEffect(() => {
+    const checkDataAvailability = async () => {
+      if (!user?.uid) return;
+
+      try {
+        // Check for profile data
+        const profileResponse = await fetch(`${API_BASE_URL}/profiles/status/${user.uid}`);
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          setHasProfileData(profileData.status === 'completed');
+        }
+
+        // Check for recommendations
+        const recResponse = await fetch(`${API_BASE_URL}/recommendations/status/${user.uid}`);
+        if (recResponse.ok) {
+          const recData = await recResponse.json();
+          setHasRealRecommendations(recData.status === 'completed' && recData.recommendation_count > 0);
+        }
+      } catch (error) {
+        console.error('Error checking data availability:', error);
+      }
+    };
+
+    checkDataAvailability();
+  }, [user?.uid]);
   
   // Convert questionsData to array format and check completion status
   const sections = Object.entries(questionsData).map(([sectionId, questions]) => {
@@ -166,8 +195,8 @@ export default function ProfileBuilder() {
     <div className="min-h-screen bg-gray-50">
       <Navigation 
         user={{ name: user.displayName || user.email || 'User', email: user.email || '' }}
-        hasProfileData={false}
-        hasRealRecommendations={false}
+        hasProfileData={hasProfileData}
+        hasRealRecommendations={hasRealRecommendations}
       />
       
       <div className="max-w-4xl mx-auto px-4 py-8">

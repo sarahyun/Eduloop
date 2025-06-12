@@ -65,6 +65,8 @@ export function StudentProfileView({ userId: propUserId }: StudentProfileViewPro
   const [generationProgress, setGenerationProgress] = useState<string>('');
   const [activeTab, setActiveTab] = useState('overview');
   const [, navigate] = useLocation();
+  const [hasProfileData, setHasProfileData] = useState(false);
+  const [hasRealRecommendations, setHasRealRecommendations] = useState(false);
 
   useEffect(() => {
     if (userId) {
