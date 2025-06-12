@@ -21,6 +21,35 @@ export default function ChatOnboarding() {
   const [isLoading, setIsLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [responsesLoaded, setResponsesLoaded] = useState(false);
+  const [hasProfileData, setHasProfileData] = useState(false);
+  const [hasRealRecommendations, setHasRealRecommendations] = useState(false);
+
+  // Check for profile data and recommendations availability
+  useEffect(() => {
+    const checkDataAvailability = async () => {
+      if (!user?.uid) return;
+
+      try {
+        // Check for profile data
+        const profileResponse = await fetch(`${API_BASE_URL}/profiles/status/${user.uid}`);
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          setHasProfileData(profileData.status === 'completed');
+        }
+
+        // Check for recommendations
+        const recResponse = await fetch(`${API_BASE_URL}/recommendations/status/${user.uid}`);
+        if (recResponse.ok) {
+          const recData = await recResponse.json();
+          setHasRealRecommendations(recData.status === 'completed' && recData.recommendation_count > 0);
+        }
+      } catch (error) {
+        console.error('Error checking data availability:', error);
+      }
+    };
+
+    checkDataAvailability();
+  }, [user?.uid]);
 
   // Fetch existing responses on mount
   useEffect(() => {
