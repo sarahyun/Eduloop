@@ -1,5 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { CheckCircle, Clock, Info } from 'lucide-react';
 
 interface ProfileCompletionBannerProps {
@@ -42,12 +43,21 @@ export function ProfileCompletionBanner({
                   {completionPercentage}% Complete
                 </Badge>
               </div>
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-600 text-sm mb-3">
                 {isFullyComplete 
                   ? 'All required sections are complete. Your profile is ready to generate insights and college recommendations.'
                   : `Complete ${100 - completionPercentage}% more of the required sections to unlock profile insights and recommendations.`
                 }
               </p>
+              
+              {/* Progress Bar */}
+              <div className="mb-2">
+                <Progress 
+                  value={completionPercentage} 
+                  className="h-2"
+                />
+              </div>
+              
               {isFullyComplete && (
                 <div className="flex items-center gap-1 mt-2 text-xs text-gray-500">
                   <Info className="h-3 w-3" />
