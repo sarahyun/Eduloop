@@ -30,6 +30,14 @@ export function Navigation({ user, hasProfileData = false, hasRealRecommendation
 
   // Filter navigation items based on conditions
   const navigation = allNavigation.filter(item => item.alwaysShow || item.condition);
+  
+  // Debug logging
+  console.log('Navigation Debug:', {
+    hasProfileData,
+    hasRealRecommendations,
+    allNavigation,
+    filteredNavigation: navigation
+  });
 
   const isActive = (href: string) => location === href || location.startsWith(href);
 
@@ -62,7 +70,7 @@ export function Navigation({ user, hasProfileData = false, hasRealRecommendation
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-6 flex-1 justify-center max-w-2xl">
             {navigation.map((item) => (
               <Link key={item.name} href={item.href}>
                 <span
