@@ -29,6 +29,7 @@ export default function Dashboard() {
   const [hasRealRecommendations, setHasRealRecommendations] = useState(false);
   const [hasProfileData, setHasProfileData] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [completionLoaded, setCompletionLoaded] = useState(false);
 
   // Calculate profile completion based on required sections only
   const allSections = Object.keys(questionsData);
@@ -46,12 +47,12 @@ export default function Dashboard() {
   // Progressive guidance logic
   const isNewUser = !hasCompletedIntroduction();
 
-  // Redirect new users to onboarding
+  // Redirect new users to onboarding - only after completion data is loaded
   useEffect(() => {
-    if (user && isNewUser) {
+    if (user && !loading && completionLoaded && isNewUser) {
       window.location.href = '/onboarding';
     }
-  }, [user, isNewUser]);
+  }, [user, loading, completionLoaded, isNewUser]);
 
 
 
@@ -133,6 +134,7 @@ export default function Dashboard() {
       }
       
       setCompletedSections(completed);
+      setCompletionLoaded(true);
     };
 
     loadCompletionStatus();
