@@ -49,7 +49,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/">
-        {user ? <Redirect to="/dashboard" /> : <LandingPage />}
+        <LandingPage />
       </Route>
       <Route path="/dashboard">
         <ProtectedRoute component={Dashboard} />

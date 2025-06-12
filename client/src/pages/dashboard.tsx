@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import { User, Star, ArrowRight, Clock, Sparkles, MessageCircle, GraduationCap, ChevronLeft, ChevronRight, MapPin, TrendingUp } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useNavigationData } from "@/hooks/useNavigationData";
 import { questionsData, type Question, getSectionConfig } from '@/data/questionsData';
 import { SchoolRecommendationsService, SchoolRecommendation } from '@/services/schoolRecommendationsService';
 import { API_BASE_URL } from '@/lib/config';
@@ -24,10 +25,9 @@ interface FormResponse {
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
+  const { hasProfileData, hasRealRecommendations } = useNavigationData();
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
   const [recommendations, setRecommendations] = useState<SchoolRecommendation[]>([]);
-  const [hasRealRecommendations, setHasRealRecommendations] = useState(false);
-  const [hasProfileData, setHasProfileData] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [completionLoaded, setCompletionLoaded] = useState(false);
 
@@ -47,15 +47,6 @@ export default function Dashboard() {
   // Progressive guidance logic
   const isNewUser = !hasCompletedIntroduction();
 
-  // Redirect new users to onboarding - only after completion data is loaded
-  useEffect(() => {
-    if (user && !loading && completionLoaded && isNewUser) {
-      window.location.href = '/onboarding';
-    }
-  }, [user, loading, completionLoaded, isNewUser]);
-
-
-
   // Load recommendations when profile is complete
   useEffect(() => {
     const loadRecommendations = async () => {
@@ -68,7 +59,6 @@ export default function Dashboard() {
         const status = await SchoolRecommendationsService.getGenerationStatus(user.uid);
         console.log('Generation status:', status);
         const hasGenerated = status.status === 'completed';
-        setHasRealRecommendations(hasGenerated);
 
         if (hasGenerated) {
           // Load actual recommendations
@@ -87,11 +77,6 @@ export default function Dashboard() {
 
     loadRecommendations();
   }, [user?.uid, profileCompletion]);
-
-  // Profile Insights available when forms are 100% complete
-  useEffect(() => {
-    setHasProfileData(profileCompletion >= 100);
-  }, [profileCompletion]);
 
   // Load completion status for all sections
   useEffect(() => {
@@ -240,8 +225,8 @@ export default function Dashboard() {
           </Card>
 
           {/* Profile Insights */}
-          <Card className={`hover:shadow-lg transition-shadow ${hasProfileData ? 'cursor-pointer' : 'opacity-60'}`} 
-                onClick={() => hasProfileData && (window.location.href = '/profile-view')}>
+          <Card className={`hover:shadow-lg transition-shadow ${profileCompletion >= 100 ? 'cursor-pointer' : 'opacity-60'}`} 
+                onClick={() => profileCompletion >= 100 && (window.location.href = '/profile-view')}>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
@@ -250,7 +235,7 @@ export default function Dashboard() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Profile Insights</h3>
                   <p className="text-gray-600 text-sm">
-                    {hasProfileData ? 'View your analysis' : 'Complete profile to view insights'}
+                    {profileCompletion >= 100 ? 'Generate your AI profile' : 'Complete profile to view insights'}
                   </p>
                 </div>
               </div>

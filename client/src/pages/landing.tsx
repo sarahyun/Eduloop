@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,15 +34,17 @@ const signInSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-const signUpSchema = z.object({
-  fullName: z.string().min(2, "Please enter your full name"),
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const signUpSchema = z
+  .object({
+    fullName: z.string().min(2, "Please enter your full name"),
+    email: z.string().email("Please enter a valid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type SignInForm = z.infer<typeof signInSchema>;
 type SignUpForm = z.infer<typeof signUpSchema>;
@@ -49,8 +57,19 @@ function LandingPage() {
   const [hoveredStep, setHoveredStep] = useState<number | null>(null);
   const [hoveredBenefit, setHoveredBenefit] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { signup, login } = useAuth();
-  const { toast } = useToast();
+
+  const { signup, login, user, loading } = useAuth();
+
+  // Redirect authenticated users to dashboard (unless they just signed up)
+  useEffect(() => {
+    if (user && !loading && !isLoading) {
+      // Allow a brief moment for signup redirect to onboarding to take effect
+      const timer = setTimeout(() => {
+        setLocation("/dashboard");
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [user, loading, isLoading, setLocation]);
 
   // Form setup
   const signInForm = useForm<SignInForm>({
@@ -107,12 +126,20 @@ function LandingPage() {
       toast({
         title: "Welcome back!",
         description: "You've been signed in successfully.",
+
+        title: "Account created successfully!",
+        description:
+          "Let's start with a quick introduction to personalize your experience.",
+        duration: 4000,
       });
       window.location.href = "/dashboard";
     } catch (error) {
       toast({
         title: "Sign in failed",
-        description: error instanceof Error ? error.message : "Please check your credentials and try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Please check your credentials and try again.",
         variant: "destructive",
       });
     } finally {
@@ -132,7 +159,8 @@ function LandingPage() {
     } catch (error) {
       toast({
         title: "Account creation failed",
-        description: error instanceof Error ? error.message : "Please try again.",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -223,8 +251,8 @@ function LandingPage() {
                       Support When You Need It
                     </div>
                     <div className="text-sm text-gray-600">
-                      Late-night essay stress and overwhelm? Decision anxiety? We're here with
-                      practical advice.
+                      Late-night essay stress and overwhelm? Decision anxiety?
+                      We're here with practical advice.
                     </div>
                   </div>
                 </div>
@@ -237,8 +265,8 @@ function LandingPage() {
                       Your Competitive Edge
                     </div>
                     <div className="text-sm text-gray-600">
-                      No more generic essays. Get a personalized strategy for each school, so
-                      you stand out.
+                      No more generic essays. Get a personalized strategy for
+                      each school, so you stand out.
                     </div>
                   </div>
                 </div>
@@ -254,7 +282,6 @@ function LandingPage() {
                   Find My College Match
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
-                
               </div>
             </div>
 
@@ -798,9 +825,13 @@ function LandingPage() {
                   <div
                     className={`hidden lg:block absolute top-20 w-4 h-4 rounded-full border-4 border-white shadow-sm z-10 left-1/2 transform -translate-x-1/2 transition-colors duration-300 ${
                       hoveredStep === index
-                        ? index === 0 ? "bg-slate-500" :
-                          index === 1 ? "bg-blue-500" :
-                          index === 2 ? "bg-emerald-500" : "bg-orange-500"
+                        ? index === 0
+                          ? "bg-slate-500"
+                          : index === 1
+                            ? "bg-blue-500"
+                            : index === 2
+                              ? "bg-emerald-500"
+                              : "bg-orange-500"
                         : "bg-gray-300"
                     }`}
                   ></div>
@@ -818,9 +849,13 @@ function LandingPage() {
                         <div
                           className={`w-12 h-12 rounded-lg flex items-center justify-center transition-colors duration-300 ${
                             hoveredStep === index
-                              ? index === 0 ? "bg-slate-500 text-white" :
-                                index === 1 ? "bg-blue-500 text-white" :
-                                index === 2 ? "bg-emerald-500 text-white" : "bg-orange-500 text-white"
+                              ? index === 0
+                                ? "bg-slate-500 text-white"
+                                : index === 1
+                                  ? "bg-blue-500 text-white"
+                                  : index === 2
+                                    ? "bg-emerald-500 text-white"
+                                    : "bg-orange-500 text-white"
                               : "bg-gray-100 text-gray-600"
                           }`}
                         >
@@ -832,9 +867,13 @@ function LandingPage() {
                         <div
                           className={`text-sm font-semibold mb-2 transition-colors duration-300 ${
                             hoveredStep === index
-                              ? index === 0 ? "text-slate-600" :
-                                index === 1 ? "text-blue-600" :
-                                index === 2 ? "text-emerald-600" : "text-orange-600"
+                              ? index === 0
+                                ? "text-slate-600"
+                                : index === 1
+                                  ? "text-blue-600"
+                                  : index === 2
+                                    ? "text-emerald-600"
+                                    : "text-orange-600"
                               : "text-gray-500"
                           }`}
                         >
@@ -1345,8 +1384,8 @@ function LandingPage() {
                 <CardTitle className="text-2xl">
                   {activeTab === "signin" ? "Sign In" : "Create Account"}
                 </CardTitle>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={() => setActiveTab("")}
                 >
@@ -1354,15 +1393,17 @@ function LandingPage() {
                 </Button>
               </div>
               <CardDescription>
-                {activeTab === "signin" 
-                  ? "Welcome back to your college journey" 
-                  : "Start your personalized college discovery journey"
-                }
+                {activeTab === "signin"
+                  ? "Welcome back to your college journey"
+                  : "Start your personalized college discovery journey"}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {activeTab === "signin" ? (
-                <form onSubmit={signInForm.handleSubmit(onSignIn)} className="space-y-4">
+                <form
+                  onSubmit={signInForm.handleSubmit(onSignIn)}
+                  className="space-y-4"
+                >
                   <div className="space-y-2">
                     <Label htmlFor="signin-email">Email</Label>
                     <Input
@@ -1372,7 +1413,9 @@ function LandingPage() {
                       {...signInForm.register("email")}
                     />
                     {signInForm.formState.errors.email && (
-                      <p className="text-sm text-red-600">{signInForm.formState.errors.email.message}</p>
+                      <p className="text-sm text-red-600">
+                        {signInForm.formState.errors.email.message}
+                      </p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -1384,11 +1427,13 @@ function LandingPage() {
                       {...signInForm.register("password")}
                     />
                     {signInForm.formState.errors.password && (
-                      <p className="text-sm text-red-600">{signInForm.formState.errors.password.message}</p>
+                      <p className="text-sm text-red-600">
+                        {signInForm.formState.errors.password.message}
+                      </p>
                     )}
                   </div>
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                     disabled={isLoading}
                   >
@@ -1396,7 +1441,7 @@ function LandingPage() {
                   </Button>
                   <p className="text-sm text-center text-gray-600 mt-4">
                     Don't have an account?{" "}
-                    <button 
+                    <button
                       type="button"
                       className="text-purple-600 hover:text-purple-700 font-medium"
                       onClick={() => setActiveTab("signup")}
@@ -1406,7 +1451,10 @@ function LandingPage() {
                   </p>
                 </form>
               ) : (
-                <form onSubmit={signUpForm.handleSubmit(onSignUp)} className="space-y-4">
+                <form
+                  onSubmit={signUpForm.handleSubmit(onSignUp)}
+                  className="space-y-4"
+                >
                   <div className="space-y-2">
                     <Label htmlFor="signup-name">Full Name</Label>
                     <Input
@@ -1416,7 +1464,9 @@ function LandingPage() {
                       {...signUpForm.register("fullName")}
                     />
                     {signUpForm.formState.errors.fullName && (
-                      <p className="text-sm text-red-600">{signUpForm.formState.errors.fullName.message}</p>
+                      <p className="text-sm text-red-600">
+                        {signUpForm.formState.errors.fullName.message}
+                      </p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -1428,7 +1478,9 @@ function LandingPage() {
                       {...signUpForm.register("email")}
                     />
                     {signUpForm.formState.errors.email && (
-                      <p className="text-sm text-red-600">{signUpForm.formState.errors.email.message}</p>
+                      <p className="text-sm text-red-600">
+                        {signUpForm.formState.errors.email.message}
+                      </p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -1440,7 +1492,9 @@ function LandingPage() {
                       {...signUpForm.register("password")}
                     />
                     {signUpForm.formState.errors.password && (
-                      <p className="text-sm text-red-600">{signUpForm.formState.errors.password.message}</p>
+                      <p className="text-sm text-red-600">
+                        {signUpForm.formState.errors.password.message}
+                      </p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -1452,11 +1506,13 @@ function LandingPage() {
                       {...signUpForm.register("confirmPassword")}
                     />
                     {signUpForm.formState.errors.confirmPassword && (
-                      <p className="text-sm text-red-600">{signUpForm.formState.errors.confirmPassword.message}</p>
+                      <p className="text-sm text-red-600">
+                        {signUpForm.formState.errors.confirmPassword.message}
+                      </p>
                     )}
                   </div>
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                     disabled={isLoading}
                   >
@@ -1464,7 +1520,7 @@ function LandingPage() {
                   </Button>
                   <p className="text-sm text-center text-gray-600 mt-4">
                     Already have an account?{" "}
-                    <button 
+                    <button
                       type="button"
                       className="text-purple-600 hover:text-purple-700 font-medium"
                       onClick={() => setActiveTab("signin")}
