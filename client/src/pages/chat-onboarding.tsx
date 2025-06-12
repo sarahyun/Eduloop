@@ -334,7 +334,11 @@ export default function ChatOnboarding() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation user={{ name: user?.displayName || user?.email || 'User', email: user?.email || '' }} />
+      <Navigation 
+        user={{ name: user?.displayName || user?.email || 'User', email: user?.email || '' }}
+        hasProfileData={false}
+        hasRealRecommendations={false}
+      />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section with Context */}
