@@ -529,6 +529,116 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
+
+        {/* College Recommendations Preview */}
+        <Card className="mt-8">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl font-bold text-gray-900">College Recommendations</CardTitle>
+                <p className="text-gray-600 text-sm">Personalized matches based on your profile</p>
+              </div>
+              {profileCompletion >= 100 ? (
+                <Button 
+                  onClick={() => window.location.href = '/college-recommendations'}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  size="sm"
+                >
+                  View All Matches
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  disabled
+                  className="opacity-50 cursor-not-allowed"
+                >
+                  Complete Profile to Unlock
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {profileCompletion >= 100 ? (
+              hasRealRecommendations && recommendations.length > 0 ? (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {recommendations.slice(0, 3).map((school, index) => (
+                      <div key={index} className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-gray-900 mb-1">{school.name}</h3>
+                            <div className="flex items-center text-gray-600 mb-2">
+                              <MapPin className="h-3 w-3 mr-1" />
+                              <span className="text-xs">{school.location}</span>
+                            </div>
+                          </div>
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            school.type === 'Reach' ? 'bg-red-100 text-red-700' :
+                            school.type === 'Match' ? 'bg-blue-100 text-blue-700' :
+                            'bg-green-100 text-green-700'
+                          }`}>
+                            {school.type}
+                          </span>
+                        </div>
+                        <div className="mb-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-medium text-gray-700">Fit Score</span>
+                            <span className="text-xs font-bold text-gray-900">{school.fit_score}</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-1.5">
+                            <div 
+                              className="bg-blue-600 h-1.5 rounded-full transition-all duration-500"
+                              style={{ width: school.fit_score }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-center pt-4 border-t border-gray-200">
+                    <p className="text-sm text-gray-600 mb-2">
+                      Showing 3 of {recommendations.length} matches
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Star className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready for Recommendations</h3>
+                  <p className="text-gray-600 mb-4">
+                    Your profile is complete. Visit the recommendations page to generate your personalized college matches.
+                  </p>
+                </div>
+              )
+            ) : (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Complete Your Profile</h3>
+                <p className="text-gray-600 mb-4">
+                  Build your profile to unlock personalized college recommendations tailored to your interests and goals.
+                </p>
+                <div className="max-w-sm mx-auto mb-4">
+                  <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                    <span>{profileCompletion}% Complete</span>
+                    <span>{Math.ceil((100 - profileCompletion) / (100 / Object.keys(questionsData).length))} sections left</span>
+                  </div>
+                  <Progress value={profileCompletion} className="h-2" />
+                </div>
+                <Button 
+                  onClick={() => window.location.href = '/profile'}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Continue Profile
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
         </div>
       </div>
     </div>
