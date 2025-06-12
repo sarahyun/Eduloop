@@ -247,13 +247,8 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Dashboard Layout with Sidebar */}
-        <div className="flex gap-8 mb-8">
-          {/* Main Content */}
-          <div className="flex-1">
-            {/* Main Dashboard Cards */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Profile Building */}
+        {/* Main Dashboard Cards */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/profile'}>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
@@ -534,18 +529,6 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
-            </div>
-          </div>
-
-          {/* Progress Tracker Sidebar */}
-          {!isNewUser && (
-            <div className="w-80 flex-shrink-0">
-              <ProgressTracker 
-                completedSteps={Array.from(completedSections)}
-                className="sticky top-8"
-              />
-            </div>
-          )}
         </div>
       </div>
     </div>
