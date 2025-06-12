@@ -86,8 +86,11 @@ export function StudentProfileView({ userId: propUserId }: StudentProfileViewPro
       console.log('🔍 Fetching profile for userId:', userId);
       const response = await fetch(`${API_BASE_URL}/profile/${userId}`);
       
+      console.log('🔍 Profile API response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('🔍 Profile API response data:', data);
         if (data && data.student_profile && data.student_profile.student_profile) {
           setProfileData(data);
         } else {
@@ -96,13 +99,24 @@ export function StudentProfileView({ userId: propUserId }: StudentProfileViewPro
         }
       } else if (response.status === 404) {
         // Profile not found - this is normal for new users
+        console.log('🔍 Profile not found (404) - showing empty state');
+        setProfileData(null);
+      } else if (response.status >= 400 && response.status < 500) {
+        // Client errors (400-499) - treat as "no profile found"
+        console.log('🔍 Client error - showing empty state');
         setProfileData(null);
       } else {
-        throw new Error('Failed to fetch profile data');
+        // Server errors (500+) - show actual error
+        throw new Error(`Server error: ${response.status}`);
       }
     } catch (err) {
-      console.error('Failed to fetch profile data:', err);
-      setError('Failed to load profile data. Please try again.');
+      console.error('🔍 Network or server error:', err);
+      // Only set error for actual network/server failures
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        setError('Unable to connect to server. Please check your connection and try again.');
+      } else {
+        setError('Server is temporarily unavailable. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }
