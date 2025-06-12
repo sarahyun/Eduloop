@@ -92,7 +92,19 @@ export function StudentProfileView({ userId: propUserId }: StudentProfileViewPro
         const data = await response.json();
         console.log('🔍 Profile API response data:', data);
         if (data && data.student_profile && data.student_profile.student_profile) {
-          setProfileData(data);
+          // Check if this is a placeholder/dummy profile
+          const sections = data.student_profile.student_profile;
+          const isPlaceholder = sections.length === 1 && 
+            (sections[0].section_id === 'no_data' || 
+             sections[0].content === 'No profile data available.' ||
+             sections[0].title === 'Complete Your Profile');
+          
+          if (isPlaceholder) {
+            console.log('🔍 Detected placeholder profile - showing empty state');
+            setProfileData(null);
+          } else {
+            setProfileData(data);
+          }
         } else {
           // No profile data found - this is normal for new users
           setProfileData(null);
