@@ -1,7 +1,9 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Clock, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CheckCircle, Clock, Info, ArrowRight } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 interface ProfileCompletionBannerProps {
   completionPercentage: number;
@@ -14,6 +16,12 @@ export function ProfileCompletionBanner({
   isFullyComplete, 
   className = "" 
 }: ProfileCompletionBannerProps) {
+  const [, setLocation] = useLocation();
+  
+  const handleNavigateToProfile = () => {
+    setLocation('/profile');
+  };
+  
   // Always show the banner to display progress
 
   return (
@@ -49,13 +57,25 @@ export function ProfileCompletionBanner({
               </p>
               
               {/* Progress Bar */}
-              <div className="mb-2">
+              <div className="mb-3">
                 <div className="text-xs text-gray-500 mb-1">Profile Completion</div>
                 <Progress 
                   value={completionPercentage} 
                   className="h-3 bg-gray-200"
                 />
               </div>
+              
+              {/* Navigation Button */}
+              {!isFullyComplete && (
+                <Button 
+                  onClick={handleNavigateToProfile}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  size="sm"
+                >
+                  Continue Building Profile
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              )}
               
               {isFullyComplete && (
                 <div className="flex items-center gap-1 mt-2 text-xs text-gray-500">
