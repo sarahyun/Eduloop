@@ -74,6 +74,33 @@ export function StudentProfileView({ userId: propUserId }: StudentProfileViewPro
     }
   }, [userId]);
 
+  // Check for profile data and recommendations availability
+  useEffect(() => {
+    const checkDataAvailability = async () => {
+      if (!userId) return;
+
+      try {
+        // Check for profile data
+        const profileResponse = await fetch(`${API_BASE_URL}/profiles/status/${userId}`);
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          setHasProfileData(profileData.status === 'completed');
+        }
+
+        // Check for recommendations
+        const recResponse = await fetch(`${API_BASE_URL}/recommendations/status/${userId}`);
+        if (recResponse.ok) {
+          const recData = await recResponse.json();
+          setHasRealRecommendations(recData.status === 'completed' && recData.recommendation_count > 0);
+        }
+      } catch (error) {
+        console.error('Error checking data availability:', error);
+      }
+    };
+
+    checkDataAvailability();
+  }, [userId]);
+
   const fetchProfileData = async () => {
     if (!userId) {
       setError('User ID is required');
@@ -538,19 +565,14 @@ export function StudentProfileView({ userId: propUserId }: StudentProfileViewPro
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 p-6">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Return to Dashboard Button */}
-        <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => window.location.href = '/dashboard'}
-            className="flex items-center gap-2 hover:bg-gray-100 text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Return to Dashboard
-          </Button>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <Navigation 
+        user={{ name: user?.displayName || user?.email || 'User', email: user?.email || '' }}
+        hasProfileData={hasProfileData}
+        hasRealRecommendations={hasRealRecommendations}
+      />
+      
+      <div className="max-w-6xl mx-auto space-y-8 p-6">
 
         {/* Header */}
         <div className="text-center space-y-6">
