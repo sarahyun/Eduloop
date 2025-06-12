@@ -3,8 +3,7 @@ import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
-import { GuidanceHelper, ProgressTracker } from "@/components/GuidanceHelper";
+
 import { User, Star, ArrowRight, Clock, Sparkles, MessageCircle, GraduationCap, ChevronLeft, ChevronRight, MapPin, TrendingUp } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { questionsData, type Question, getSectionConfig } from '@/data/questionsData';
@@ -166,7 +165,7 @@ export default function Dashboard() {
       />
       
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* New User Onboarding Guidance */}
+        {/* Progressive Onboarding Guidance */}
         {isNewUser && (
           <Card className="mb-8 border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-lg">
             <CardContent className="p-8">
@@ -199,6 +198,61 @@ export default function Dashboard() {
           </Card>
         )}
 
+        {/* Profile Building Guidance - Show when intro is complete but profile isn't */}
+        {!isNewUser && profileCompletion < 100 && (
+          <Card className="mb-8 border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                  <User className="h-8 w-8 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    Complete Your Profile
+                  </h3>
+                  <p className="text-gray-700 mb-4">
+                    You're {profileCompletion}% done! Finish building your profile to get personalized college recommendations.
+                  </p>
+                  <Button 
+                    onClick={() => window.location.href = '/profile'}
+                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                  >
+                    Continue Building Profile
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Recommendations Guidance - Show when profile is complete but no recommendations */}
+        {!isNewUser && profileCompletion >= 100 && !hasRealRecommendations && (
+          <Card className="mb-8 border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-violet-50 shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center">
+                  <Star className="h-8 w-8 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    Ready for College Recommendations!
+                  </h3>
+                  <p className="text-gray-700 mb-4">
+                    Your profile is complete! Generate personalized college recommendations based on your interests and goals.
+                  </p>
+                  <Button 
+                    onClick={() => window.location.href = '/college-recommendations'}
+                    className="bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Generate Recommendations
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -213,33 +267,7 @@ export default function Dashboard() {
               : "Find colleges that match your interests and goals."
             }
           </p>
-          
-          {/* Smart Profile Completion Banner - only show for existing users */}
-          {!isNewUser && (
-            <ProfileCompletionBanner 
-              completionPercentage={profileCompletion}
-              isFullyComplete={profileCompletion >= 100}
-              className="mb-6"
-            />
-          )}
         </div>
-
-        {/* Smart Guidance for Next Steps */}
-        {!isNewUser && profileCompletion < 100 && (
-          <div className="mb-8">
-            <GuidanceHelper 
-              currentStep={
-                !hasCompletedIntroduction() 
-                  ? 'onboarding' 
-                  : profileCompletion < 30 
-                    ? 'profile' 
-                    : profileCompletion < 80 
-                      ? 'profile' 
-                      : 'recommendations'
-              }
-            />
-          </div>
-        )}
 
         {/* Main Dashboard Cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
