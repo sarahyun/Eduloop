@@ -205,14 +205,20 @@ const OnboardingPage: React.FC = () => {
         <Card className="border-0 shadow-xl">
           <CardHeader className="text-center pb-8">
             <div className="flex justify-center mb-4">
-              <GraduationCap className="w-12 h-12 text-primary" />
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+                <GraduationCap className="w-8 h-8 text-white" />
+              </div>
             </div>
             <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
               Let's Get to Know You
             </CardTitle>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-600 mb-4">
               Help us understand your interests and goals
             </p>
+            <div className="inline-flex items-center px-4 py-2 bg-blue-50 rounded-full text-sm text-blue-700 font-medium">
+              <Sparkles className="w-4 h-4 mr-2" />
+              Personalized recommendations await
+            </div>
           </CardHeader>
           
           <CardContent className="px-8 pb-8">
@@ -221,9 +227,25 @@ const OnboardingPage: React.FC = () => {
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   {currentQuestion.question}
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 mb-3">
                   Share your thoughts - there are no wrong answers!
                 </p>
+                {/* Contextual guidance based on question */}
+                {currentQuestion.id === 1 && (
+                  <div className="text-sm text-blue-600 bg-blue-50 rounded-lg p-3 mx-auto max-w-md">
+                    💡 Think about what excites you most in school or outside activities
+                  </div>
+                )}
+                {currentQuestion.id === 2 && (
+                  <div className="text-sm text-blue-600 bg-blue-50 rounded-lg p-3 mx-auto max-w-md">
+                    💡 Consider your dream job, lifestyle, or how you want to impact the world
+                  </div>
+                )}
+                {currentQuestion.id === 3 && (
+                  <div className="text-sm text-blue-600 bg-blue-50 rounded-lg p-3 mx-auto max-w-md">
+                    💡 Think about size, location, campus culture, or academic focus
+                  </div>
+                )}
               </div>
               
               <div className="space-y-4">

@@ -159,6 +159,9 @@ export default function Dashboard() {
     );
   }
 
+  // Check if user is completely new (no sections completed at all)
+  const isNewUser = completedSections.size === 0;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation 
@@ -168,21 +171,62 @@ export default function Dashboard() {
       />
       
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* New User Onboarding Guidance */}
+        {isNewUser && (
+          <Card className="mb-8 border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-lg">
+            <CardContent className="p-8">
+              <div className="text-center space-y-6">
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto">
+                  <GraduationCap className="h-10 w-10 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                    Welcome to CollegeNavigate AI!
+                  </h2>
+                  <p className="text-lg text-gray-700 leading-relaxed mb-6">
+                    Let's start with a quick introduction to understand your background and goals. 
+                    This will help us provide personalized college recommendations just for you.
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <Button 
+                    onClick={() => window.location.href = '/onboarding'}
+                    size="lg"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                  >
+                    <Sparkles className="h-5 w-5 mr-2" />
+                    Start Your Journey
+                  </Button>
+                  <p className="text-sm text-gray-600">Takes about 5 minutes to complete</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, {user.displayName ? user.displayName.split(' ')[0] : 'there'}!
+            {isNewUser 
+              ? `Welcome, ${user.displayName ? user.displayName.split(' ')[0] : 'there'}!`
+              : `Welcome back, ${user.displayName ? user.displayName.split(' ')[0] : 'there'}!`
+            }
           </h1>
           <p className="text-gray-600 mb-6">
-            Find colleges that match your interests and goals.
+            {isNewUser 
+              ? "Ready to discover your perfect college matches? Let's get started!"
+              : "Find colleges that match your interests and goals."
+            }
           </p>
           
-          {/* Smart Profile Completion Banner */}
-          <ProfileCompletionBanner 
-            completionPercentage={profileCompletion}
-            isFullyComplete={profileCompletion >= 100}
-            className="mb-6"
-          />
+          {/* Smart Profile Completion Banner - only show for existing users */}
+          {!isNewUser && (
+            <ProfileCompletionBanner 
+              completionPercentage={profileCompletion}
+              isFullyComplete={profileCompletion >= 100}
+              className="mb-6"
+            />
+          )}
         </div>
 
         {/* Main Dashboard Cards */}

@@ -61,9 +61,9 @@ export default function LandingPage() {
       await signup(data.email, data.password, data.fullName);
       toast({
         title: "Account created successfully!",
-        description: "Welcome to your college discovery journey.",
+        description: "Let's start with a quick introduction to personalize your experience.",
       });
-      setLocation("/dashboard");
+      setLocation("/onboarding");
     } catch (error: any) {
       toast({
         title: "Sign up failed",
