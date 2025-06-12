@@ -105,8 +105,14 @@ export default function Dashboard() {
   };
 
   const hasCompletedIntroduction = () => {
-    const introResponse = responses.find(r => r.form_id === 'Introduction');
-    if (!introResponse || !introResponse.responses) return false;
+    // Check both cases since API might return different case than expected  
+    const introResponse = responses.find(r => 
+      r.form_id === 'Introduction' || r.form_id === 'introduction'
+    );
+    
+    if (!introResponse || !introResponse.responses) {
+      return false;
+    }
     
     const answeredQuestions = introResponse.responses || [];
     return answeredQuestions.length > 0; // Any answered question in intro marks it as started/completed
@@ -148,7 +154,8 @@ export default function Dashboard() {
 
   const completedSections = getCompletedSections();
   const profileCompletion = calculateProfileCompletion();
-  const isNewUser = !hasCompletedIntroduction();
+  const introCompleted = hasCompletedIntroduction();
+  const isNewUser = !introCompleted;
 
   return (
     <div className="min-h-screen bg-gray-50">
