@@ -10,21 +10,26 @@ import { useToast } from "@/hooks/use-toast";
 
 interface NavigationProps {
   user?: { name: string; email: string };
+  hasProfileData?: boolean;
+  hasRealRecommendations?: boolean;
 }
 
-export function Navigation({ user }: NavigationProps) {
+export function Navigation({ user, hasProfileData = false, hasRealRecommendations = false }: NavigationProps) {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { logout } = useAuth();
   const { toast } = useToast();
 
-  const navigation = [
-    { name: "Dashboard", href: "/dashboard" },
-    { name: "Profile", href: "/profile" },
-    { name: "Insights", href: "/profile-view" },
-    { name: "Schools", href: "/recommendations" },
-    { name: "Mentor", href: "/chat" },
+  const allNavigation = [
+    { name: "Dashboard", href: "/dashboard", alwaysShow: true },
+    { name: "Profile", href: "/profile", alwaysShow: true },
+    { name: "Insights", href: "/profile-view", alwaysShow: false, condition: hasProfileData },
+    { name: "Schools", href: "/recommendations", alwaysShow: false, condition: hasRealRecommendations },
+    { name: "Mentor", href: "/chat", alwaysShow: true },
   ];
+
+  // Filter navigation items based on conditions
+  const navigation = allNavigation.filter(item => item.alwaysShow || item.condition);
 
   const isActive = (href: string) => location === href || location.startsWith(href);
 

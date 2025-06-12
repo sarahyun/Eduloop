@@ -161,7 +161,11 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation user={{ name: user.displayName || user.email || '', email: user.email || '' }} />
+      <Navigation 
+        user={{ name: user.displayName || user.email || '', email: user.email || '' }} 
+        hasProfileData={hasProfileData}
+        hasRealRecommendations={hasRealRecommendations}
+      />
       
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Welcome Section */}

@@ -308,7 +308,11 @@ export default function CollegeRecommendations() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation user={{ name: user.displayName || user.email || '', email: user.email || '' }} />
+      <Navigation 
+        user={{ name: user.displayName || user.email || '', email: user.email || '' }}
+        hasProfileData={true}
+        hasRealRecommendations={true}
+      />
       
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
