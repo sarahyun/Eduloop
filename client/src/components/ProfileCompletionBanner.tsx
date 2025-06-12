@@ -14,9 +14,7 @@ export function ProfileCompletionBanner({
   isFullyComplete, 
   className = "" 
 }: ProfileCompletionBannerProps) {
-  if (!isFullyComplete && completionPercentage < 85) {
-    return null; // Don't show banner until nearly complete
-  }
+  // Always show the banner to display progress
 
   return (
     <Card className={`border-2 ${isFullyComplete ? 'border-green-200 bg-green-50' : 'border-blue-200 bg-blue-50'} ${className}`}>
@@ -52,9 +50,10 @@ export function ProfileCompletionBanner({
               
               {/* Progress Bar */}
               <div className="mb-2">
+                <div className="text-xs text-gray-500 mb-1">Profile Completion</div>
                 <Progress 
                   value={completionPercentage} 
-                  className="h-2"
+                  className="h-3 bg-gray-200"
                 />
               </div>
               
