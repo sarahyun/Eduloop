@@ -339,32 +339,178 @@ export function StudentProfileView({ userId: propUserId }: StudentProfileViewPro
 
   if (!profileData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 p-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <Card className="max-w-md w-full border-2 border-gray-200 shadow-lg">
-              <CardContent className="p-8 text-center">
-                <div className="p-3 bg-gray-100 rounded-full w-fit mx-auto mb-4">
-                  <User className="h-8 w-8 text-gray-500" />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Return to Dashboard Button */}
+          <div className="mb-8">
+            <Button 
+              variant="ghost" 
+              onClick={() => window.location.href = '/dashboard'}
+              className="flex items-center gap-2 hover:bg-white/50 text-gray-600 hover:text-gray-900 backdrop-blur-sm"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Return to Dashboard
+            </Button>
+          </div>
+
+          <div className="text-center space-y-8">
+            {/* Main Illustration */}
+            <div className="relative">
+              <div className="relative w-48 h-48 mx-auto mb-8">
+                {/* Background glow */}
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full opacity-20 animate-pulse"></div>
+                
+                {/* Main circle */}
+                <div className="absolute inset-4 bg-gradient-to-br from-white to-gray-50 rounded-full shadow-xl border border-gray-100 flex items-center justify-center">
+                  <div className="relative">
+                    <User className="h-16 w-16 text-gray-400" />
+                    <div className="absolute -top-2 -right-2">
+                      <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                        <Lightbulb className="h-3 w-3 text-white" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">No Profile Data</h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">Your profile hasn't been generated yet.</p>
+                
+                {/* Floating elements */}
+                <div className="absolute top-8 left-8 animate-bounce delay-100">
+                  <div className="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
+                    <BookOpen className="h-4 w-4 text-purple-600" />
+                  </div>
+                </div>
+                <div className="absolute top-12 right-4 animate-bounce delay-300">
+                  <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center">
+                    <Trophy className="h-3 w-3 text-blue-600" />
+                  </div>
+                </div>
+                <div className="absolute bottom-8 left-4 animate-bounce delay-500">
+                  <div className="w-7 h-7 bg-indigo-200 rounded-full flex items-center justify-center">
+                    <Target className="h-3 w-3 text-indigo-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main content */}
+            <div className="max-w-2xl mx-auto space-y-6">
+              <div className="space-y-3">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  Your Profile Awaits
+                </h1>
+                <p className="text-xl text-gray-600 leading-relaxed">
+                  Let AI create a comprehensive profile that reveals your unique strengths, 
+                  growth areas, and college readiness insights.
+                </p>
+              </div>
+
+              {/* Features preview */}
+              <div className="grid md:grid-cols-3 gap-4 mt-8">
+                <Card className="border-0 bg-white/60 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300">
+                  <CardContent className="p-4 text-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <BookOpen className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Academic Identity</h3>
+                    <p className="text-sm text-gray-600">Discover your learning style and intellectual strengths</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 bg-white/60 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300">
+                  <CardContent className="p-4 text-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <Heart className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Hidden Strengths</h3>
+                    <p className="text-sm text-gray-600">Uncover talents you might not even realize you have</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 bg-white/60 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300">
+                  <CardContent className="p-4 text-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <Rocket className="h-6 w-6 text-indigo-600" />
+                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Future Direction</h3>
+                    <p className="text-sm text-gray-600">Get insights on your college and career path</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* What you'll get */}
+              <Card className="border-0 bg-white/70 backdrop-blur-sm shadow-lg">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <Star className="h-5 w-5 text-yellow-500" />
+                    What you'll discover
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-3 text-left">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-gray-700">Personalized academic profile analysis</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-gray-700">Growth opportunities and blind spots</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-gray-700">College fit recommendations</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-gray-700">Future aspirations and pathway insights</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Action button */}
+              <div className="pt-4">
                 <Button 
                   onClick={regenerateProfile}
                   disabled={isRegenerating}
-                  className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-md"
+                  size="lg"
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-3 text-lg font-semibold"
                 >
                   {isRegenerating ? (
                     <>
-                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      Generating...
+                      <RefreshCw className="h-5 w-5 mr-3 animate-spin" />
+                      Generating Your Profile...
                     </>
                   ) : (
-                    'Generate Profile'
+                    <>
+                      <Lightbulb className="h-5 w-5 mr-3" />
+                      Generate Your Profile
+                    </>
                   )}
                 </Button>
-              </CardContent>
-            </Card>
+                
+                {!isRegenerating && (
+                  <p className="text-sm text-gray-500 mt-3">
+                    Takes about 2-3 minutes to analyze your responses
+                  </p>
+                )}
+              </div>
+
+              {/* Generation Progress */}
+              {generationProgress && (
+                <div className="max-w-md mx-auto">
+                  <Card className="border-2 border-blue-200 bg-blue-50/80 backdrop-blur-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3">
+                        <RefreshCw className="h-5 w-5 text-blue-600 animate-spin" />
+                        <span className="text-blue-800 font-medium">{generationProgress}</span>
+                      </div>
+                      <div className="mt-2">
+                        <div className="w-full bg-blue-200 rounded-full h-2">
+                          <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{width: '60%'}}></div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
