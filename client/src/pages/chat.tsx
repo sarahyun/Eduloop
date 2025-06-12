@@ -1,48 +1,21 @@
 import { useState, useEffect } from "react";
-import { Navigation } from "@/components/Navigation";
-import { AIChat } from "@/components/AIChat";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Plus, Globe, ArrowLeft } from "lucide-react";
-import { api, type Conversation, type Message } from "@/lib/api";
-import { useToast } from "@/hooks/use-toast";
+import { MessageCircle, ArrowLeft, Globe } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useNavigationData } from "@/hooks/useNavigationData";
+import { Navigation } from "@/components/Navigation";
+import { AIChat } from "@/components/AIChat";
+import { useToast } from "@/hooks/use-toast";
+import { sendMessage, type Message } from "@/lib/api";
 
 export default function ChatPage() {
   const { toast } = useToast();
   const { user, loading } = useAuth();
+  const { hasProfileData, hasRealRecommendations } = useNavigationData();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasProfileData, setHasProfileData] = useState(false);
-  const [hasRealRecommendations, setHasRealRecommendations] = useState(false);
-
-  // Check for profile data and recommendations availability
-  useEffect(() => {
-    const checkDataAvailability = async () => {
-      if (!user?.uid) return;
-
-      try {
-        // Check for profile data
-        const profileResponse = await fetch(`https://web-production-bb19.up.railway.app/profiles/status/${user.uid}`);
-        if (profileResponse.ok) {
-          const profileData = await profileResponse.json();
-          setHasProfileData(profileData.status === 'completed');
-        }
-
-        // Check for recommendations
-        const recResponse = await fetch(`https://web-production-bb19.up.railway.app/recommendations/status/${user.uid}`);
-        if (recResponse.ok) {
-          const recData = await recResponse.json();
-          setHasRealRecommendations(recData.status === 'completed' && recData.recommendation_count > 0);
-        }
-      } catch (error) {
-        console.error('Error checking data availability:', error);
-      }
-    };
-
-    checkDataAvailability();
-  }, [user?.uid]);
 
   if (loading) {
     return (
@@ -63,8 +36,6 @@ export default function ChatPage() {
     );
   }
 
-  
-
   // Handle sending messages
   const handleSendMessage = async (content: string) => {
     const userMessage: Message = {
@@ -77,7 +48,7 @@ export default function ChatPage() {
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
     try {
-      const response = await api.sendMessage(1, { role: 'user', content });
+      const response = await sendMessage(1, 'user', content);
       setMessages(prev => [...prev, response.aiMessage ?? {
         id: Date.now() + 2,
         conversationId: 1,

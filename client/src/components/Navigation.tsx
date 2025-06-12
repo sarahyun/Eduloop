@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -7,6 +7,8 @@ import { Bell, Compass, Menu, LogOut, User } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { questionsData, type Question, getSectionConfig } from '@/data/questionsData';
+import { API_BASE_URL } from '@/lib/config';
 
 interface NavigationProps {
   user?: { name: string; email: string };
@@ -14,32 +16,107 @@ interface NavigationProps {
   hasRealRecommendations?: boolean;
 }
 
+interface FormResponse {
+  response_id?: string;
+  user_id: string;
+  form_id: string;
+  submitted_at?: string;
+  responses: Array<{
+    question_id: string;
+    question_text: string;
+    answer: string;
+  }>;
+}
+
 export function Navigation({ user, hasProfileData = false, hasRealRecommendations = false }: NavigationProps) {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { logout } = useAuth();
+  const { logout, user: authUser } = useAuth();
   const { toast } = useToast();
+  const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
+  const [profileCompletion, setProfileCompletion] = useState(0);
 
-  const allNavigation = [
-    { name: "Dashboard", href: "/dashboard", alwaysShow: true },
-    { name: "Profile", href: "/profile", alwaysShow: true },
-    { name: "Insights", href: "/profile-view", alwaysShow: false, condition: hasProfileData },
-    { name: "Schools", href: "/recommendations", alwaysShow: false, condition: hasRealRecommendations },
-    { name: "Mentor", href: "/chat", alwaysShow: true },
+  // Calculate profile completion for navigation
+  useEffect(() => {
+    const loadCompletionStatus = async () => {
+      if (!authUser?.uid) return;
+
+      const completed = new Set<string>();
+      
+      for (const sectionId of Object.keys(questionsData)) {
+        const sectionFormId = sectionId.toLowerCase().replace(/\s+/g, '_');
+        const sectionQuestions = questionsData[sectionId as keyof typeof questionsData] as Question[];
+        const sectionConfig = getSectionConfig(sectionId);
+        
+        try {
+          const response = await fetch(`${API_BASE_URL}/responses/${authUser.uid}/${sectionFormId}`);
+          if (response.ok) {
+            const data: FormResponse = await response.json();
+            
+            if (data.responses && data.responses.length > 0) {
+              const answeredCount = sectionQuestions.filter(q => {
+                const response = data.responses.find(r => r.question_id === q.id.toString());
+                return response && response.answer.trim().length > 0;
+              }).length;
+              
+              const completionThreshold = Math.ceil(sectionQuestions.length * sectionConfig.completionThreshold);
+              if (answeredCount >= completionThreshold) {
+                completed.add(sectionId);
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Error loading completion status for ${sectionId}:`, error);
+        }
+      }
+      
+      setCompletedSections(completed);
+      
+      // Calculate completion percentage
+      const allSections = Object.keys(questionsData);
+      const requiredSections = allSections.filter(sectionId => !getSectionConfig(sectionId).isOptional);
+      const completedRequiredSections = requiredSections.filter(sectionId => completed.has(sectionId));
+      const completion = requiredSections.length > 0 
+        ? Math.round((completedRequiredSections.length / requiredSections.length) * 100)
+        : 100;
+      setProfileCompletion(completion);
+    };
+
+    loadCompletionStatus();
+  }, [authUser?.uid]);
+
+  const navigation = [
+    { name: "Dashboard", href: "/dashboard", enabled: true },
+    { name: "Profile", href: "/profile", enabled: true },
+    { name: "Insights", href: "/profile-view", enabled: profileCompletion >= 100, tooltip: profileCompletion >= 100 ? "" : "Complete profile to view insights" },
+    { name: "Schools", href: "/recommendations", enabled: profileCompletion >= 100, tooltip: profileCompletion >= 100 ? "" : "Complete profile to view recommendations" },
+    { name: "Mentor", href: "/chat", enabled: true },
   ];
-
-  // Filter navigation items based on conditions
-  const navigation = allNavigation.filter(item => item.alwaysShow || item.condition);
   
   // Debug logging
   console.log('Navigation Debug:', {
+    profileCompletion,
     hasProfileData,
     hasRealRecommendations,
-    allNavigation,
-    filteredNavigation: navigation
+    navigation
   });
 
-  const isActive = (href: string) => location === href || location.startsWith(href);
+  const isActive = (href: string) => {
+    // Exact match for most routes
+    if (location === href) return true;
+    
+    // Special case for dashboard variants
+    if (href === '/dashboard' && (location === '/dashboard' || location === '/')) return true;
+    
+    // For other routes, only match if it's an exact match or a direct sub-path
+    // but not if it's just a prefix (e.g., /profile vs /profile-view)
+    if (href !== '/' && location.startsWith(href)) {
+      const remainingPath = location.slice(href.length);
+      return remainingPath === '' || remainingPath.startsWith('/');
+    }
+    
+    return false;
+  };
 
   const handleLogout = async () => {
     try {
@@ -53,6 +130,19 @@ export function Navigation({ user, hasProfileData = false, hasRealRecommendation
         title: "Logout failed",
         description: "There was an error logging out. Please try again.",
         variant: "destructive",
+      });
+    }
+  };
+
+  const handleNavClick = (item: typeof navigation[0], e: React.MouseEvent) => {
+    if (!item.enabled) {
+      e.preventDefault();
+      toast({
+        title: item.tooltip,
+        description: item.name === "Insights" 
+          ? "Complete your profile questionnaire to unlock personalized insights."
+          : "Complete your profile questionnaire to unlock college recommendations.",
+        variant: "default",
       });
     }
   };
@@ -72,13 +162,17 @@ export function Navigation({ user, hasProfileData = false, hasRealRecommendation
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6 flex-1 justify-center max-w-2xl">
             {navigation.map((item) => (
-              <Link key={item.name} href={item.href}>
+              <Link key={item.name} href={item.enabled ? item.href : "#"}>
                 <span
                   className={`transition-colors cursor-pointer ${
-                    isActive(item.href)
+                    item.enabled && isActive(item.href)
                       ? "text-primary font-medium"
-                      : "text-gray-600 hover:text-gray-900"
+                      : item.enabled
+                      ? "text-gray-600 hover:text-gray-900"
+                      : "text-gray-400 cursor-not-allowed"
                   }`}
+                  onClick={(e) => handleNavClick(item, e)}
+                  title={item.tooltip}
                 >
                   {item.name}
                 </span>
@@ -130,14 +224,20 @@ export function Navigation({ user, hasProfileData = false, hasRealRecommendation
               <SheetContent side="right" className="w-64">
                 <div className="flex flex-col space-y-4 mt-8">
                   {navigation.map((item) => (
-                    <Link key={item.name} href={item.href}>
+                    <Link key={item.name} href={item.enabled ? item.href : "#"}>
                       <span
                         className={`block px-3 py-2 rounded-md text-base font-medium transition-colors cursor-pointer ${
-                          isActive(item.href)
+                          item.enabled && isActive(item.href)
                             ? "text-primary bg-primary/10"
-                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                            : item.enabled
+                            ? "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                            : "text-gray-400 cursor-not-allowed bg-gray-50"
                         }`}
-                        onClick={() => setMobileMenuOpen(false)}
+                        onClick={(e) => {
+                          handleNavClick(item, e);
+                          if (item.enabled) setMobileMenuOpen(false);
+                        }}
+                        title={item.tooltip}
                       >
                         {item.name}
                       </span>

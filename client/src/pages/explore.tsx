@@ -9,13 +9,16 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Filter, Search, MapPin, Users, School, DollarSign } from "lucide-react";
+import { Filter, Search, MapPin, Users, School, DollarSign, Star, GraduationCap, ExternalLink, ArrowLeft } from "lucide-react";
 import { api, type User, type College } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { useNavigationData } from "@/hooks/useNavigationData";
+import { API_BASE_URL } from "@/lib/config";
 
 export default function ExplorePage() {
   const { user, loading } = useAuth();
+  const { hasProfileData, hasRealRecommendations } = useNavigationData();
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     type: "",
@@ -28,35 +31,6 @@ export default function ExplorePage() {
   const [showFilters, setShowFilters] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [hasProfileData, setHasProfileData] = useState(false);
-  const [hasRealRecommendations, setHasRealRecommendations] = useState(false);
-
-  // Check for profile data and recommendations availability
-  useEffect(() => {
-    const checkDataAvailability = async () => {
-      if (!user?.uid) return;
-
-      try {
-        // Check for profile data
-        const profileResponse = await fetch(`https://web-production-bb19.up.railway.app/profiles/status/${user.uid}`);
-        if (profileResponse.ok) {
-          const profileData = await profileResponse.json();
-          setHasProfileData(profileData.status === 'completed');
-        }
-
-        // Check for recommendations
-        const recResponse = await fetch(`https://web-production-bb19.up.railway.app/recommendations/status/${user.uid}`);
-        if (recResponse.ok) {
-          const recData = await recResponse.json();
-          setHasRealRecommendations(recData.status === 'completed' && recData.recommendation_count > 0);
-        }
-      } catch (error) {
-        console.error('Error checking data availability:', error);
-      }
-    };
-
-    checkDataAvailability();
-  }, [user?.uid]);
 
   // Show loading state while auth is loading
   if (loading) {

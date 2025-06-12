@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,7 +35,18 @@ export default function LandingPage() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { signup, login } = useAuth();
+  const { signup, login, user, loading } = useAuth();
+
+  // Redirect authenticated users to dashboard (unless they just signed up)
+  useEffect(() => {
+    if (user && !loading && !isLoading) {
+      // Allow a brief moment for signup redirect to onboarding to take effect
+      const timer = setTimeout(() => {
+        setLocation("/dashboard");
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [user, loading, isLoading, setLocation]);
 
   const signUpForm = useForm<SignUpData>({
     resolver: zodResolver(signUpSchema),
@@ -62,6 +73,7 @@ export default function LandingPage() {
       toast({
         title: "Account created successfully!",
         description: "Let's start with a quick introduction to personalize your experience.",
+        duration: 4000,
       });
       setLocation("/onboarding");
     } catch (error: any) {
