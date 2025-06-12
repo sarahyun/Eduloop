@@ -104,6 +104,14 @@ export default function Dashboard() {
     return completedSections;
   };
 
+  const hasCompletedIntroduction = () => {
+    const introResponse = responses.find(r => r.form_id === 'Introduction');
+    if (!introResponse || !introResponse.responses) return false;
+    
+    const answeredQuestions = introResponse.responses || [];
+    return answeredQuestions.length > 0; // Any answered question in intro marks it as started/completed
+  };
+
   const calculateProfileCompletion = () => {
     const completedSections = getCompletedSections();
     const totalSections = Object.keys(questionsData).length;
@@ -140,7 +148,7 @@ export default function Dashboard() {
 
   const completedSections = getCompletedSections();
   const profileCompletion = calculateProfileCompletion();
-  const isNewUser = completedSections.size === 0;
+  const isNewUser = !hasCompletedIntroduction();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -214,7 +222,7 @@ export default function Dashboard() {
           <div className="mb-8">
             <GuidanceHelper 
               currentStep={
-                completedSections.size === 0 
+                !hasCompletedIntroduction() 
                   ? 'onboarding' 
                   : profileCompletion < 30 
                     ? 'profile' 
